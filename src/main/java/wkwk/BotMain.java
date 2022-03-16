@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -87,56 +89,65 @@ public class BotMain extends Thread {
 
                                 if (sw || e.getMessage().getUserAuthor().get().isBotOwner())
                                     if (cmd[0].equalsIgnoreCase("ping")) response = "pong!";
-                                    else if (cmd[0].equalsIgnoreCase("set")) try {
-                                        if (cmd[1].equalsIgnoreCase("prefix")) if (cmd[2].length() == 1) {
-                                            dao.BotSetDate("p", server, cmd[2]);
-                                            response = "Prefix更新完了 --> " + cmd[2];
-                                        } else response = "一文字だけにしてください";
-                                        else if (cmd[1].equalsIgnoreCase("vcat"))
-                                            if (api.getChannelCategoryById(cmd[2]).isPresent())
-                                                if (api.getChannelCategoryById(cmd[2]).get().getServer().getId() == serverl) {
-                                                    dao.BotSetDate("v", server, cmd[2]);
-                                                    response = "VoiceCategory更新可能";
-                                                } else response = "このサーバーのカテゴリを設定してください";
-                                            else response = "カテゴリIDを入力してください";
-                                        else if (cmd[1].equalsIgnoreCase("tcat"))
-                                            if (api.getChannelCategoryById(cmd[2]).isPresent())
-                                                if (api.getChannelCategoryById(cmd[2]).get().getServer().getId() == serverl) {
-                                                    dao.BotSetDate("t", server, cmd[2]);
-                                                    response = "TextCategory更新可能";
-                                                } else response = "このサーバーのカテゴリを設定してください";
-                                            else response = "カテゴリIDを入力してください";
-                                        else if (cmd[1].equalsIgnoreCase("1stc"))
-                                            if (api.getServerVoiceChannelById(cmd[2]).isPresent())
-                                                if (api.getServerVoiceChannelById(cmd[2]).get().getServer().getId() == serverl) {
-                                                    dao.BotSetDate("f", server, cmd[2]);
-                                                    response = "FirstChannel更新可能";
-                                                } else response = "このサーバーの通話チャンネルを設定してください";
-                                            else response = "通話チャンネルのIDを入力してください";
-                                        else if (cmd[1].equalsIgnoreCase("role")) {
-                                            StringBuilder str = new StringBuilder();
-                                            try {
-                                                ReactionRoleRecord record = dao.getReactMessageData(server);
-                                                if (api.getRoleById(cmd[2]).isPresent() && EmojiManager.isEmoji(cmd[3]) && record.getServerid().equalsIgnoreCase(server) && api.getServerTextChannelById(record.getTextchannelid()).isPresent()) {
-                                                    dao.setReactRoleData(record.getMessageid(), cmd[2], cmd[3]);
-                                                    api.getMessageById(record.getMessageid(), api.getServerTextChannelById(record.getTextchannelid()).get()).join().addReaction(cmd[3]).join();
-                                                    response = "リアクションロール設定完了";
-                                                } else if (!EmojiManager.isEmoji(cmd[3]))
-                                                    str.append("それは絵文字ではない\n");
-                                                else if (!api.getRoleById(cmd[2]).isPresent())
-                                                    str.append("それはロールではない\n");
-                                            } catch (NumberFormatException ignored) {
-                                                str.append("それは数字じゃない");
-                                            }
-                                            response = str.toString();
-                                        } else if (cmd[1].equalsIgnoreCase("mess") && cmd.length > 3)
-                                            if (api.getServerTextChannelById(cmd[3]).isPresent() && serverl == api.getServerTextChannelById(cmd[3]).get().getServer().getId())
-                                                if (api.getMessageById(cmd[2], api.getServerTextChannelById(cmd[3]).get()).join().getServer().isPresent() && api.getMessageById(cmd[2], api.getServerTextChannelById(cmd[3]).get()).join().getServer().get().getId() == serverl)
-                                                    dao.setReactMessageData(server, cmd[3], cmd[2]);
-                                    } catch (SystemException | DatabaseException ex) {
-                                        ex.printStackTrace();
-                                    }
-                                    else if (cmd[0].equalsIgnoreCase("remove")) {
+                                    else if (cmd[0].equalsIgnoreCase("set")) {
+                                        try {
+                                            if (cmd[1].equalsIgnoreCase("prefix")) if (cmd[2].length() == 1) {
+                                                dao.BotSetDate("p", server, cmd[2]);
+                                                response = "Prefix更新完了 --> " + cmd[2];
+                                            } else response = "一文字だけにしてください";
+                                            else if (cmd[1].equalsIgnoreCase("vcat"))
+                                                if (api.getChannelCategoryById(cmd[2]).isPresent())
+                                                    if (api.getChannelCategoryById(cmd[2]).get().getServer().getId() == serverl) {
+                                                        dao.BotSetDate("v", server, cmd[2]);
+                                                        response = "VoiceCategory更新可能";
+                                                    } else response = "このサーバーのカテゴリを設定してください";
+                                                else response = "カテゴリIDを入力してください";
+                                            else if (cmd[1].equalsIgnoreCase("tcat"))
+                                                if (api.getChannelCategoryById(cmd[2]).isPresent())
+                                                    if (api.getChannelCategoryById(cmd[2]).get().getServer().getId() == serverl) {
+                                                        dao.BotSetDate("t", server, cmd[2]);
+                                                        response = "TextCategory更新可能";
+                                                    } else response = "このサーバーのカテゴリを設定してください";
+                                                else response = "カテゴリIDを入力してください";
+                                            else if (cmd[1].equalsIgnoreCase("men"))
+                                                if (api.getServerTextChannelById(cmd[2]).isPresent() && api.getServerTextChannelById(cmd[2]).get().getServer().getId() == e.getServer().get().getId()) {
+                                                    dao.setMentionChannel(cmd[2],e.getServer().get().getIdAsString());
+                                                    response = "メンション送信チャンネルを更新しました";
+                                                }else {
+                                                    response = "テキストチャンネルを設定してください";
+                                                }
+                                            else if (cmd[1].equalsIgnoreCase("1stc"))
+                                                if (api.getServerVoiceChannelById(cmd[2]).isPresent())
+                                                    if (api.getServerVoiceChannelById(cmd[2]).get().getServer().getId() == serverl) {
+                                                        dao.BotSetDate("f", server, cmd[2]);
+                                                        response = "FirstChannel更新可能";
+                                                    } else response = "このサーバーの通話チャンネルを設定してください";
+                                                else response = "通話チャンネルのIDを入力してください";
+                                            else if (cmd[1].equalsIgnoreCase("role")) {
+                                                StringBuilder str = new StringBuilder();
+                                                try {
+                                                    ReactionRoleRecord record = dao.getReactMessageData(server);
+                                                    if (api.getRoleById(cmd[2]).isPresent() && EmojiManager.isEmoji(cmd[3].split("️")[0]) && record.getServerid().equalsIgnoreCase(server) && api.getServerTextChannelById(record.getTextchannelid()).isPresent()) {
+                                                        dao.setReactRoleData(record.getMessageid(), cmd[2], cmd[3]);
+                                                        api.getMessageById(record.getMessageid(), api.getServerTextChannelById(record.getTextchannelid()).get()).join().addReaction(cmd[3]).join();
+                                                        response = "リアクションロール設定完了";
+                                                    } else if (!EmojiManager.isEmoji(cmd[3]))
+                                                        str.append("それは絵文字ではない\n");
+                                                    else if (!api.getRoleById(cmd[2]).isPresent())
+                                                        str.append("それはロールではない\n");
+                                                } catch (NumberFormatException ignored) {
+                                                    str.append("それは数字じゃない");
+                                                }
+                                                response = str.toString();
+                                                } else if (cmd[1].equalsIgnoreCase("mess") && cmd.length > 3)
+                                                if (api.getServerTextChannelById(cmd[3]).isPresent() && serverl == api.getServerTextChannelById(cmd[3]).get().getServer().getId())
+                                                    if (api.getMessageById(cmd[2], api.getServerTextChannelById(cmd[3]).get()).join().getServer().isPresent() && api.getMessageById(cmd[2], api.getServerTextChannelById(cmd[3]).get()).join().getServer().get().getId() == serverl) {
+                                                        dao.setReactMessageData(server, cmd[3], cmd[2]);
+                                                        response = "メッセージ設定完了";
+                                                    }
+                                        } catch (SystemException | DatabaseException ignored) {
+                                        }
+                                    } else if (cmd[0].equalsIgnoreCase("remove")) {
                                         if (cmd[1].equalsIgnoreCase("role") && EmojiManager.isEmoji(cmd[2])) {
                                             ReactionRoleRecord record = dao.getReactMessageData(server);
                                             if (api.getServerTextChannelById(record.getTextchannelid()).isPresent()) {
@@ -180,7 +191,7 @@ public class BotMain extends Thread {
                                             reacts.append("・リアクションロールメッセージ : ").append(api.getMessageById(react.getMessageid(), api.getServerTextChannelById(react.getTextchannelid()).get()).join().getLink()).append("\n");
                                         for (int i = 0; i < emojis.length; i++)
                                             if (api.getRoleById(roles[i]).isPresent())
-                                                reacts.append("・リアクションロール : ").append("@").append(api.getRoleById(roles[i]).get().getName()).append(" >>>> ").append(emojis[i]);
+                                                reacts.append("・リアクションロール : ").append("@").append(api.getRoleById(roles[i]).get().getName()).append(" >>>> ").append(emojis[i]).append("\n");
                                         EmbedBuilder embed = new EmbedBuilder()
                                                 .setTitle("一覧情報表示")
                                                 .setAuthor(e.getMessage().getUserAuthor().get())
@@ -195,19 +206,20 @@ public class BotMain extends Thread {
                                         e.getMessage().getUserAuthor().get().sendMessage(embed);
                                     }
                                 if (e.getMessage().getUserAuthor().get().getConnectedVoiceChannel(e.getServer().get()).isPresent() && list.getVoiceid() != null) {
-                                    if (dao.TempGetChannelList(e.getChannel().getIdAsString(), "t").getVoiceid().equalsIgnoreCase(e.getMessage().getUserAuthor().get().getConnectedVoiceChannel(e.getServer().get()).get().getIdAsString()))
-                                        if (cmd[0].equalsIgnoreCase("name")) {//ここから
+                                    String requestvoiceid = dao.TempGetChannelList(e.getChannel().getIdAsString(), "t").getVoiceid();
+                                    if (requestvoiceid.equalsIgnoreCase(e.getMessage().getUserAuthor().get().getConnectedVoiceChannel(e.getServer().get()).get().getIdAsString()) && api.getServerVoiceChannelById(requestvoiceid).isPresent() && api.getServerVoiceChannelById(requestvoiceid).get().getEffectivePermissions(e.getMessage().getUserAuthor().get()).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS))
+                                        if (cmd[0].equalsIgnoreCase("name") || cmd[0].equalsIgnoreCase("n")) {//ここから
                                             if (api.getServerVoiceChannelById(list.getVoiceid()).isPresent())
                                                 api.getServerVoiceChannelById(list.getVoiceid()).get().createUpdater().setName(cmd[1]).update();
                                             if (api.getServerTextChannelById(list.getTextid()).isPresent())
                                                 api.getServerTextChannelById(list.getTextid()).get().createUpdater().setName(cmd[1]).update();
                                             response = "NAME更新完了";
-                                        } else if (cmd[0].equalsIgnoreCase("size")) {
+                                        } else if (cmd[0].equalsIgnoreCase("size") || cmd[0].equalsIgnoreCase("s")) {
                                             if (api.getServerVoiceChannelById(list.getVoiceid()).isPresent())
                                                 api.getServerVoiceChannelById(list.getVoiceid()).get().createUpdater().setUserLimit(Integer.parseInt(cmd[1])).update();
                                             response = "人数制限を" + cmd[1] + "に設定しました";
                                             if (Integer.parseInt(cmd[1]) == 0) response = "人数制限を0(limitless)に設定しました";
-                                        } else if (cmd[0].equalsIgnoreCase("men")) {
+                                        } else if (cmd[0].equalsIgnoreCase("men") || cmd[0].equalsIgnoreCase("m")) {
                                             StringBuilder strb = new StringBuilder("@here <#" + list.getVoiceid() + ">");
                                             for (int i = 1; i < cmd.length; i++) strb.append("\n").append(cmd[i]);
                                             ServerDataList serverlist = dao.TempGetData(server);
@@ -230,12 +242,13 @@ public class BotMain extends Thread {
                                                     "・`" + prefix + "set vcat <カテゴリID>` -> 一時通話の作成先を変更\n" +
                                                     "・`" + prefix + "set tcat <カテゴリID>` -> 一時チャットの作成先を変更\n" +
                                                     "・`" + prefix + "set 1stc <チャンネルID>` -> 最初に入るチャンネルを変更\n" +
+                                                    "・`" + prefix + "set men <チャンネルID>` -> 募集送信チャンネル変更\n" +
                                                     "・`" + prefix + "set role <ロールメンション> <絵文字>`↓\n　リアクションロールの付与ロールと絵文字を変更\n" +
                                                     "・`" + prefix + "set mess <メッセージID>　<チャンネルID>`↓\n　リアクションロールの対象メッセージを変更\n" +
                                                     "・`" + prefix + "remove role <絵文字>`↓\n　リアクションロールの絵文字を削除\n"))
-                                            .addField("[USER]一時チャネルコマンド一覧", "・`" + prefix + ("name <文字>` -> チャンネルの名前を変更\n" +
-                                                    "・`" + prefix + "size <数字>` -> 通話参加人数を変更\n" +
-                                                    "・`" + prefix + "men <募集内容>` -> 募集チャットの内容を書いて送信\n"))
+                                            .addField("[USER]一時チャネルコマンド一覧", "・`" + prefix + "name <文字>`or`" + prefix + "n <文字>` -> チャンネルの名前を変更\n" +
+                                                    "・`" + prefix + "size <数字>`or`" + prefix + "s <数字>` -> 通話参加人数を変更\n" +
+                                                    "・`" + prefix + "men <募集内容>`or`" + prefix + "m <募集内容>`↓\n　募集チャットの内容を書いて送信\n")
                                             .setColor(Color.BLUE)
                                             .setThumbnail(new File("src/main/resources/q.png"));
                                     e.getMessage().getUserAuthor().get().sendMessage(embed);
@@ -247,8 +260,7 @@ public class BotMain extends Thread {
                             e.getChannel().sendMessage(response);
                         }
                     }
-                } catch (DatabaseException | SystemException | IOException ex) {
-                    ex.printStackTrace();
+                } catch (DatabaseException | SystemException | IOException ignored) {
                 }
             });
 
@@ -272,12 +284,13 @@ public class BotMain extends Thread {
                                 ServerTextChannel text = new ServerTextChannelBuilder(e.getServer()).setName(user.getName() + " channel").setCategory(Tcat).addPermissionOverwrite(e.getServer().getEveryoneRole(), new PermissionsBuilder().setAllDenied().build()).create().get();
                                 ServerVoiceChannel voice = new ServerVoiceChannelBuilder(e.getServer()).setName(user.getName() + " channel").setCategory(Vcat).setUserlimit(0).setBitrate(64000).create().get();
                                 String prefix = data.getPrefix();
-                                new MessageBuilder().setContent("・`" + prefix + "name <文字>` -> チャンネルの名前を変更\n" +
-                                        "・`" + prefix + "size <数字>` -> 通話参加人数を変更\n" +
-                                        "・`" + prefix + "men <募集内容>` -> 募集チャットの内容を書いて送信\n").addComponents(
-                                        ActionRow.of(Button.success("hide", "Toggle Hide"),
-                                                Button.success("lock", "Toggle Lock"),
-                                                Button.success("mention", "Send Mention"))).send(text);
+                                new MessageBuilder().setContent("・`" + prefix + "name <文字>` か `"+ prefix +"n <文字>` -> チャンネルの名前を変更\n" +
+                                        "・`" + prefix + "size <数字>` か `"+ prefix +"s <数字>` -> 通話参加人数を変更\n" +
+                                        "・`" + prefix + "men <募集内容>` か `"+prefix+"m <募集内容>` -> 募集チャットの内容を書いて送信\n").addComponents(
+                                        ActionRow.of(Button.success("claim", "管理権限獲得"),
+                                                Button.success("hide", "非表示切替"),
+                                                Button.success("lock", "参加許可切替"),
+                                                Button.success("mention", "募集文送信"))).send(text);
                                 ChannelList list = new ChannelList();
                                 list.setVoiceid(voice.getIdAsString());
                                 list.setTextid(text.getIdAsString());
@@ -302,8 +315,7 @@ public class BotMain extends Thread {
                                     }
                             }
                         }
-                    } catch (SystemException | DatabaseException | ExecutionException | InterruptedException ex) {
-                        ex.printStackTrace();
+                    } catch (SystemException | DatabaseException | ExecutionException | InterruptedException ignored) {
                     }
                 }
             });
@@ -342,14 +354,13 @@ public class BotMain extends Thread {
                     if (cata != null && cata.getIdAsString().equalsIgnoreCase(vcat)) {
                         String chal = e.getChannel().getIdAsString();
                         ChannelList list = dao.TempGetChannelList(chal, "v");
-                        if (e.getChannel().getConnectedUsers().size() > 0)
+                        if (e.getChannel().getConnectedUserIds().size() > 0)
                             if (api.getServerTextChannelById(list.getTextid()).isPresent()) {
                                 ServerTextChannel tx = api.getServerTextChannelById(list.getTextid()).get();
                                 tx.createUpdater().removePermissionOverwrite(user).update();
                             }
                     }
-                } catch (SystemException | DatabaseException ex) {
-                    ex.printStackTrace();
+                } catch (SystemException | DatabaseException ignored) {
                 }
             });
 
@@ -401,64 +412,86 @@ public class BotMain extends Thread {
                     try {
                         ChannelList list = dao.TempGetChannelList(textchlid, "t");
                         int sw;
-                        if (buttonInteraction.getServer().isPresent()) if ("hide".equals(id)) {
-                            if (api.getServerVoiceChannelById(list.getVoiceid()).isPresent()) {
-                                sw = dao.GetChannelHide(textchlid);
-                                if (sw == 0) {
-                                    sw = 1;
-                                    api.getServerVoiceChannelById(list.getVoiceid()).get().createUpdater().addPermissionOverwrite(buttonInteraction.getServer().get().getEveryoneRole(), new PermissionsBuilder().setDenied(PermissionType.READ_MESSAGES).build()).update();
-                                    response = "通話非表示完了";
-                                } else if (sw == 1) {
-                                    sw = 0;
-                                    api.getServerVoiceChannelById(list.getVoiceid()).get().createUpdater().addPermissionOverwrite(buttonInteraction.getServer().get().getEveryoneRole(), new PermissionsBuilder().setAllowed(PermissionType.READ_MESSAGES).build()).update();
-                                    response = "通話非表示解除完了";
+                        String requestvoiceid = list.getVoiceid();
+                        if (buttonInteraction.getUser().getConnectedVoiceChannel(buttonInteraction.getServer().get()).isPresent() &&
+                                requestvoiceid.equalsIgnoreCase(buttonInteraction.getUser().getConnectedVoiceChannel(buttonInteraction.getServer().get()).get().getIdAsString()) &&
+                                api.getServerVoiceChannelById(requestvoiceid).isPresent() && api.getServerVoiceChannelById(requestvoiceid).get().getEffectivePermissions(buttonInteraction.getUser()).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
+                            if (buttonInteraction.getServer().isPresent())
+                                if ("hide".equals(id)) {
+                                    if (api.getServerVoiceChannelById(list.getVoiceid()).isPresent()) {
+                                        sw = dao.GetChannelHide(textchlid);
+                                        if (sw == 0) {
+                                            sw = 1;
+                                            api.getServerVoiceChannelById(list.getVoiceid()).get().createUpdater().addPermissionOverwrite(buttonInteraction.getServer().get().getEveryoneRole(), new PermissionsBuilder().setDenied(PermissionType.READ_MESSAGES).build()).update();
+                                            response = "通話非表示完了";
+                                        } else if (sw == 1) {
+                                            sw = 0;
+                                            api.getServerVoiceChannelById(list.getVoiceid()).get().createUpdater().addPermissionOverwrite(buttonInteraction.getServer().get().getEveryoneRole(), new PermissionsBuilder().setAllowed(PermissionType.READ_MESSAGES).build()).update();
+                                            response = "通話非表示解除完了";
+                                        }
+                                        dao.UpdateChannelHide(textchlid, sw);
+                                    }
+                                } else if ("lock".equals(id)) {
+                                    if (api.getServerVoiceChannelById(list.getVoiceid()).isPresent()) {
+                                        sw = dao.GetChannelLock(textchlid);
+                                        if (sw == 0) {
+                                            sw = 1;
+                                            api.getServerVoiceChannelById(list.getVoiceid()).get().createUpdater().addPermissionOverwrite(buttonInteraction.getServer().get().getEveryoneRole(), new PermissionsBuilder().setDenied(PermissionType.CONNECT).build()).update();
+                                            response = "通話ロック完了";
+                                        } else if (sw == 1) {
+                                            sw = 0;
+                                            api.getServerVoiceChannelById(list.getVoiceid()).get().createUpdater().addPermissionOverwrite(buttonInteraction.getServer().get().getEveryoneRole(), new PermissionsBuilder().setAllowed(PermissionType.CONNECT).build()).update();
+                                            response = "通話ロック解除完了";
+                                        }
+                                        dao.UpdateChannelLock(textchlid, sw);
+                                    }
+                                } else if ("mention".equals(id)) {
+                                    ServerDataList serverlist = dao.TempGetData(server);
+                                    if (api.getServerTextChannelById(serverlist.getMentioncal()).isPresent()) {
+                                        ServerTextChannel mention = api.getServerTextChannelById(serverlist.getMentioncal()).get();
+                                        dao.addMentionMessage(list.getTextid(), new MessageBuilder().setContent("@here <#" + list.getVoiceid() + ">").send(mention).join().getIdAsString(), server);
+                                    }
+                                    response = "募集メッセを送信しました";
                                 }
-                                dao.UpdateChannelHide(textchlid, sw);
+                        }
+                        if (buttonInteraction.getUser().getConnectedVoiceChannel(buttonInteraction.getServer().get()).isPresent() &&
+                                requestvoiceid.equalsIgnoreCase(buttonInteraction.getUser().getConnectedVoiceChannel(buttonInteraction.getServer().get()).get().getIdAsString()) &&
+                                api.getServerVoiceChannelById(requestvoiceid).isPresent()) {
+                            if ("claim".equals(id)) {
+                                boolean claimsw = true;
+                                for (Map.Entry<Long, Permissions> entry : api.getServerVoiceChannelById(requestvoiceid).get().getOverwrittenUserPermissions().entrySet())
+                                    if (entry.getValue().getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
+                                        for (Long conectid : api.getServerVoiceChannelById(requestvoiceid).get().getConnectedUserIds())
+                                            if (Objects.equals(conectid, entry.getKey())) {
+                                                claimsw = false;
+                                                break;
+                                            }
+                                        break;
+                                    }
+                                if (claimsw){
+                                    api.getServerVoiceChannelById(requestvoiceid).get().createUpdater().addPermissionOverwrite(buttonInteraction.getUser(),new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS).build()).update();
+                                    response = buttonInteraction.getUser().getName()+"が新しく通話管理者になりました";
+                                }else response = "通話管理者が通話にいらっしゃいます";
                             }
-                        } else if ("lock".equals(id)) {
-                            if (api.getServerVoiceChannelById(list.getVoiceid()).isPresent()) {
-                                sw = dao.GetChannelLock(textchlid);
-                                if (sw == 0) {
-                                    sw = 1;
-                                    api.getServerVoiceChannelById(list.getVoiceid()).get().createUpdater().addPermissionOverwrite(buttonInteraction.getServer().get().getEveryoneRole(), new PermissionsBuilder().setDenied(PermissionType.CONNECT).build()).update();
-                                    response = "通話ロック完了";
-                                } else if (sw == 1) {
-                                    sw = 0;
-                                    api.getServerVoiceChannelById(list.getVoiceid()).get().createUpdater().addPermissionOverwrite(buttonInteraction.getServer().get().getEveryoneRole(), new PermissionsBuilder().setAllowed(PermissionType.CONNECT).build()).update();
-                                    response = "通話ロック解除完了";
-                                }
-                                dao.UpdateChannelLock(textchlid, sw);
-                            }
-                        } else if ("mention".equals(id)) {
-                            ServerDataList serverlist = dao.TempGetData(server);
-                            if (api.getServerTextChannelById(serverlist.getMentioncal()).isPresent()) {
-                                ServerTextChannel mention = api.getServerTextChannelById(serverlist.getMentioncal()).get();
-                                dao.addMentionMessage(list.getTextid(), new MessageBuilder().setContent("@here <#" + list.getVoiceid() + ">").send(mention).join().getIdAsString(), server);
-                            }
-                            response = "募集メッセを送信しました";
                         }
                         e.getInteraction().createImmediateResponder().setContent(response).respond();
-                    } catch (DatabaseException | SystemException ex) {
-                        ex.printStackTrace();
+                    } catch (DatabaseException | SystemException ignored) {
                     }
                 }
             });
 
             api.addServerJoinListener(e -> {
                 try {
-                    System.out.println("join"+e.getServer().getName());
                     if (e.getServer().getSystemChannel().isPresent())
                         e.getServer().getSystemChannel().get().sendMessage(">setup を打つと\nチャンネルとカテゴリを作成されます");
                     dao.TempNewServer(e.getServer().getIdAsString());
-                } catch (DatabaseException ex) {
-                    ex.printStackTrace();
+                } catch (DatabaseException ignored) {
                 }
             });
             api.addServerLeaveListener(e -> {
                 try {
                     dao.TempDeleteData(e.getServer().getIdAsString());
-                } catch (DatabaseException ex) {
-                    ex.printStackTrace();
+                } catch (DatabaseException ignored) {
                 }
             });
             System.out.println("URL : " + api.createBotInvite());
@@ -500,8 +533,7 @@ public class BotMain extends Thread {
                     System.out.println(out + "\n" + outs + "\n" + outm);
                 }
             }
-        } catch (DatabaseException | SystemException | IOException ex) {
-            ex.printStackTrace();
+        } catch (DatabaseException | SystemException | IOException ignored) {
         }
     }
 }

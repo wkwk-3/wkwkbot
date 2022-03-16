@@ -243,7 +243,7 @@ public class BotMain extends Thread {
                                                     "・`" + prefix + "set tcat <カテゴリID>` -> 一時チャットの作成先を変更\n" +
                                                     "・`" + prefix + "set 1stc <チャンネルID>` -> 最初に入るチャンネルを変更\n" +
                                                     "・`" + prefix + "set men <チャンネルID>` -> 募集送信チャンネル変更\n" +
-                                                    "・`" + prefix + "set role <ロールメンション> <絵文字>`↓\n　リアクションロールの付与ロールと絵文字を変更\n" +
+                                                    "・`" + prefix + "set role <ロールID> <絵文字>`↓\n　リアクションロールの付与ロールと絵文字を変更\n" +
                                                     "・`" + prefix + "set mess <メッセージID>　<チャンネルID>`↓\n　リアクションロールの対象メッセージを変更\n" +
                                                     "・`" + prefix + "remove role <絵文字>`↓\n　リアクションロールの絵文字を削除\n"))
                                             .addField("[USER]一時チャネルコマンド一覧", "・`" + prefix + "name <文字>`or`" + prefix + "n <文字>` -> チャンネルの名前を変更\n" +

@@ -2,7 +2,7 @@
 ***
  [BOT追加]() ← **近日公開**
 ***
-##BOT保有機能
+## BOT保有機能
 - **一時通話チャンネルの管理**
   - 通話自動削除
   - 通話非表示切替
@@ -25,8 +25,8 @@
   - コマンドヘルプ機能
   - BOTによるメッセージ代替送信
 ***
-  ###コマンド情報(デフォルト)
-  ######※PREFIXを変更すると`>`が変更されます
+  ### コマンド情報(デフォルト)
+  ###### ※PREFIXを変更すると`>`が変更されます
 - [ADMIN]確認用コマンド一覧  
   - `>help` : コマンド一覧を表示  
   - `>show` : サーバーの設定状況を確認  
@@ -45,8 +45,8 @@
   - `>size <数字>`or`>s <数字>` : 通話参加人数を変更  
   - `>men <募集内容>`or`>m <募集内容>` : 募集チャットの内容を書いて送信  
 ***
-#####セットアップ方法
-######※以下は自分でBOTを動かしたい方向けとなっております
+##### セットアップ方法
+###### ※以下は自分でBOTを動かしたい方向けとなっております
 インストールするべきもの。  
 [MySQL](https://dev.mysql.com/downloads/mysql/) ※インストールしてください  
 [JDK-17](https://www.oracle.com/java/technologies/downloads/) ※パッチを通してください  
@@ -58,7 +58,7 @@
 
 
 ***
-######以下使用API
+###### 以下使用API
 [MySQL Connecter / J](https://github.com/mysql/mysql-connector-j)  
 [JavaCord](https://javacord.org)  
 [emoji-java](https://github.com/vdurmont/emoji-java)  

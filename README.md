@@ -1,6 +1,7 @@
 # wkwkbot
 ***
- [BOT追加]() ← **近日公開**
+ [BOT追加]() ← **近日公開**  
+ [サポートサーバー]() ← **近日公開**
 ***
   ## BOT保有機能
 - **一時通話チャンネルの管理**
@@ -55,10 +56,14 @@
 2. 1 で取得した情報を追記し [DB.txt](https://github.com/wkwk-3/wkwkbot/blob/main/DB/DB.txt) をSQLで実行 
 3. プロジェクト内で`mvn install`を実行
 4. targetフォルダ内で`java -jar <ファイル名>.jar`を実行
-
-
+***
+###### 今後追加する機能(予定)  
+- Webサイトからの管理機能
+- 読み上げ機能
+- 各機能の有効化切り替え
+- その他要望の可能な限りの対応
 ***
 ###### 以下使用API
 [MySQL Connecter / J](https://github.com/mysql/mysql-connector-j)  
 [JavaCord](https://javacord.org)  
-[emoji-java](https://github.com/vdurmont/emoji-java)  
+[emoji-java](https://github.com/vdurmont/emoji-java)

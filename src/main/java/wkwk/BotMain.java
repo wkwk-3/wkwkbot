@@ -111,9 +111,9 @@ public class BotMain extends Thread {
                                                 else response = "カテゴリIDを入力してください";
                                             else if (cmd[1].equalsIgnoreCase("men"))
                                                 if (api.getServerTextChannelById(cmd[2]).isPresent() && api.getServerTextChannelById(cmd[2]).get().getServer().getId() == e.getServer().get().getId()) {
-                                                    dao.setMentionChannel(cmd[2],e.getServer().get().getIdAsString());
+                                                    dao.setMentionChannel(cmd[2], e.getServer().get().getIdAsString());
                                                     response = "メンション送信チャンネルを更新しました";
-                                                }else {
+                                                } else {
                                                     response = "テキストチャンネルを設定してください";
                                                 }
                                             else if (cmd[1].equalsIgnoreCase("1stc"))
@@ -139,7 +139,7 @@ public class BotMain extends Thread {
                                                     str.append("それは数字じゃない");
                                                 }
                                                 response = str.toString();
-                                                } else if (cmd[1].equalsIgnoreCase("mess") && cmd.length > 3)
+                                            } else if (cmd[1].equalsIgnoreCase("mess") && cmd.length > 3)
                                                 if (api.getServerTextChannelById(cmd[3]).isPresent() && serverl == api.getServerTextChannelById(cmd[3]).get().getServer().getId())
                                                     if (api.getMessageById(cmd[2], api.getServerTextChannelById(cmd[3]).get()).join().getServer().isPresent() && api.getMessageById(cmd[2], api.getServerTextChannelById(cmd[3]).get()).join().getServer().get().getId() == serverl) {
                                                         dao.setReactMessageData(server, cmd[3], cmd[2]);
@@ -284,9 +284,9 @@ public class BotMain extends Thread {
                                 ServerTextChannel text = new ServerTextChannelBuilder(e.getServer()).setName(user.getName() + " channel").setCategory(Tcat).addPermissionOverwrite(e.getServer().getEveryoneRole(), new PermissionsBuilder().setAllDenied().build()).create().get();
                                 ServerVoiceChannel voice = new ServerVoiceChannelBuilder(e.getServer()).setName(user.getName() + " channel").setCategory(Vcat).setUserlimit(0).setBitrate(64000).create().get();
                                 String prefix = data.getPrefix();
-                                new MessageBuilder().setContent("・`" + prefix + "name <文字>` か `"+ prefix +"n <文字>` -> チャンネルの名前を変更\n" +
-                                        "・`" + prefix + "size <数字>` か `"+ prefix +"s <数字>` -> 通話参加人数を変更\n" +
-                                        "・`" + prefix + "men <募集内容>` か `"+prefix+"m <募集内容>` -> 募集チャットの内容を書いて送信\n").addComponents(
+                                new MessageBuilder().setContent("・`" + prefix + "name <文字>` か `" + prefix + "n <文字>` -> チャンネルの名前を変更\n" +
+                                        "・`" + prefix + "size <数字>` か `" + prefix + "s <数字>` -> 通話参加人数を変更\n" +
+                                        "・`" + prefix + "men <募集内容>` か `" + prefix + "m <募集内容>` -> 募集チャットの内容を書いて送信\n").addComponents(
                                         ActionRow.of(Button.success("claim", "管理権限獲得"),
                                                 Button.success("hide", "非表示切替"),
                                                 Button.success("lock", "参加許可切替"),
@@ -468,10 +468,10 @@ public class BotMain extends Thread {
                                             }
                                         break;
                                     }
-                                if (claimsw){
-                                    api.getServerVoiceChannelById(requestvoiceid).get().createUpdater().addPermissionOverwrite(buttonInteraction.getUser(),new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS).build()).update();
-                                    response = buttonInteraction.getUser().getName()+"が新しく通話管理者になりました";
-                                }else response = "通話管理者が通話にいらっしゃいます";
+                                if (claimsw) {
+                                    api.getServerVoiceChannelById(requestvoiceid).get().createUpdater().addPermissionOverwrite(buttonInteraction.getUser(), new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS).build()).update();
+                                    response = buttonInteraction.getUser().getName() + "が新しく通話管理者になりました";
+                                } else response = "通話管理者が通話にいらっしゃいます";
                             }
                         }
                         e.getInteraction().createImmediateResponder().setContent(response).respond();

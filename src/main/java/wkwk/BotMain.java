@@ -49,7 +49,6 @@ public class BotMain extends Thread {
                 if (!api.getServerVoiceChannelById(voice).isPresent()) dao.TempDeleteChannelList(voice, "v");
 
             api.addMessageCreateListener(e -> {
-                System.out.println("test");
                 try {
                     if (e.getMessage().getUserAuthor().isPresent() && !e.getMessage().getUserAuthor().get().isBot() && e.getServer().isPresent()) {
                         String server = e.getServer().get().getIdAsString();

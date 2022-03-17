@@ -3,7 +3,7 @@
  [BOT追加]() ← **近日公開**  
  [サポートサーバー](https://discord.gg/) ← **近日公開**
 
- [![Discord Presence](https://lanyard.cnrad.dev/api/422099698388697108?idleMessage=今は何もしてないよ
+ [![Discord Presence](https://lanyard.cnrad.dev/api/422099698388697108?idleMessage=今は何もしてないよ&hideTimestamp=true
  )](https://discord.com/users/422099698388697108)
 ***
   ## BOT保有機能

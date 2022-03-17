@@ -170,9 +170,9 @@ public class DiscordDAO extends DAOBase {
         try {
             String sql = "INSERT INTO " + DAOParameters.TABLE_TEMP_CHANNEL + " VALUES (?,?,?,0,0)";
             prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, list.getVoiceid());
-            prestmt.setString(2, list.getTextid());
-            prestmt.setString(3, list.getServerid());
+            prestmt.setString(1, list.getVoiceID());
+            prestmt.setString(2, list.getTextID());
+            prestmt.setString(3, list.getServerID());
             prestmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -196,9 +196,9 @@ public class DiscordDAO extends DAOBase {
             ResultSet rs = prestmt.executeQuery();
             list = new ChannelList();
             while (rs.next()) {
-                list.setServerid(rs.getString(TempChannelsParameters.SERVER_ID));
-                list.setVoiceid(rs.getString(TempChannelsParameters.VOICE_CHANNEL_ID));
-                list.setTextid(rs.getString(TempChannelsParameters.TEXT_CHANNEL_ID));
+                list.setServerID(rs.getString(TempChannelsParameters.SERVER_ID));
+                list.setVoiceID(rs.getString(TempChannelsParameters.VOICE_CHANNEL_ID));
+                list.setTextID(rs.getString(TempChannelsParameters.TEXT_CHANNEL_ID));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -344,7 +344,7 @@ public class DiscordDAO extends DAOBase {
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, textid);
             ResultSet rs = prestmt.executeQuery();
-            while (rs.next()) list.addMessages(rs.getString(MentionMessageParameters.MESSAGE_ID));
+            while (rs.next()) list.getMessages().add(rs.getString(MentionMessageParameters.MESSAGE_ID));
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -361,7 +361,7 @@ public class DiscordDAO extends DAOBase {
             stmt = con.createStatement();
             String sql = "SELECT DISTINCT " + TempChannelsParameters.TEXT_CHANNEL_ID + " FROM " + DAOParameters.TABLE_MENTION_MESSAGE;
             ResultSet rs = stmt.executeQuery(sql);
-            while (rs.next()) list.addtextid(rs.getString(TempChannelsParameters.TEXT_CHANNEL_ID));
+            while (rs.next()) list.getTextID().add(rs.getString(TempChannelsParameters.TEXT_CHANNEL_ID));
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -440,11 +440,11 @@ public class DiscordDAO extends DAOBase {
                 ResultSet rs = prestmt2.executeQuery();
                 ReactionRoleRecord record = new ReactionRoleRecord();
                 while (rs.next()) {
-                    record.setServerid(serverid);
-                    record.setTextchannelid(rs.getString(ReactMessageParameters.TEXT_CHANNEL_ID));
-                    record.setMessageid(rs.getString(ReactMessageParameters.MESSAGE_ID));
+                    record.setServerID(serverid);
+                    record.setTextChannelID(rs.getString(ReactMessageParameters.TEXT_CHANNEL_ID));
+                    record.setMessageID(rs.getString(ReactMessageParameters.MESSAGE_ID));
                 }
-                String sql3 = "DELETE FROM " + DAOParameters.TABLE_REACT_ROLE + " WHERE " + ReactRoleParameters.MESSAGE_ID + " = " + record.getMessageid();
+                String sql3 = "DELETE FROM " + DAOParameters.TABLE_REACT_ROLE + " WHERE " + ReactRoleParameters.MESSAGE_ID + " = " + record.getMessageID();
                 Statement stmt = con.createStatement();
                 stmt.execute(sql3);
                 sql = "UPDATE " + DAOParameters.TABLE_REACT_MESSAGE + " SET " + ReactMessageParameters.TEXT_CHANNEL_ID + " = ?," + ReactMessageParameters.MESSAGE_ID + " = ? WHERE " + ReactMessageParameters.SERVER_ID + " = ?";
@@ -475,9 +475,9 @@ public class DiscordDAO extends DAOBase {
             ResultSet rs = prestmt.executeQuery();
             record = new ReactionRoleRecord();
             while (rs.next()) {
-                record.setServerid(serverid);
-                record.setTextchannelid(rs.getString(ReactMessageParameters.TEXT_CHANNEL_ID));
-                record.setMessageid(rs.getString(ReactMessageParameters.MESSAGE_ID));
+                record.setServerID(serverid);
+                record.setTextChannelID(rs.getString(ReactMessageParameters.TEXT_CHANNEL_ID));
+                record.setMessageID(rs.getString(ReactMessageParameters.MESSAGE_ID));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -528,17 +528,17 @@ public class DiscordDAO extends DAOBase {
             ResultSet rs = prestmt.executeQuery();
             record = new ReactionRoleRecord();
             while (rs.next()) {
-                record.setServerid(serverid);
-                record.setTextchannelid(rs.getString(ReactMessageParameters.TEXT_CHANNEL_ID));
-                record.setMessageid(rs.getString(ReactMessageParameters.MESSAGE_ID));
+                record.setServerID(serverid);
+                record.setTextChannelID(rs.getString(ReactMessageParameters.TEXT_CHANNEL_ID));
+                record.setMessageID(rs.getString(ReactMessageParameters.MESSAGE_ID));
             }
             String sql2 = "SELECT * FROM " + DAOParameters.TABLE_REACT_ROLE + " WHERE " + ReactRoleParameters.MESSAGE_ID + " = ?";
             prestmt2 = con.prepareStatement(sql2);
-            prestmt2.setString(1, record.getMessageid());
+            prestmt2.setString(1, record.getMessageID());
             ResultSet rs2 = prestmt2.executeQuery();
             while (rs2.next()) {
-                record.addEmoji(rs2.getString(ReactRoleParameters.EMOJI));
-                record.addRoleid(rs2.getString(ReactRoleParameters.ROLE_ID));
+                record.getEmoji().add(rs2.getString(ReactRoleParameters.EMOJI));
+                record.getRoleID().add(rs2.getString(ReactRoleParameters.ROLE_ID));
             }
         } catch (SQLException e) {
             e.printStackTrace();

@@ -2,6 +2,9 @@
 ***
  [BOT追加]() ← **近日公開**  
  [サポートサーバー](https://discord.gg/) ← **近日公開**
+
+ [![Discord Presence](https://lanyard.cnrad.dev/api/422099698388697108?idleMessage=今は何もしてないよ
+ )](https://discord.com/users/422099698388697108)
 ***
   ## BOT保有機能
 - **一時通話チャンネルの管理**

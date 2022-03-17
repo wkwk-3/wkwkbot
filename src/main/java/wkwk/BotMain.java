@@ -494,7 +494,8 @@ public class BotMain extends Thread {
                 } catch (DatabaseException ignored) {
                 }
             });
-            System.out.println("URL : " + api.createBotInvite());
+            Permissions per = new PermissionsBuilder().setAllowed(PermissionType.MANAGE_EMOJIS,PermissionType.MANAGE_CHANNELS,PermissionType.READ_MESSAGES,PermissionType.SEND_MESSAGES,PermissionType.EMBED_LINKS,PermissionType.ATTACH_FILE,PermissionType.READ_MESSAGE_HISTORY,PermissionType.MENTION_EVERYONE,PermissionType.ADD_REACTIONS,PermissionType.MOVE_MEMBERS).build();
+            System.out.println("URL : " + api.createBotInvite(per));
             System.out.println();
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             while (true) {

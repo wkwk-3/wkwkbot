@@ -14,6 +14,7 @@ import org.javacord.api.entity.permission.Permissions;
 import org.javacord.api.entity.permission.PermissionsBuilder;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
+import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.interaction.ButtonInteraction;
 import wkwk.dao.DiscordDAO;
 import wkwk.exception.DatabaseException;
@@ -33,6 +34,34 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class BotMain extends Thread {
+    private EmbedBuilder createShow(String serverId,User sendUser, MessageCreateEvent e,DiscordDAO dao,DiscordApi api) throws SystemException, DatabaseException {
+        ServerDataList tempdata = dao.TempGetData(serverId);
+        ReactionRoleRecord react = dao.getReactAllData(tempdata.getServer());
+        e.getMessage().delete();
+        String[] emojis = react.getEmoji().toArray(new String[0]);
+        String[] roles = react.getRoleid().toArray(new String[0]);
+        StringBuilder reacts = new StringBuilder();
+        if (api.getServerTextChannelById(react.getTextchannelid()).isPresent()) {
+            reacts.append("・リアクションロールメッセージ : ").append(api.getMessageById(react.getMessageid(), api.getServerTextChannelById(react.getTextchannelid()).get()).join().getLink()).append("\n");
+        }
+        for (int i = 0; i < emojis.length; i++) {
+            if (api.getRoleById(roles[i]).isPresent()) {
+                reacts.append("・リアクションロール : ").append("@").append(api.getRoleById(roles[i]).get().getName()).append(" >>>> ").append(emojis[i]).append("\n");
+            }
+        }
+        return new EmbedBuilder()
+                .setTitle("一覧情報表示")
+                .setAuthor(sendUser)
+                .addField("サーバー情報一覧", "・メンション送信チャンネルID : <#" + tempdata.getMentioncal() + ">\n" +
+                        "・一時作成チャネル : <#" + tempdata.getFstchannel() + ">\n" +
+                        "・通話カテゴリ : <#" + tempdata.getVoicecate() + ">\n" +
+                        "・テキストカテゴリ : <#" + tempdata.getTextcate() + ">\n" +
+                        "・prefix : " + tempdata.getPrefix() + "\n" +
+                        reacts)
+                .setColor(Color.cyan)
+                .setThumbnail(new File("src/main/resources/s.png"));
+    }
+
     private EmbedBuilder createHelp(String prefix, String serverName, User user) {
         return new EmbedBuilder()
                 .setTitle("BOT情報案内 With" + serverName)
@@ -87,25 +116,30 @@ public class BotMain extends Thread {
                         String messageContent = e.getMessageContent();
                         String responseMessage = null;
                         boolean isAdmin = server.getAllowedPermissions(sendUser).contains(PermissionType.ADMINISTRATOR);
-                        if (prefix == null && isAdmin) {
-                            if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX + "setup")) {
-                                dao.TempNewServer(serverId);
-                                ServerDataList data = new ServerDataList();
-                                data.setServer(serverId);
-                                data.setFstchannel(new ServerVoiceChannelBuilder(server).setName("NewTEMP").setRawPosition(0).setBitrate(64000).addPermissionOverwrite(e.getServer().get().getEveryoneRole(), new PermissionsBuilder().setDenied(PermissionType.SEND_MESSAGES).build()).create().join().getIdAsString());
-                                data.setMentioncal(new ServerTextChannelBuilder(server).setName("Mention").setRawPosition(1).create().join().getIdAsString());
-                                data.setVoicecate(new ChannelCategoryBuilder(server).setName("Voice").setRawPosition(0).create().join().getIdAsString());
-                                data.setTextcate(new ChannelCategoryBuilder(server).setName("Text").setRawPosition(0).create().join().getIdAsString());
-                                dao.TempDataUpData(data);
-                                responseMessage = "セットアップ完了";
-                            } else if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX + "help")) {
+                        if (prefix == null) {
+                            if (isAdmin) {
+                                if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX + "setup")) {
+                                    dao.TempNewServer(serverId);
+                                    ServerDataList data = new ServerDataList();
+                                    data.setServer(serverId);
+                                    data.setFstchannel(new ServerVoiceChannelBuilder(server).setName("NewTEMP").setRawPosition(0).setBitrate(64000).addPermissionOverwrite(e.getServer().get().getEveryoneRole(), new PermissionsBuilder().setDenied(PermissionType.SEND_MESSAGES).build()).create().join().getIdAsString());
+                                    data.setMentioncal(new ServerTextChannelBuilder(server).setName("Mention").setRawPosition(1).create().join().getIdAsString());
+                                    data.setVoicecate(new ChannelCategoryBuilder(server).setName("Voice").setRawPosition(0).create().join().getIdAsString());
+                                    data.setTextcate(new ChannelCategoryBuilder(server).setName("Text").setRawPosition(0).create().join().getIdAsString());
+                                    dao.TempDataUpData(data);
+                                    responseMessage = "セットアップ完了";
+                                }else if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX + "show")) {
+                                    sendUser.sendMessage(createShow(serverId,sendUser,e,dao,api));
+                                }
+                            }
+                            if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX + "help")) {
                                 sendUser.sendMessage(createHelp(ServerPropertyParameters.DEFAULT_PREFIX, server.getName(), sendUser));
                             }
-
-                        } else if (prefix != null) {
+                        } else {
                             if (messageContent.split(prefix).length > 1) {
                                 String[] cmd = messageContent.split(prefix)[1].split(" ");
                                 if (cmd[0].equalsIgnoreCase("help")) {
+                                    e.getMessage().delete();
                                     sendUser.sendMessage(createHelp(prefix, server.getName(), sendUser));
                                 }
                                 if (isAdmin) {
@@ -214,32 +248,7 @@ public class BotMain extends Thread {
                                         mess.remove("mess");
                                         responseMessage = mess.stream().map(st -> st + "\n").collect(Collectors.joining());
                                     } else if (cmd[0].equalsIgnoreCase("show")) {
-                                        ServerDataList tempdata = dao.TempGetData(serverId);
-                                        ReactionRoleRecord react = dao.getReactAllData(tempdata.getServer());
-                                        e.getMessage().delete();
-                                        String[] emojis = react.getEmoji().toArray(new String[0]);
-                                        String[] roles = react.getRoleid().toArray(new String[0]);
-                                        StringBuilder reacts = new StringBuilder();
-                                        if (api.getServerTextChannelById(react.getTextchannelid()).isPresent()) {
-                                            reacts.append("・リアクションロールメッセージ : ").append(api.getMessageById(react.getMessageid(), api.getServerTextChannelById(react.getTextchannelid()).get()).join().getLink()).append("\n");
-                                        }
-                                        for (int i = 0; i < emojis.length; i++) {
-                                            if (api.getRoleById(roles[i]).isPresent()) {
-                                                reacts.append("・リアクションロール : ").append("@").append(api.getRoleById(roles[i]).get().getName()).append(" >>>> ").append(emojis[i]).append("\n");
-                                            }
-                                        }
-                                        EmbedBuilder embed = new EmbedBuilder()
-                                                .setTitle("一覧情報表示")
-                                                .setAuthor(sendUser)
-                                                .addField("サーバー情報一覧", "・メンション送信チャンネルID : <#" + tempdata.getMentioncal() + ">\n" +
-                                                        "・一時作成チャネル : <#" + tempdata.getFstchannel() + ">\n" +
-                                                        "・通話カテゴリ : <#" + tempdata.getVoicecate() + ">\n" +
-                                                        "・テキストカテゴリ : <#" + tempdata.getTextcate() + ">\n" +
-                                                        "・prefix : " + tempdata.getPrefix() + "\n" +
-                                                        reacts)
-                                                .setColor(Color.cyan)
-                                                .setThumbnail(new File("src/main/resources/s.png"));
-                                        sendUser.sendMessage(embed);
+                                        sendUser.sendMessage(createShow(serverId,sendUser,e,dao,api));
                                     }
                                 }
                                 ChannelList list = dao.TempGetChannelList(e.getChannel().getIdAsString(), "t");

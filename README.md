@@ -69,4 +69,5 @@
 ###### 以下使用API
 [MySQL Connecter / J](https://github.com/mysql/mysql-connector-j)  
 [JavaCord](https://javacord.org)  
-[emoji-java](https://github.com/vdurmont/emoji-java)
+[emoji-java](https://github.com/vdurmont/emoji-java)  
+[lombok](https://github.com/projectlombok/lombok)

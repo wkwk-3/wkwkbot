@@ -1,7 +1,16 @@
 package wkwk.paramater;
 
-public class MentionMessageParameters {
-    public static final String SERVER_ID = ServerPropertyParameters.SERVER_ID;
-    public static final String MESSAGE_ID = "MESSAGEID";
-    public static final String TEXT_CHANNEL_ID = "TEXTCHANNELID";
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
+public enum MentionMessageParameters {
+
+    SERVER_ID(ServerPropertyParameters.SERVER_ID.getParameter()),
+    MESSAGE_ID("MESSAGEID"),
+    TEXT_CHANNEL_ID("TEXTCHANNELID");
+
+    private final String parameter;
+
 }

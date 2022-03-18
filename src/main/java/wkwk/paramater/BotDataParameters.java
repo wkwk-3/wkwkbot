@@ -1,7 +1,16 @@
 package wkwk.paramater;
 
-public class BotDataParameters {
-    public static final String BOT_TOKEN = "BOTTOKEN";
-    public static final String BOT_CLIENT_ID = "BOTCLIENTID";
-    public static final String CLIENT_SECRET = "CLIENTSECRET";
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
+public enum BotDataParameters {
+
+    BOT_TOKEN("BOTTOKEN"),
+    BOT_CLIENT_ID("BOTCLIENTID"),
+    CLIENT_SECRET("CLIENTSECRET");
+
+    private final String parameter;
+
 }

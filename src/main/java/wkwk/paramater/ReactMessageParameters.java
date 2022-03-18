@@ -1,7 +1,16 @@
 package wkwk.paramater;
 
-public class ReactMessageParameters {
-    public static final String SERVER_ID = ServerPropertyParameters.SERVER_ID;
-    public static final String TEXT_CHANNEL_ID = "TEXTCHANNELID";
-    public static final String MESSAGE_ID = "MESSAGEID";
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
+public enum ReactMessageParameters {
+
+    SERVER_ID(ServerPropertyParameters.SERVER_ID.getParameter()),
+    TEXT_CHANNEL_ID("TEXTCHANNELID"),
+    MESSAGE_ID("MESSAGEID");
+
+    private final String parameter;
+
 }

@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 
 public class BotMain extends Thread {
 
-    private EmbedBuilder createShow(String serverId,User sendUser, MessageCreateEvent e,DiscordDAO dao,DiscordApi api) throws SystemException, DatabaseException {
+    private EmbedBuilder createShow(String serverId, User sendUser, MessageCreateEvent e, DiscordDAO dao, DiscordApi api) throws SystemException, DatabaseException {
         ServerDataList tempData = dao.TempGetData(serverId);
         ReactionRoleRecord react = dao.getReactAllData(tempData.getServer());
         e.getMessage().delete();
@@ -118,7 +118,7 @@ public class BotMain extends Thread {
                                     dao.TempNewServer(serverId);
                                     ServerDataList data = new ServerDataList();
                                     data.setServer(serverId);
-                                    data.setFstchannel(new ServerVoiceChannelBuilder(server).setName("NewTEMP").setRawPosition(0).setBitrate(64000).addPermissionOverwrite(e.getServer().get().getEveryoneRole(), new PermissionsBuilder().setDenied(PermissionType.SEND_MESSAGES).build()).addPermissionOverwrite(api.getYourself(),new PermissionsBuilder().setAllowed(PermissionType.MOVE_MEMBERS).build()).create().join().getIdAsString());
+                                    data.setFstchannel(new ServerVoiceChannelBuilder(server).setName("NewTEMP").setRawPosition(0).setBitrate(64000).addPermissionOverwrite(e.getServer().get().getEveryoneRole(), new PermissionsBuilder().setDenied(PermissionType.SEND_MESSAGES).build()).addPermissionOverwrite(api.getYourself(), new PermissionsBuilder().setAllowed(PermissionType.MOVE_MEMBERS).build()).create().join().getIdAsString());
                                     ServerTextChannel mentionChannel = new ServerTextChannelBuilder(server).setName("Mention").setRawPosition(1).create().join();
                                     mentionChannel.createUpdater().addPermissionOverwrite(api.getYourself(), new PermissionsBuilder().setAllowed(PermissionType.MENTION_EVERYONE).build()).update().join();
                                     data.setMentioncal(mentionChannel.getIdAsString());
@@ -126,17 +126,17 @@ public class BotMain extends Thread {
                                     voiceCategory.createUpdater().addPermissionOverwrite(api.getYourself(), new PermissionsBuilder().setAllowed(PermissionType.MOVE_MEMBERS, PermissionType.MANAGE_ROLES, PermissionType.MANAGE_CHANNELS).build()).update().join();
                                     data.setVoicecate(voiceCategory.getIdAsString());
                                     ChannelCategory textCategory = new ChannelCategoryBuilder(server).setName("Text").setRawPosition(0).create().join();
-                                    textCategory.createUpdater().addPermissionOverwrite(api.getYourself(), new PermissionsBuilder().setAllowed(PermissionType.MANAGE_MESSAGES,PermissionType.MANAGE_ROLES,PermissionType.MANAGE_CHANNELS).build()).update();
+                                    textCategory.createUpdater().addPermissionOverwrite(api.getYourself(), new PermissionsBuilder().setAllowed(PermissionType.MANAGE_MESSAGES, PermissionType.MANAGE_ROLES, PermissionType.MANAGE_CHANNELS).build()).update();
                                     data.setTextcate(textCategory.getIdAsString());
                                     dao.TempDataUpData(data);
                                     responseMessage = "セットアップ完了";
-                                }else if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX + "show")) {
+                                } else if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX + "show")) {
                                     e.getMessage().delete();
-                                    sendUser.sendMessage(createShow(serverId,sendUser,e,dao,api));
+                                    sendUser.sendMessage(createShow(serverId, sendUser, e, dao, api));
                                 }
                             }
                             if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX + "help")) {
-                                sendUser.sendMessage(createHelp(ServerPropertyParameters.DEFAULT_PREFIX.getParameter() ,server.getName(),sendUser));
+                                sendUser.sendMessage(createHelp(ServerPropertyParameters.DEFAULT_PREFIX.getParameter(), server.getName(), sendUser));
                             }
                         } else {
 
@@ -144,7 +144,7 @@ public class BotMain extends Thread {
                                 String[] cmd = messageContent.split(prefix)[1].split(" ");
                                 if (cmd[0].equalsIgnoreCase("help")) {
                                     e.getMessage().delete();
-                                    sendUser.sendMessage(createHelp(prefix,server.getName(),sendUser));
+                                    sendUser.sendMessage(createHelp(prefix, server.getName(), sendUser));
                                 }
                                 if (isAdmin) {
                                     if (cmd[0].equalsIgnoreCase("ping")) {
@@ -234,15 +234,15 @@ public class BotMain extends Thread {
                                         ServerDataList data;
                                         data = new ServerDataList();
                                         data.setServer(serverId);
-                                        data.setFstchannel(new ServerVoiceChannelBuilder(server).setName("NewTEMP").setRawPosition(0).setBitrate(64000).addPermissionOverwrite(e.getServer().get().getEveryoneRole(), new PermissionsBuilder().setDenied(PermissionType.SEND_MESSAGES).build()).addPermissionOverwrite(api.getYourself(),new PermissionsBuilder().setAllowed(PermissionType.MOVE_MEMBERS).build()).create().join().getIdAsString());
+                                        data.setFstchannel(new ServerVoiceChannelBuilder(server).setName("NewTEMP").setRawPosition(0).setBitrate(64000).addPermissionOverwrite(e.getServer().get().getEveryoneRole(), new PermissionsBuilder().setDenied(PermissionType.SEND_MESSAGES).build()).addPermissionOverwrite(api.getYourself(), new PermissionsBuilder().setAllowed(PermissionType.MOVE_MEMBERS).build()).create().join().getIdAsString());
                                         ServerTextChannel mentionChannel = new ServerTextChannelBuilder(server).setName("Mention").setRawPosition(1).create().join();
                                         mentionChannel.createUpdater().addPermissionOverwrite(api.getYourself(), new PermissionsBuilder().setAllowed(PermissionType.MENTION_EVERYONE).build()).update().join();
                                         data.setMentioncal(mentionChannel.getIdAsString());
                                         ChannelCategory voiceCategory = new ChannelCategoryBuilder(server).setName("Voice").setRawPosition(0).create().join();
-                                        voiceCategory.createUpdater().addPermissionOverwrite(api.getYourself(), new PermissionsBuilder().setAllowed(PermissionType.MOVE_MEMBERS,PermissionType.MANAGE_ROLES,PermissionType.MANAGE_CHANNELS).build()).update().join();
+                                        voiceCategory.createUpdater().addPermissionOverwrite(api.getYourself(), new PermissionsBuilder().setAllowed(PermissionType.MOVE_MEMBERS, PermissionType.MANAGE_ROLES, PermissionType.MANAGE_CHANNELS).build()).update().join();
                                         data.setVoicecate(voiceCategory.getIdAsString());
                                         ChannelCategory textCategory = new ChannelCategoryBuilder(server).setName("Text").setRawPosition(0).create().join();
-                                        textCategory.createUpdater().addPermissionOverwrite(api.getYourself(), new PermissionsBuilder().setAllowed(PermissionType.MANAGE_MESSAGES,PermissionType.MANAGE_ROLES,PermissionType.MANAGE_CHANNELS).build()).update();
+                                        textCategory.createUpdater().addPermissionOverwrite(api.getYourself(), new PermissionsBuilder().setAllowed(PermissionType.MANAGE_MESSAGES, PermissionType.MANAGE_ROLES, PermissionType.MANAGE_CHANNELS).build()).update();
                                         data.setTextcate(textCategory.getIdAsString());
                                         dao.TempDataUpData(data);
                                         if (api.getChannelCategoryById(old.getVoicecate()).isPresent())
@@ -259,7 +259,7 @@ public class BotMain extends Thread {
                                         mess.remove("mess");
                                         responseMessage = mess.stream().map(st -> st + "\n").collect(Collectors.joining());
                                     } else if (cmd[0].equalsIgnoreCase("show")) {
-                                        sendUser.sendMessage(createShow(serverId,sendUser,e,dao,api));
+                                        sendUser.sendMessage(createShow(serverId, sendUser, e, dao, api));
                                     }
                                 }
                                 ChannelList list = dao.TempGetChannelList(e.getChannel().getIdAsString(), "t");
@@ -455,7 +455,7 @@ public class BotMain extends Thread {
                     }
                 }
             });
-//koko
+
             api.addButtonClickListener(e -> {
                 String response = null;
                 ButtonInteraction buttonInteraction = e.getButtonInteraction();

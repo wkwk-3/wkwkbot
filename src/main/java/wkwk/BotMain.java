@@ -122,12 +122,8 @@ public class BotMain extends Thread {
                                     ServerTextChannel mentionChannel = new ServerTextChannelBuilder(server).setName("Mention").setRawPosition(1).create().join();
                                     mentionChannel.createUpdater().addPermissionOverwrite(api.getYourself(), new PermissionsBuilder().setAllowed(PermissionType.MENTION_EVERYONE).build()).update().join();
                                     data.setMentioncal(mentionChannel.getIdAsString());
-                                    ChannelCategory voiceCategory = new ChannelCategoryBuilder(server).setName("Voice").setRawPosition(0).create().join();
-                                    voiceCategory.createUpdater().addPermissionOverwrite(api.getYourself(), new PermissionsBuilder().setAllowed(PermissionType.MOVE_MEMBERS, PermissionType.MANAGE_ROLES, PermissionType.MANAGE_CHANNELS).build()).update().join();
-                                    data.setVoicecate(voiceCategory.getIdAsString());
-                                    ChannelCategory textCategory = new ChannelCategoryBuilder(server).setName("Text").setRawPosition(0).create().join();
-                                    textCategory.createUpdater().addPermissionOverwrite(api.getYourself(), new PermissionsBuilder().setAllowed(PermissionType.MANAGE_MESSAGES, PermissionType.MANAGE_ROLES, PermissionType.MANAGE_CHANNELS).build()).update();
-                                    data.setTextcate(textCategory.getIdAsString());
+                                    data.setVoicecate(new ChannelCategoryBuilder(server).setName("Voice").setRawPosition(0).create().join().getIdAsString());
+                                    data.setTextcate(new ChannelCategoryBuilder(server).setName("Text").setRawPosition(0).create().join().getIdAsString());
                                     dao.TempDataUpData(data);
                                     responseMessage = "セットアップ完了";
                                 } else if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX + "show")) {
@@ -238,12 +234,8 @@ public class BotMain extends Thread {
                                         ServerTextChannel mentionChannel = new ServerTextChannelBuilder(server).setName("Mention").setRawPosition(1).create().join();
                                         mentionChannel.createUpdater().addPermissionOverwrite(api.getYourself(), new PermissionsBuilder().setAllowed(PermissionType.MENTION_EVERYONE).build()).update().join();
                                         data.setMentioncal(mentionChannel.getIdAsString());
-                                        ChannelCategory voiceCategory = new ChannelCategoryBuilder(server).setName("Voice").setRawPosition(0).create().join();
-                                        voiceCategory.createUpdater().addPermissionOverwrite(api.getYourself(), new PermissionsBuilder().setAllowed(PermissionType.MOVE_MEMBERS, PermissionType.MANAGE_ROLES, PermissionType.MANAGE_CHANNELS).build()).update().join();
-                                        data.setVoicecate(voiceCategory.getIdAsString());
-                                        ChannelCategory textCategory = new ChannelCategoryBuilder(server).setName("Text").setRawPosition(0).create().join();
-                                        textCategory.createUpdater().addPermissionOverwrite(api.getYourself(), new PermissionsBuilder().setAllowed(PermissionType.MANAGE_MESSAGES, PermissionType.MANAGE_ROLES, PermissionType.MANAGE_CHANNELS).build()).update();
-                                        data.setTextcate(textCategory.getIdAsString());
+                                        data.setVoicecate(new ChannelCategoryBuilder(server).setName("Voice").setRawPosition(0).create().join().getIdAsString());
+                                        data.setTextcate(new ChannelCategoryBuilder(server).setName("Text").setRawPosition(0).create().join().getIdAsString());
                                         dao.TempDataUpData(data);
                                         if (api.getChannelCategoryById(old.getVoicecate()).isPresent())
                                             api.getChannelCategoryById(old.getVoicecate()).get().delete();
@@ -283,14 +275,14 @@ public class BotMain extends Thread {
                                                 responseMessage = "人数制限を0(limitless)に設定しました";
                                             }
                                         } else if (cmd[0].equalsIgnoreCase("men") || cmd[0].equalsIgnoreCase("m")) {
-                                            StringBuilder strb = new StringBuilder("@here <#" + list.getVoiceID() + ">");
+                                            StringBuilder mentionText = new StringBuilder("@here <#" + list.getVoiceID() + ">");
                                             for (int i = 1; i < cmd.length; i++) {
-                                                strb.append("\n").append(cmd[i]);
+                                                mentionText.append("\n").append(cmd[i]);
                                             }
                                             ServerDataList serverList = dao.TempGetData(serverId);
                                             if (api.getServerTextChannelById(serverList.getMentioncal()).isPresent()) {
                                                 ServerTextChannel mention = api.getServerTextChannelById(serverList.getMentioncal()).get();
-                                                dao.addMentionMessage(list.getTextID(), new MessageBuilder().setContent(strb.toString()).send(mention).join().getIdAsString(), serverId);
+                                                dao.addMentionMessage(list.getTextID(), new MessageBuilder().setContent(mentionText.toString()).send(mention).join().getIdAsString(), serverId);
                                             }
                                             responseMessage = "募集メッセを送信しました";
                                         }
@@ -320,10 +312,10 @@ public class BotMain extends Thread {
                     }
                     try {
                         ServerDataList data = dao.TempGetData(serverId);
-                        String fstc = data.getFstchannel();
+                        String firstChannel = data.getFstchannel();
                         String vcatId = data.getVoicecate();
                         String tcatId = data.getTextcate();
-                        if (joinVoiceId.equalsIgnoreCase(fstc)) {
+                        if (joinVoiceId.equalsIgnoreCase(firstChannel)) {
                             if (server.getChannelCategoryById(tcatId).isPresent() && server.getChannelCategoryById(vcatId).isPresent()) {
                                 ChannelCategory tcat = server.getChannelCategoryById(tcatId).get();
                                 ChannelCategory vcat = server.getChannelCategoryById(vcatId).get();
@@ -566,9 +558,9 @@ public class BotMain extends Thread {
                     int i = 0;
                     int k = 0;
                     int j = 0;
-                    String out = "削除するサーバーデータがありませんでした";
-                    String outs = "削除するメンションデータがありませんでした";
-                    String outm = "削除する一時データがありませんでした";
+                    String outServer = "削除するサーバーデータがありませんでした";
+                    String outMention = "削除するメンションデータがありませんでした";
+                    String outTemp = "削除する一時データがありませんでした";
                     for (String serverId : dao.getServerList())
                         if (!api.getServerById(serverId).isPresent()) {
                             i++;
@@ -587,10 +579,10 @@ public class BotMain extends Thread {
                             dao.TempDeleteChannelList(voice, "v");
                             System.out.println("右の一時データを削除しました -> " + voice);
                         }
-                    if (i > 0) out = "サーバーデータ削除完了";
-                    if (k > 0) outs = "メンションデータ削除完了";
-                    if (j > 0) outm = "一時データ削除完了";
-                    System.out.println(out + "\n" + outs + "\n" + outm);
+                    if (i > 0) outServer = "サーバーデータ削除完了";
+                    if (k > 0) outMention = "メンションデータ削除完了";
+                    if (j > 0) outTemp = "一時データ削除完了";
+                    System.out.println(outServer + "\n" + outMention + "\n" + outTemp);
                 }
             }
         } catch (DatabaseException | SystemException | IOException ignored) {

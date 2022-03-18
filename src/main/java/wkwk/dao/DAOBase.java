@@ -11,7 +11,7 @@ public class DAOBase {
     protected void open() {
         try {
             prestmt = null;
-            con = DriverManager.getConnection(DAOParameters.CONNECT_STRING, DAOParameters.USERID, DAOParameters.PASSWORD);
+            con = DriverManager.getConnection(DAOParameters.CONNECT_STRING.getParameter(), DAOParameters.USERID.getParameter(), DAOParameters.PASSWORD.getParameter());
         } catch (SQLException e) {
             e.printStackTrace();
         }

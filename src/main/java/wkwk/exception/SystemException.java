@@ -1,6 +1,7 @@
 package wkwk.exception;
 
 public class SystemException extends Exception {
+
     public SystemException() {
         super();
     }

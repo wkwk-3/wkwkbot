@@ -12,7 +12,6 @@ import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.permission.Permissions;
 import org.javacord.api.entity.permission.PermissionsBuilder;
-import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
@@ -35,12 +34,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class BotMain extends Thread {
-    
+
     private EmbedBuilder createShow(String serverId,User sendUser, MessageCreateEvent e,DiscordDAO dao,DiscordApi api) throws SystemException, DatabaseException {
         ServerDataList tempdata = dao.TempGetData(serverId);
         ReactionRoleRecord react = dao.getReactAllData(tempdata.getServer());
         e.getMessage().delete();
         String[] emojis = react.getEmoji().toArray(new String[0]);
+
         String[] roles = react.getRoleID().toArray(new String[0]);
         StringBuilder reacts = new StringBuilder();
         if (api.getServerTextChannelById(react.getTextChannelID()).isPresent()) {
@@ -97,7 +97,6 @@ public class BotMain extends Thread {
             }
             for (String s : dao.getAllMentionText().getTextID()) {
                 if (!api.getServerTextChannelById(s).isPresent()) dao.deleteMentions(s);
-
             }
             for (String voice : dao.TempVoiceids()) {
                 if (!api.getServerVoiceChannelById(voice).isPresent()) dao.TempDeleteChannelList(voice, "v");
@@ -130,7 +129,7 @@ public class BotMain extends Thread {
                                 }
                             }
                             if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX.getParameter() + "help")) {
-                                sendUser.sendMessage(createHelp(ServerPropertyParameters.DEFAULT_PREFIX.getParameter(), server.getName(), sendUser));
+                                sendUser.sendMessage(createHelp(ServerPropertyParameters.DEFAULT_PREFIX.getParameter(), server.getName(), sendUser));      
                             }
                         } else {
                             if (messageContent.split(prefix).length > 1) {

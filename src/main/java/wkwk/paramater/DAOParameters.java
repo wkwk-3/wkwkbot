@@ -9,7 +9,7 @@ public enum DAOParameters {
 
     CONNECT_STRING("jdbc:mysql://localhost:3306/WKWKDISCORD"),
     USERID("wkwk"),
-    PASSWORD("Horizon"),
+    PASSWORD("horizonLuna"),
     TABLE_BOT_DATA("BOTDATA"),
     TABLE_SERVER_PROPERTY("SERVERPROPERTY"),
     TABLE_TEMP_CHANNEL("TEMPCHANNELS"),

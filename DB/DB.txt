@@ -49,5 +49,5 @@ CREATE TABLE REACTROLES (
 
 INSERT INTO BOTDATA VALUES ('<BotToken>','<ClientId>','<ClientSecret>');
 
-CREATE USER 'wkwk' IDENTIFIED BY 'Horizon';
+CREATE USER 'wkwk' IDENTIFIED BY 'horizonLuna';
 GRANT ALL ON WKWKDISCORD.* TO 'wkwk';

@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 
 public class BotMain extends Thread {
 
-    private EmbedBuilder createShow(String serverId, User sendUser, MessageCreateEvent e, DiscordDAO dao, DiscordApi api) throws SystemException, DatabaseException {
+    private EmbedBuilder createShow(String serverName, String serverId, User sendUser, MessageCreateEvent e, DiscordDAO dao, DiscordApi api) throws SystemException, DatabaseException {
         ServerDataList tempData = dao.TempGetData(serverId);
         ReactionRoleRecord react = dao.getReactAllData(tempData.getServer());
         e.getMessage().delete();
@@ -72,7 +72,7 @@ public class BotMain extends Thread {
             }
         }
         return new EmbedBuilder()
-                .setTitle("一覧情報表示")
+                .setTitle("一覧情報表示 With " + serverName)
                 .setAuthor(sendUser)
                 .addField("サーバー情報一覧", "・メンション送信チャンネルID : <#" + tempData.getMentioncal() + ">\n" +
                         "・一時作成チャネル : <#" + tempData.getFstchannel() + ">\n" +
@@ -97,8 +97,8 @@ public class BotMain extends Thread {
                             "・`" + prefix + "set tcat <カテゴリID>` -> 一時チャットの作成先を変更\n" +
                             "・`" + prefix + "set 1stc <チャンネルID>` -> 最初に入るチャンネルを変更\n" +
                             "・`" + prefix + "set men <チャンネルID>` -> 募集送信チャンネル変更\n" +
-                            "・`" + prefix + "set enable <true or false>` -> 一時通話チャンネル作成切替\n" +
-                            "・`" + prefix + "set createtext <true or false>` -> 一時テキストチャンネル作成切替\n" +
+                            "・`" + prefix + "set enable <true or false>`↓\n　一時通話チャンネル作成切替\n" +
+                            "・`" + prefix + "set text <true or false>`↓\n　一時テキストチャンネル作成切替\n" +
                             "・`" + prefix + "set size <0~99の数字>` -> 一時通話初期人数変更\n" +
                             "・`" + prefix + "set role <ロールID> <絵文字>`↓\n　リアクションロールの付与ロールと絵文字を変更\n" +
                             "・`" + prefix + "set mess <メッセージID>　<チャンネルID>`↓\n　リアクションロールの対象メッセージを変更\n" +
@@ -159,25 +159,28 @@ public class BotMain extends Thread {
                                     responseMessageString = "セットアップ完了";
                                 } else if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX + "show")) {
                                     e.getMessage().delete();
-                                    sendUser.sendMessage(createShow(serverId, sendUser, e, dao, api));
+                                    sendUser.sendMessage(createShow(server.getName(),serverId, sendUser, e, dao, api));
                                 }
                             }
                             if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX + "help")) {
                                 sendUser.sendMessage(createHelp(ServerPropertyParameters.DEFAULT_PREFIX.getParameter(), server.getName(), sendUser, isAdmin));
                             }
                         } else {
+                            boolean sw = true;
                             if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX.getParameter() + "help")) {
                                 e.getMessage().delete();
+                                sw = false;
                                 sendUser.sendMessage(createHelp(prefix, server.getName(), sendUser, isAdmin));
                             }
                             if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX.getParameter() + "show") && isAdmin) {
                                 e.getMessage().delete();
-                                sendUser.sendMessage(createShow(serverId, sendUser, e, dao, api));
+                                sw = false;
+                                sendUser.sendMessage(createShow(server.getName(),serverId, sendUser, e, dao, api));
                             }
                             if (messageContent.startsWith(prefix)) {
                                 String commandHeadless = messageContent.substring(prefix.length());
                                 String[] cmd = commandHeadless.split(" ");
-                                if (cmd[0].equalsIgnoreCase("help")) {
+                                if (cmd[0].equalsIgnoreCase("help") && sw) {
                                     e.getMessage().delete();
                                     sendUser.sendMessage(createHelp(prefix, server.getName(), sendUser, isAdmin));
                                 }
@@ -267,7 +270,7 @@ public class BotMain extends Thread {
                                                 responseMessageString = "'true'か'false'だけを入力して下さい";
                                             }
 
-                                        } else if (cmd[1].equalsIgnoreCase("createtext")) {
+                                        } else if (cmd[1].equalsIgnoreCase("text")) {
                                             if (cmd[2].equalsIgnoreCase("true")) {
                                                 dao.BotSetDate("txtby", serverId, "1");
                                                 responseMessageString = "チャット作成を有効化しました";
@@ -328,8 +331,8 @@ public class BotMain extends Thread {
                                         for (MessageAttachment attachment : e.getMessageAttachments()) {
                                             responseMessage.addAttachment(attachment.getUrl());
                                         }
-                                    } else if (cmd[0].equalsIgnoreCase("show")) {
-                                        sendUser.sendMessage(createShow(serverId, sendUser, e, dao, api));
+                                    } else if (cmd[0].equalsIgnoreCase("show") && sw) {
+                                        sendUser.sendMessage(createShow(server.getName(),serverId, sendUser, e, dao, api));
                                     }
                                 }
                                 ChannelList list = dao.TempGetChannelList(e.getChannel().getIdAsString(), "t");

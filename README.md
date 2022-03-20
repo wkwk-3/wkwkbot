@@ -47,7 +47,7 @@
   - `>set men <チャンネルID>` : 募集送信チャンネル変更
   - `>set role <ロールID> <絵文字>` : リアクションロールの付与ロールと絵文字を変更
   - `>set enable <true or false>` -> 一時通話チャンネル作成切替
-  - `>set createtext <true or false>` -> 一時テキストチャンネル作成切替
+  - `>set text <true or false>` -> 一時テキストチャンネル作成切替
   - `>set size <0~99の数字>` -> 一時通話初期人数変更
   - `>set mess <メッセージID>　<チャンネルID>` : リアクションロールの対象メッセージを変更
   - `>remove role <絵文字>` : リアクションロールの絵文字を削除

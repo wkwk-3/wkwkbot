@@ -68,11 +68,11 @@ public class BotMain extends Thread {
                 .setThumbnail("https://i.imgur.com/KHpjoiu.png");
     }
 
-    private EmbedBuilder createHelp(String prefix, String serverName, User user,boolean admin) {
+    private EmbedBuilder createHelp(String prefix, String serverName, User user, boolean admin) {
         EmbedBuilder embed = new EmbedBuilder()
                 .setTitle("BOT情報案内 With " + serverName)
                 .setAuthor(user);
-        if(admin){
+        if (admin) {
             embed.addField("[ADMIN]確認用コマンド一覧", "・`" + prefix + "help` -> コマンド一覧を表示\n" +
                             "・`" + prefix + "show` -> サーバーの設定状況を確認\n")
                     .addField("[ADMIN]設定コマンド一覧", "・`" + prefix + "setup` -> 必要なチャンネルとカテゴリを自動作成\n" +
@@ -84,7 +84,7 @@ public class BotMain extends Thread {
                             "・`" + prefix + "set role <ロールID> <絵文字>`↓\n　リアクションロールの付与ロールと絵文字を変更\n" +
                             "・`" + prefix + "set mess <メッセージID>　<チャンネルID>`↓\n　リアクションロールの対象メッセージを変更\n" +
                             "・`" + prefix + "remove role <絵文字>`↓\n　リアクションロールの絵文字を削除\n")
-                    .addField("[ADMIN]ユーティリティ","・`" + prefix + "mess <文字><画像>` -> メッセージをBOTに送信させなおす\n");
+                    .addField("[ADMIN]ユーティリティ", "・`" + prefix + "mess <文字><画像>` -> メッセージをBOTに送信させなおす\n");
 
 
         }
@@ -102,7 +102,7 @@ public class BotMain extends Thread {
             DiscordDAO dao = new DiscordDAO();
             String token = dao.BotGetToken();
             DiscordApi api = new DiscordApiBuilder().setToken(token).login().join();
-            api.updateActivity(ActivityType.PLAYING,">help 現在稼働中");
+            api.updateActivity(ActivityType.PLAYING, ">help 現在稼働中");
             for (String serverId : dao.getServerList()) {
                 if (!api.getServerById(serverId).isPresent()) dao.TempDeleteData(serverId);
             }
@@ -264,7 +264,7 @@ public class BotMain extends Thread {
                                         String response;
                                         response = mess.stream().map(st -> st + "\n").collect(Collectors.joining());
                                         responseMessage = new MessageBuilder().setContent(response);
-                                        for (MessageAttachment attachment : e.getMessageAttachments()){
+                                        for (MessageAttachment attachment : e.getMessageAttachments()) {
                                             responseMessage.addAttachment(attachment.getUrl());
                                         }
                                     } else if (cmd[0].equalsIgnoreCase("show")) {
@@ -348,7 +348,7 @@ public class BotMain extends Thread {
                                                 Button.success("hide", "非表示切替"),
                                                 Button.success("lock", "参加許可切替"),
                                                 Button.success("mention", "募集文送信"),
-                                                Button.success("transfer","通話権限移譲"))).send(text);
+                                                Button.success("transfer", "通話権限移譲"))).send(text);
                                 ChannelList list = new ChannelList();
                                 list.setVoiceID(voice.getIdAsString());
                                 list.setTextID(text.getIdAsString());
@@ -469,14 +469,14 @@ public class BotMain extends Thread {
             });
 
             api.addSelectMenuChooseListener(e -> {
-               SelectMenuInteraction menuInteraction =  e.getSelectMenuInteraction();
-               String cmd = menuInteraction.getCustomId();
-               String response = null;
+                SelectMenuInteraction menuInteraction = e.getSelectMenuInteraction();
+                String cmd = menuInteraction.getCustomId();
+                String response = null;
                 try {
-                    if (menuInteraction.getChannel().isPresent()){
+                    if (menuInteraction.getChannel().isPresent()) {
                         ChannelList list = dao.TempGetChannelList(menuInteraction.getChannel().get().getIdAsString(), "t");
                         String requestVoiceId = list.getVoiceID();
-                        if (cmd.equalsIgnoreCase("transSelect")){
+                        if (cmd.equalsIgnoreCase("transSelect")) {
                             if (api.getServerVoiceChannelById(requestVoiceId).isPresent()) {
                                 boolean claimSw = false;
                                 long oldAdminId = 0L;

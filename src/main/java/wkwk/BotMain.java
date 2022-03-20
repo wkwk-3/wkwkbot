@@ -44,8 +44,18 @@ public class BotMain extends Thread {
         ReactionRoleRecord react = dao.getReactAllData(tempData.getServer());
         e.getMessage().delete();
         String[] emojis = react.getEmoji().toArray(new String[0]);
-
         String[] roles = react.getRoleID().toArray(new String[0]);
+        String bys = "";
+        if (tempData.getTempBy().equalsIgnoreCase("1")) {
+            bys += "・一時作成切り替え : 有効化\n";
+        } else {
+            bys += "・一時作成切り替え : 無効化\n";
+        }
+        if (tempData.getTextBy().equalsIgnoreCase("1")) {
+            bys += "・一時テキストチェンネル作成切り替え : 有効化\n";
+        } else {
+            bys += "・一時テキストチェンネル作成切り替え : 無効化\n";
+        }
         StringBuilder reacts = new StringBuilder();
         if (api.getServerTextChannelById(react.getTextChannelID()).isPresent()) {
             reacts.append("・リアクションロールメッセージ : ").append(api.getMessageById(react.getMessageID(), api.getServerTextChannelById(react.getTextChannelID()).get()).join().getLink()).append("\n");
@@ -62,7 +72,8 @@ public class BotMain extends Thread {
                         "・一時作成チャネル : <#" + tempData.getFstchannel() + ">\n" +
                         "・通話カテゴリ : <#" + tempData.getVoicecate() + ">\n" +
                         "・テキストカテゴリ : <#" + tempData.getTextcate() + ">\n" +
-                        "・prefix : " + tempData.getPrefix() + "\n" +
+                        "・prefix : " + tempData.getPrefix() + "\n" + bys +
+                        "・一時通話初期人数 : " + tempData.getDefaultSize() + "\n"+
                         reacts)
                 .setColor(Color.cyan)
                 .setThumbnail("https://i.imgur.com/KHpjoiu.png");
@@ -81,6 +92,9 @@ public class BotMain extends Thread {
                             "・`" + prefix + "set tcat <カテゴリID>` -> 一時チャットの作成先を変更\n" +
                             "・`" + prefix + "set 1stc <チャンネルID>` -> 最初に入るチャンネルを変更\n" +
                             "・`" + prefix + "set men <チャンネルID>` -> 募集送信チャンネル変更\n" +
+                            "・`" + prefix + "set enable <true or false>` -> 一時通話チャンネル作成切替\n" +
+                            "・`" + prefix + "set createtext <true or false>` -> 一時テキストチャンネル作成切替\n" +
+                            "・`" + prefix + "set size <0~99の数字>` -> 一時通話初期人数変更\n" +
                             "・`" + prefix + "set role <ロールID> <絵文字>`↓\n　リアクションロールの付与ロールと絵文字を変更\n" +
                             "・`" + prefix + "set mess <メッセージID>　<チャンネルID>`↓\n　リアクションロールの対象メッセージを変更\n" +
                             "・`" + prefix + "remove role <絵文字>`↓\n　リアクションロールの絵文字を削除\n")
@@ -185,7 +199,7 @@ public class BotMain extends Thread {
                                             }
                                         } else if (cmd[1].equalsIgnoreCase("men")) {
                                             if (api.getServerTextChannelById(cmd[2]).isPresent() && api.getServerTextChannelById(cmd[2]).get().getServer().getId() == e.getServer().get().getId()) {
-                                                dao.setMentionChannel(cmd[2], e.getServer().get().getIdAsString());
+                                                dao.BotSetDate("m", serverId, cmd[2]);
                                                 responseMessageString = "メンション送信チャンネルを更新しました";
                                             } else {
                                                 responseMessageString = "テキストチャンネルを設定してください";
@@ -227,6 +241,39 @@ public class BotMain extends Thread {
                                                 responseMessageString = "このサーバーのチャンネルIDを入力してください";
                                             } else if (!api.getMessageById(cmd[2], api.getServerTextChannelById(cmd[3]).get()).join().getServer().isPresent()) {
                                                 responseMessageString = "このサーバーのメッセージIDを入力してください";
+                                            }
+                                        } else if (cmd[1].equalsIgnoreCase("enable")) {
+                                            if (cmd[2].equalsIgnoreCase("true")) {
+                                                dao.BotSetDate("tmpby", serverId, "1");
+                                                responseMessageString = "通話作成を有効化しました";
+                                            } else if (cmd[2].equalsIgnoreCase("false")) {
+                                                dao.BotSetDate("tmpby", serverId, "0");
+                                                responseMessageString = "通話作成を無効化しました";
+                                            } else {
+                                                responseMessageString = "'true'か'false'だけを入力して下さい";
+                                            }
+
+                                        } else if (cmd[1].equalsIgnoreCase("createtext")) {
+                                            if (cmd[2].equalsIgnoreCase("true")) {
+                                                dao.BotSetDate("txtby", serverId, "1");
+                                                responseMessageString = "チャット作成を有効化しました";
+                                            } else if (cmd[2].equalsIgnoreCase("false")) {
+                                                dao.BotSetDate("txtby", serverId, "0");
+                                                responseMessageString = "チャット作成を無効化しました";
+                                            } else {
+                                                responseMessageString = "'true'か'false'だけを入力して下さい";
+                                            }
+                                        } else if (cmd[1].equalsIgnoreCase("size")) {
+                                            try {
+                                                int size = Integer.parseInt(cmd[2]);
+                                                if (0 <= size && size < 100) {
+                                                    dao.BotSetDate("size", serverId, cmd[2]);
+                                                    responseMessageString = "初期人数制限を"+cmd[2]+"人に設定しました";
+                                                } else {
+                                                    responseMessageString = "0~99の範囲で入力して下さい";
+                                                }
+                                            } catch (NumberFormatException ex){
+                                                responseMessageString = "0~99の数字を入力して下さい";
                                             }
                                         }
                                     } else if (cmd[0].equalsIgnoreCase("remove")) {
@@ -334,24 +381,28 @@ public class BotMain extends Thread {
                         String firstChannel = data.getFstchannel();
                         String vcatId = data.getVoicecate();
                         String tcatId = data.getTextcate();
-                        if (joinVoiceId.equalsIgnoreCase(firstChannel)) {
+                        if (joinVoiceId.equalsIgnoreCase(firstChannel) && data.getTempBy().equalsIgnoreCase("1")) {
                             if (server.getChannelCategoryById(tcatId).isPresent() && server.getChannelCategoryById(vcatId).isPresent()) {
                                 ChannelCategory tcat = server.getChannelCategoryById(tcatId).get();
                                 ChannelCategory vcat = server.getChannelCategoryById(vcatId).get();
-                                ServerTextChannel text = new ServerTextChannelBuilder(server).setName(joinUser.getName() + " channel").setCategory(tcat).addPermissionOverwrite(server.getEveryoneRole(), new PermissionsBuilder().setAllDenied().build()).create().get();
-                                ServerVoiceChannel voice = new ServerVoiceChannelBuilder(server).setName(joinUser.getName() + " channel").setCategory(vcat).setUserlimit(0).setBitrate(64000).create().get();
-                                String prefix = data.getPrefix();
-                                new MessageBuilder().setContent("・`" + prefix + "name <文字>` か `" + prefix + "n <文字>` -> チャンネルの名前を変更\n" +
-                                        "・`" + prefix + "size <数字>` か `" + prefix + "s <数字>` -> 通話参加人数を変更\n" +
-                                        "・`" + prefix + "men <募集内容>` か `" + prefix + "m <募集内容>` -> 募集チャットの内容を書いて送信\n").addComponents(
-                                        ActionRow.of(Button.success("claim", "管理権限獲得"),
-                                                Button.success("hide", "非表示切替"),
-                                                Button.success("lock", "参加許可切替"),
-                                                Button.success("mention", "募集文送信"),
-                                                Button.success("transfer", "通話権限移譲"))).send(text);
                                 ChannelList list = new ChannelList();
+                                if (data.getTextBy().equalsIgnoreCase("1")) {
+                                    ServerTextChannel text = new ServerTextChannelBuilder(server).setName(joinUser.getName() + " channel").setCategory(tcat).addPermissionOverwrite(server.getEveryoneRole(), new PermissionsBuilder().setAllDenied().build()).create().get();
+                                    list.setTextID(text.getIdAsString());
+                                    String prefix = data.getPrefix();
+                                    new MessageBuilder().setContent("・`" + prefix + "name <文字>` か `" + prefix + "n <文字>` -> チャンネルの名前を変更\n" +
+                                            "・`" + prefix + "size <数字>` か `" + prefix + "s <数字>` -> 通話参加人数を変更\n" +
+                                            "・`" + prefix + "men <募集内容>` か `" + prefix + "m <募集内容>` -> 募集チャットの内容を書いて送信\n").addComponents(
+                                            ActionRow.of(Button.success("claim", "管理権限獲得"),
+                                                    Button.success("hide", "非表示切替"),
+                                                    Button.success("lock", "参加許可切替"),
+                                                    Button.success("mention", "募集文送信"),
+                                                    Button.success("transfer", "通話権限移譲"))).send(text);
+                                } else {
+                                    list.setTextID("NULL");
+                                }
+                                ServerVoiceChannel voice = new ServerVoiceChannelBuilder(server).setName(joinUser.getName() + " channel").setCategory(vcat).setUserlimit(Integer.parseInt(data.getDefaultSize())).setBitrate(64000).create().get();
                                 list.setVoiceID(voice.getIdAsString());
-                                list.setTextID(text.getIdAsString());
                                 list.setServerID(serverId);
                                 dao.TempSetChannelList(list);
                                 joinUser.move(voice);
@@ -519,7 +570,6 @@ public class BotMain extends Thread {
                     String textChannelId = buttonInteraction.getChannel().get().getIdAsString();
                     try {
                         ChannelList list = dao.TempGetChannelList(textChannelId, "t");
-                        int sw;
                         String requestVoiceId = list.getVoiceID();
                         if (buttonInteraction.getUser().getConnectedVoiceChannel(buttonInteraction.getServer().get()).isPresent() &&
                                 requestVoiceId.equalsIgnoreCase(buttonInteraction.getUser().getConnectedVoiceChannel(buttonInteraction.getServer().get()).get().getIdAsString()) &&
@@ -527,31 +577,47 @@ public class BotMain extends Thread {
                             if (buttonInteraction.getServer().isPresent())
                                 if (id.equalsIgnoreCase("hide")) {
                                     if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
-                                        sw = dao.GetChannelHide(textChannelId);
-                                        if (sw == 0) {
-                                            sw = 1;
-                                            api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(buttonInteraction.getServer().get().getEveryoneRole(), new PermissionsBuilder().setDenied(PermissionType.READ_MESSAGES).build()).update();
+                                        PermissionsBuilder permissions = new PermissionsBuilder();
+                                        int lockIs = dao.GetChannelLock(textChannelId);
+                                        int hideIs = dao.GetChannelHide(textChannelId);
+                                        if (hideIs == 0) {
+                                            hideIs = 1;
+                                            permissions.setDenied(PermissionType.READ_MESSAGES);
                                             response = "通話非表示完了";
-                                        } else if (sw == 1) {
-                                            sw = 0;
-                                            api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(buttonInteraction.getServer().get().getEveryoneRole(), new PermissionsBuilder().setAllowed(PermissionType.READ_MESSAGES).build()).update();
+                                        } else if (hideIs == 1) {
+                                            hideIs = 0;
+                                            permissions.setAllowed(PermissionType.READ_MESSAGES);
                                             response = "通話非表示解除完了";
                                         }
-                                        dao.UpdateChannelHide(textChannelId, sw);
+                                        if (lockIs == 0) {
+                                            permissions.setAllowed(PermissionType.CONNECT);
+                                        } else if (lockIs == 1) {
+                                            permissions.setDenied(PermissionType.CONNECT);
+                                        }
+                                        api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(buttonInteraction.getServer().get().getEveryoneRole(), permissions.build()).update();
+                                        dao.UpdateChannelHide(textChannelId, hideIs);
                                     }
                                 } else if (id.equalsIgnoreCase("lock")) {
                                     if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
-                                        sw = dao.GetChannelLock(textChannelId);
-                                        if (sw == 0) {
-                                            sw = 1;
-                                            api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(buttonInteraction.getServer().get().getEveryoneRole(), new PermissionsBuilder().setDenied(PermissionType.CONNECT).build()).update();
+                                        PermissionsBuilder permissions = new PermissionsBuilder();
+                                        int lockIs = dao.GetChannelLock(textChannelId);
+                                        int hideIs = dao.GetChannelHide(textChannelId);
+                                        if (lockIs == 0) {
+                                            lockIs = 1;
+                                            permissions.setDenied(PermissionType.CONNECT);
                                             response = "通話ロック完了";
-                                        } else if (sw == 1) {
-                                            sw = 0;
-                                            api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(buttonInteraction.getServer().get().getEveryoneRole(), new PermissionsBuilder().setAllowed(PermissionType.CONNECT).build()).update();
+                                        } else if (lockIs == 1) {
+                                            lockIs = 0;
+                                            permissions.setAllowed(PermissionType.CONNECT);
                                             response = "通話ロック解除完了";
                                         }
-                                        dao.UpdateChannelLock(textChannelId, sw);
+                                        if (hideIs == 0) {
+                                            permissions.setAllowed(PermissionType.READ_MESSAGES);
+                                        } else if (hideIs == 1) {
+                                            permissions.setDenied(PermissionType.READ_MESSAGES);
+                                        }
+                                        api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(buttonInteraction.getServer().get().getEveryoneRole(), permissions.build()).update();
+                                        dao.UpdateChannelLock(textChannelId, lockIs);
                                     }
                                 } else if (id.equalsIgnoreCase("mention")) {
                                     ServerDataList serverList = dao.TempGetData(serverId);

@@ -13,6 +13,9 @@ public enum ServerPropertyParameters {
     VOICE_CATEGORY_ID("VOICECATEGORYID"),
     TEXT_CATEGORY_ID("TEXTCATEGORYID"),
     PREFIX("PREFIX"),
+    TEMP_BY("TEMPBY"),
+    TEXT_BY("TEXTBY"),
+    DEFAULT_SIZE("DEFAULTSIZE"),
     DEFAULT_PREFIX(">");
 
     private final String parameter;

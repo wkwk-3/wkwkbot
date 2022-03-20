@@ -49,22 +49,25 @@ public class DiscordDAO extends DAOBase {
         return prefix;
     }
 
-    public ServerDataList TempGetData(String serverid) throws SystemException, DatabaseException {
+    public ServerDataList TempGetData(String serverId) throws SystemException, DatabaseException {
         this.open();
         prestmt = null;
         ServerDataList dataList = new ServerDataList();
         try {
             String sql = "SELECT * FROM " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
             prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, serverid);
+            prestmt.setString(1, serverId);
             ResultSet rs = prestmt.executeQuery();
             while (rs.next()) {
-                dataList.setServer(serverid);
+                dataList.setServer(serverId);
                 dataList.setPrefix(rs.getString(ServerPropertyParameters.PREFIX.getParameter()));
                 dataList.setMentioncal(rs.getString(ServerPropertyParameters.MENTION_CHANNEL_ID.getParameter()));
                 dataList.setFstchannel(rs.getString(ServerPropertyParameters.FIRST_CHANNEL_ID.getParameter()));
                 dataList.setVoicecate(rs.getString(ServerPropertyParameters.VOICE_CATEGORY_ID.getParameter()));
                 dataList.setTextcate(rs.getString(ServerPropertyParameters.TEXT_CATEGORY_ID.getParameter()));
+                dataList.setTempBy(rs.getString(ServerPropertyParameters.TEMP_BY.getParameter()));
+                dataList.setTextBy(rs.getString(ServerPropertyParameters.TEXT_BY.getParameter()));
+                dataList.setDefaultSize(rs.getString(ServerPropertyParameters.DEFAULT_SIZE.getParameter()));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -87,6 +90,14 @@ public class DiscordDAO extends DAOBase {
                 sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET " + ServerPropertyParameters.FIRST_CHANNEL_ID.getParameter() + " = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
             else if ("p".equals(idx))
                 sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET " + ServerPropertyParameters.PREFIX.getParameter() + " = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
+            else if ("m".equals(idx))
+                sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET " + ServerPropertyParameters.MENTION_CHANNEL_ID.getParameter() + " = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
+            else if ("tmpby".equals(idx))
+                sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET " + ServerPropertyParameters.TEMP_BY.getParameter() + " = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
+            else if ("txtby".equals(idx))
+                sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET " + ServerPropertyParameters.TEXT_BY.getParameter() + " = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
+            else if ("size".equals(idx))
+                sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET " + ServerPropertyParameters.DEFAULT_SIZE.getParameter() + " = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, value);
             prestmt.setString(2, select);
@@ -566,32 +577,6 @@ public class DiscordDAO extends DAOBase {
             prestmt.setString(1, emoji);
             prestmt.setString(2, message);
             prestmt.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            this.close(prestmt);
-        }
-    }
-
-    public void setMentionChannel(String textchanel, String serverid) {
-        this.open();
-        prestmt = null;
-        try {
-            String sql = "INSERT INTO " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " (" + ServerPropertyParameters.MENTION_CHANNEL_ID.getParameter() + ") VALUES (?) WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
-            prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, textchanel);
-            prestmt.setString(2, serverid);
-            prestmt.execute();
-        } catch (SQLIntegrityConstraintViolationException | SQLSyntaxErrorException e) {
-            String sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET " + ServerPropertyParameters.MENTION_CHANNEL_ID.getParameter() + " = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
-            try {
-                prestmt = con.prepareStatement(sql);
-                prestmt.setString(1, textchanel);
-                prestmt.setString(2, serverid);
-                prestmt.execute();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {

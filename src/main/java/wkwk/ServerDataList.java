@@ -11,6 +11,9 @@ public class ServerDataList {
     private String voicecate;
     private String textcate;
     private String prefix;
+    private String tempBy;
+    private String textBy;
+    private String defaultSize;
 
     public ServerDataList() {
         server = null;
@@ -19,5 +22,8 @@ public class ServerDataList {
         voicecate = null;
         textcate = null;
         prefix = null;
+        tempBy = null;
+        textBy = null;
+        defaultSize = null;
     }
 }

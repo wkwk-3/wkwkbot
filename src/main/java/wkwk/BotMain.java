@@ -92,7 +92,7 @@ public class BotMain extends Thread {
             embed.addField("[ADMIN]確認用コマンド一覧", "・`" + prefix + "help` -> コマンド一覧を表示\n" +
                             "・`" + prefix + "show` -> サーバーの設定状況を確認\n")
                     .addField("[ADMIN]設定コマンド一覧", "・`" + prefix + "setup` -> 必要なチャンネルとカテゴリを自動作成\n" +
-                            "・`" + prefix + "set prefix <prefix>` -> コマンドの前に打つ文字を変更\n" +
+                            "・`" + prefix + "set prefix <1~100文字>` -> コマンドの前に打つ文字を変更\n" +
                             "・`" + prefix + "set vcat <カテゴリID>` -> 一時通話の作成先を変更\n" +
                             "・`" + prefix + "set tcat <カテゴリID>` -> 一時チャットの作成先を変更\n" +
                             "・`" + prefix + "set 1stc <チャンネルID>` -> 最初に入るチャンネルを変更\n" +

@@ -66,7 +66,7 @@ public class BotMain extends Thread {
 
     private EmbedBuilder createHelp(String prefix, String serverName, User user) {
         return new EmbedBuilder()
-                .setTitle("BOT情報案内 With" + serverName)
+                .setTitle("BOT情報案内 With " + serverName)
                 .setAuthor(user)
                 .addField("[ADMIN]確認用コマンド一覧", "・`" + prefix + ("help` -> コマンド一覧を表示\n" +
                         "・`" + prefix + "show` -> サーバーの設定状況を確認\n"))
@@ -408,19 +408,19 @@ public class BotMain extends Thread {
             });
 
             api.addReactionAddListener(e -> {
-                if (e.getUser().isPresent() && !e.getUser().get().isBot()) {
+                if (!e.requestUser().join().isBot()) {
                     Emoji emoji = e.getEmoji();
                     if (emoji.asUnicodeEmoji().isPresent() && e.getServer().isPresent()) {
                         String serverId = e.getServer().get().getIdAsString();
                         String textChannel = e.getChannel().getIdAsString();
-                        String messageId = Long.toString(e.getMessageId());
+                        String messageId = e.requestMessage().join().getIdAsString();
                         ReactionRoleRecord record = dao.getReactAllData(serverId);
                         if (record.getTextChannelID() != null && record.getMessageID() != null && record.getTextChannelID().equalsIgnoreCase(textChannel) && record.getMessageID().equalsIgnoreCase(messageId)) {
                             ArrayList<String> emojis = record.getEmoji();
                             ArrayList<String> roles = record.getRoleID();
                             for (int i = 0; i < record.getEmoji().size(); i++) {
                                 if (emoji.asUnicodeEmoji().get().equalsIgnoreCase(emojis.get(i)) && api.getRoleById(roles.get(i)).isPresent()) {
-                                    e.getUser().get().addRole(api.getRoleById(roles.get(i)).get()).join();
+                                    e.requestUser().join().addRole(api.getRoleById(roles.get(i)).get()).join();
                                 }
                             }
                         }
@@ -429,19 +429,19 @@ public class BotMain extends Thread {
             });
 
             api.addReactionRemoveListener(e -> {
-                if (e.getUser().isPresent() && !e.getUser().get().isBot()) {
+                if (!e.requestUser().join().isBot()) {
                     Emoji emoji = e.getEmoji();
                     if (emoji.asUnicodeEmoji().isPresent() && e.getServer().isPresent()) {
                         String serverId = e.getServer().get().getIdAsString();
                         String textChannel = e.getChannel().getIdAsString();
-                        String messageId = Long.toString(e.getMessageId());
+                        String messageId = e.requestMessage().join().getIdAsString();
                         ReactionRoleRecord record = dao.getReactAllData(serverId);
                         if (record.getTextChannelID() != null && record.getMessageID() != null && record.getTextChannelID().equalsIgnoreCase(textChannel) && record.getMessageID().equalsIgnoreCase(messageId)) {
                             ArrayList<String> emojis = record.getEmoji();
                             ArrayList<String> roles = record.getRoleID();
                             for (int i = 0; i < record.getEmoji().size(); i++) {
                                 if (emoji.asUnicodeEmoji().get().equalsIgnoreCase(emojis.get(i)) && api.getRoleById(roles.get(i)).isPresent()) {
-                                    e.getUser().get().removeRole(api.getRoleById(roles.get(i)).get()).join();
+                                    e.requestUser().join().removeRole(api.getRoleById(roles.get(i)).get()).join();
                                 }
                             }
                         }

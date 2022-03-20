@@ -9,6 +9,8 @@ import org.javacord.api.entity.emoji.Emoji;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.component.ActionRow;
 import org.javacord.api.entity.message.component.Button;
+import org.javacord.api.entity.message.component.SelectMenuBuilder;
+import org.javacord.api.entity.message.component.SelectMenuOptionBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.permission.Permissions;
@@ -17,6 +19,7 @@ import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.interaction.ButtonInteraction;
+import org.javacord.api.interaction.SelectMenuInteraction;
 import wkwk.dao.DiscordDAO;
 import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
@@ -64,26 +67,30 @@ public class BotMain extends Thread {
                 .setThumbnail("https://i.imgur.com/KHpjoiu.png");
     }
 
-    private EmbedBuilder createHelp(String prefix, String serverName, User user) {
-        return new EmbedBuilder()
+    private EmbedBuilder createHelp(String prefix, String serverName, User user,boolean admin) {
+        EmbedBuilder embed = new EmbedBuilder()
                 .setTitle("BOT情報案内 With " + serverName)
-                .setAuthor(user)
-                .addField("[ADMIN]確認用コマンド一覧", "・`" + prefix + ("help` -> コマンド一覧を表示\n" +
-                        "・`" + prefix + "show` -> サーバーの設定状況を確認\n"))
-                .addField("[ADMIN]設定コマンド一覧", "・`" + prefix + ("setup` -> 必要なチャンネルとカテゴリを自動作成\n" +
-                        "・`" + prefix + "set prefix <prefix>` -> コマンドの前に打つ文字を変更\n" +
-                        "・`" + prefix + "set vcat <カテゴリID>` -> 一時通話の作成先を変更\n" +
-                        "・`" + prefix + "set tcat <カテゴリID>` -> 一時チャットの作成先を変更\n" +
-                        "・`" + prefix + "set 1stc <チャンネルID>` -> 最初に入るチャンネルを変更\n" +
-                        "・`" + prefix + "set men <チャンネルID>` -> 募集送信チャンネル変更\n" +
-                        "・`" + prefix + "set role <ロールID> <絵文字>`↓\n　リアクションロールの付与ロールと絵文字を変更\n" +
-                        "・`" + prefix + "set mess <メッセージID>　<チャンネルID>`↓\n　リアクションロールの対象メッセージを変更\n" +
-                        "・`" + prefix + "remove role <絵文字>`↓\n　リアクションロールの絵文字を削除\n"))
-                .addField("[USER]一時チャネルコマンド一覧", "・`" + prefix + "name <文字>`or`" + prefix + "n <文字>` -> チャンネルの名前を変更\n" +
+                .setAuthor(user);
+        if(admin){
+            embed.addField("[ADMIN]確認用コマンド一覧", "・`" + prefix + ("help` -> コマンド一覧を表示\n" +
+                            "・`" + prefix + "show` -> サーバーの設定状況を確認\n"))
+                    .addField("[ADMIN]設定コマンド一覧", "・`" + prefix + ("setup` -> 必要なチャンネルとカテゴリを自動作成\n" +
+                            "・`" + prefix + "set prefix <prefix>` -> コマンドの前に打つ文字を変更\n" +
+                            "・`" + prefix + "set vcat <カテゴリID>` -> 一時通話の作成先を変更\n" +
+                            "・`" + prefix + "set tcat <カテゴリID>` -> 一時チャットの作成先を変更\n" +
+                            "・`" + prefix + "set 1stc <チャンネルID>` -> 最初に入るチャンネルを変更\n" +
+                            "・`" + prefix + "set men <チャンネルID>` -> 募集送信チャンネル変更\n" +
+                            "・`" + prefix + "set role <ロールID> <絵文字>`↓\n　リアクションロールの付与ロールと絵文字を変更\n" +
+                            "・`" + prefix + "set mess <メッセージID>　<チャンネルID>`↓\n　リアクションロールの対象メッセージを変更\n" +
+                            "・`" + prefix + "remove role <絵文字>`↓\n　リアクションロールの絵文字を削除\n"));
+
+        }
+        embed.addField("[USER]一時チャネルコマンド一覧", "・`" + prefix + "name <文字>`or`" + prefix + "n <文字>` -> チャンネルの名前を変更\n" +
                         "・`" + prefix + "size <数字>`or`" + prefix + "s <数字>` -> 通話参加人数を変更\n" +
                         "・`" + prefix + "men <募集内容>`or`" + prefix + "m <募集内容>`↓\n　募集チャットの内容を書いて送信\n")
                 .setColor(Color.BLUE)
                 .setThumbnail("https://i.imgur.com/oRw9ePg.png");
+        return embed;
     }
 
     @Override
@@ -133,7 +140,7 @@ public class BotMain extends Thread {
                                 }
                             }
                             if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX + "help")) {
-                                sendUser.sendMessage(createHelp(ServerPropertyParameters.DEFAULT_PREFIX.getParameter(), server.getName(), sendUser));
+                                sendUser.sendMessage(createHelp(ServerPropertyParameters.DEFAULT_PREFIX.getParameter(), server.getName(), sendUser, isAdmin));
                             }
                         } else {
 
@@ -141,7 +148,7 @@ public class BotMain extends Thread {
                                 String[] cmd = messageContent.split(prefix)[1].split(" ");
                                 if (cmd[0].equalsIgnoreCase("help")) {
                                     e.getMessage().delete();
-                                    sendUser.sendMessage(createHelp(prefix, server.getName(), sendUser));
+                                    sendUser.sendMessage(createHelp(prefix, server.getName(), sendUser, isAdmin));
                                 }
                                 if (isAdmin) {
                                     if (cmd[0].equalsIgnoreCase("ping")) {
@@ -155,19 +162,19 @@ public class BotMain extends Thread {
                                                 responseMessage = "一文字だけ入力してください";
                                             }
                                         } else if (cmd[1].equalsIgnoreCase("vcat")) {
-                                            if (api.getChannelCategoryById(cmd[2]).isPresent() && api.getChannelCategoryById(cmd[2]).get().getIdAsString().equalsIgnoreCase(serverId)) {
+                                            if (api.getChannelCategoryById(cmd[2]).isPresent() && api.getChannelCategoryById(cmd[2]).get().getServer().getIdAsString().equalsIgnoreCase(serverId)) {
                                                 dao.BotSetDate("v", serverId, cmd[2]);
                                                 responseMessage = "VoiceCategory更新可能";
-                                            } else if (!api.getChannelCategoryById(cmd[2]).get().getIdAsString().equalsIgnoreCase(serverId)) {
+                                            } else if (!api.getChannelCategoryById(cmd[2]).get().getServer().getIdAsString().equalsIgnoreCase(serverId)) {
                                                 responseMessage = "このサーバーのカテゴリを設定してください";
                                             } else if (!api.getChannelCategoryById(cmd[2]).isPresent()) {
                                                 responseMessage = "カテゴリIDを入力してください";
                                             }
                                         } else if (cmd[1].equalsIgnoreCase("tcat")) {
-                                            if (api.getChannelCategoryById(cmd[2]).isPresent() && api.getChannelCategoryById(cmd[2]).get().getIdAsString().equalsIgnoreCase(serverId)) {
+                                            if (api.getChannelCategoryById(cmd[2]).isPresent() && api.getChannelCategoryById(cmd[2]).get().getServer().getIdAsString().equalsIgnoreCase(serverId)) {
                                                 dao.BotSetDate("t", serverId, cmd[2]);
                                                 responseMessage = "TextCategory更新可能";
-                                            } else if (!api.getChannelCategoryById(cmd[2]).get().getIdAsString().equalsIgnoreCase(serverId)) {
+                                            } else if (!api.getChannelCategoryById(cmd[2]).get().getServer().getIdAsString().equalsIgnoreCase(serverId)) {
                                                 responseMessage = "このサーバーのカテゴリを設定してください";
                                             } else if (!api.getChannelCategoryById(cmd[2]).isPresent()) {
                                                 responseMessage = "カテゴリIDを入力してください";
@@ -329,7 +336,8 @@ public class BotMain extends Thread {
                                         ActionRow.of(Button.success("claim", "管理権限獲得"),
                                                 Button.success("hide", "非表示切替"),
                                                 Button.success("lock", "参加許可切替"),
-                                                Button.success("mention", "募集文送信"))).send(text);
+                                                Button.success("mention", "募集文送信"),
+                                                Button.success("transfer","通話権限移譲"))).send(text);
                                 ChannelList list = new ChannelList();
                                 list.setVoiceID(voice.getIdAsString());
                                 list.setTextID(text.getIdAsString());
@@ -449,7 +457,49 @@ public class BotMain extends Thread {
                 }
             });
 
+            api.addSelectMenuChooseListener(e -> {
+               SelectMenuInteraction menuInteraction =  e.getSelectMenuInteraction();
+               String cmd = menuInteraction.getCustomId();
+               String response = null;
+                try {
+                    if (menuInteraction.getChannel().isPresent()){
+                        ChannelList list = dao.TempGetChannelList(menuInteraction.getChannel().get().getIdAsString(), "t");
+                        String requestVoiceId = list.getVoiceID();
+                        if (cmd.equalsIgnoreCase("transSelect")){
+                            if (api.getServerVoiceChannelById(requestVoiceId).isPresent()) {
+                                boolean claimSw = false;
+                                long oldAdminId = 0L;
+                                for (Map.Entry<Long, Permissions> entry : api.getServerVoiceChannelById(requestVoiceId).get().getOverwrittenUserPermissions().entrySet()) {
+                                    if (entry.getValue().getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
+                                        for (Long connectId : api.getServerVoiceChannelById(requestVoiceId).get().getConnectedUserIds()) {
+                                            if (Objects.equals(connectId, entry.getKey())) {
+                                                oldAdminId = entry.getKey();
+                                                claimSw = true;
+                                                break;
+                                            }
+                                        }
+                                        break;
+                                    }
+                                }
+                                if (claimSw) {
+                                    User selectUser = api.getUserById(menuInteraction.getChosenOptions().get(0).getValue()).join();
+                                    User oldAdmin = api.getUserById(oldAdminId).join();
+                                    api.getServerVoiceChannelById(requestVoiceId).get().createUpdater().addPermissionOverwrite(selectUser, new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS).build()).addPermissionOverwrite(oldAdmin, new PermissionsBuilder().setUnset(PermissionType.MANAGE_CHANNELS).build()).update();
+                                    response = selectUser.getName() + "が新しく通話管理者になりました";
+                                } else {
+                                    response = "あなたは管理者ではありません";
+                                }
+                            }
+                        }
+                    }
+                    menuInteraction.createImmediateResponder().setContent(response).respond();
+                } catch (DatabaseException ex) {
+                    ex.printStackTrace();
+                }
+            });
+
             api.addButtonClickListener(e -> {
+                MessageBuilder messageBuilder = null;
                 String response = null;
                 ButtonInteraction buttonInteraction = e.getButtonInteraction();
                 String id = buttonInteraction.getCustomId();
@@ -501,12 +551,20 @@ public class BotMain extends Thread {
                                     } else {
                                         response = "通話に居ないと送れないよ";
                                     }
+                                } else if (id.equalsIgnoreCase("transfer")) {
+                                    SelectMenuBuilder selectMenuBuilder = new SelectMenuBuilder().setCustomId("transSelect").setPlaceholder("移譲ユーザーを選択してください").setMaximumValues(1).setMinimumValues(1);
+                                    for (Long userId : api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUserIds()) {
+                                        selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(api.getUserById(userId).join().getName()).setValue(String.valueOf(userId)).build());
+                                    }
+                                    messageBuilder = new MessageBuilder()
+                                            .setContent("通話管理権限移譲")
+                                            .addComponents(ActionRow.of(selectMenuBuilder.build()));
                                 }
                         }
                         if (buttonInteraction.getUser().getConnectedVoiceChannel(buttonInteraction.getServer().get()).isPresent() &&
                                 requestVoiceId.equalsIgnoreCase(buttonInteraction.getUser().getConnectedVoiceChannel(buttonInteraction.getServer().get()).get().getIdAsString()) &&
                                 api.getServerVoiceChannelById(requestVoiceId).isPresent()) {
-                            if ("claim".equals(id)) {
+                            if (id.equalsIgnoreCase("claim")) {
                                 boolean claimSw = true;
                                 for (Map.Entry<Long, Permissions> entry : api.getServerVoiceChannelById(requestVoiceId).get().getOverwrittenUserPermissions().entrySet()) {
                                     if (entry.getValue().getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
@@ -527,7 +585,12 @@ public class BotMain extends Thread {
                                 }
                             }
                         }
-                        e.getInteraction().createImmediateResponder().setContent(response).respond();
+                        if (response != null) {
+                            e.getInteraction().createImmediateResponder().setContent(response).respond();
+                        } else if (messageBuilder != null) {
+                            buttonInteraction.createImmediateResponder().respond();
+                            messageBuilder.send(buttonInteraction.getChannel().get());
+                        }
                     } catch (DatabaseException | SystemException ignored) {
                     }
                 }

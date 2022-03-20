@@ -73,9 +73,9 @@ public class BotMain extends Thread {
                 .setTitle("BOT情報案内 With " + serverName)
                 .setAuthor(user);
         if(admin){
-            embed.addField("[ADMIN]確認用コマンド一覧", "・`" + prefix + ("help` -> コマンド一覧を表示\n" +
-                            "・`" + prefix + "show` -> サーバーの設定状況を確認\n"))
-                    .addField("[ADMIN]設定コマンド一覧", "・`" + prefix + ("setup` -> 必要なチャンネルとカテゴリを自動作成\n" +
+            embed.addField("[ADMIN]確認用コマンド一覧", "・`" + prefix + "help` -> コマンド一覧を表示\n" +
+                            "・`" + prefix + "show` -> サーバーの設定状況を確認\n")
+                    .addField("[ADMIN]設定コマンド一覧", "・`" + prefix + "setup` -> 必要なチャンネルとカテゴリを自動作成\n" +
                             "・`" + prefix + "set prefix <prefix>` -> コマンドの前に打つ文字を変更\n" +
                             "・`" + prefix + "set vcat <カテゴリID>` -> 一時通話の作成先を変更\n" +
                             "・`" + prefix + "set tcat <カテゴリID>` -> 一時チャットの作成先を変更\n" +
@@ -83,7 +83,9 @@ public class BotMain extends Thread {
                             "・`" + prefix + "set men <チャンネルID>` -> 募集送信チャンネル変更\n" +
                             "・`" + prefix + "set role <ロールID> <絵文字>`↓\n　リアクションロールの付与ロールと絵文字を変更\n" +
                             "・`" + prefix + "set mess <メッセージID>　<チャンネルID>`↓\n　リアクションロールの対象メッセージを変更\n" +
-                            "・`" + prefix + "remove role <絵文字>`↓\n　リアクションロールの絵文字を削除\n"));
+                            "・`" + prefix + "remove role <絵文字>`↓\n　リアクションロールの絵文字を削除\n")
+                    .addField("[ADMIN]ユーティリティ","・`" + prefix + "mess <文字><画像>` -> メッセージをBOTに送信させなおす\n");
+
 
         }
         embed.addField("[USER]一時チャネルコマンド一覧", "・`" + prefix + "name <文字>`or`" + prefix + "n <文字>` -> チャンネルの名前を変更\n" +

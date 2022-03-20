@@ -3,6 +3,7 @@ package wkwk;
 import com.vdurmont.emoji.EmojiManager;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
+import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.channel.*;
 import org.javacord.api.entity.emoji.Emoji;
 import org.javacord.api.entity.message.MessageBuilder;
@@ -23,7 +24,6 @@ import wkwk.paramater.ServerPropertyParameters;
 
 import java.awt.*;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public class BotMain extends Thread {
                         "・prefix : " + tempData.getPrefix() + "\n" +
                         reacts)
                 .setColor(Color.cyan)
-                .setThumbnail(new File("src/main/resources/s.png"));
+                .setThumbnail("https://i.imgur.com/KHpjoiu.png");
     }
 
     private EmbedBuilder createHelp(String prefix, String serverName, User user) {
@@ -83,7 +83,7 @@ public class BotMain extends Thread {
                         "・`" + prefix + "size <数字>`or`" + prefix + "s <数字>` -> 通話参加人数を変更\n" +
                         "・`" + prefix + "men <募集内容>`or`" + prefix + "m <募集内容>`↓\n　募集チャットの内容を書いて送信\n")
                 .setColor(Color.BLUE)
-                .setThumbnail(new File("src/main/resources/q.png"));
+                .setThumbnail("https://i.imgur.com/oRw9ePg.png");
     }
 
     @Override
@@ -92,6 +92,7 @@ public class BotMain extends Thread {
             DiscordDAO dao = new DiscordDAO();
             String token = dao.BotGetToken();
             DiscordApi api = new DiscordApiBuilder().setToken(token).login().join();
+            api.updateActivity(ActivityType.PLAYING,">help 現在稼働中");
             for (String serverId : dao.getServerList()) {
                 if (!api.getServerById(serverId).isPresent()) dao.TempDeleteData(serverId);
             }
@@ -496,8 +497,10 @@ public class BotMain extends Thread {
                                     if (api.getServerTextChannelById(serverList.getMentioncal()).isPresent()) {
                                         ServerTextChannel mention = api.getServerTextChannelById(serverList.getMentioncal()).get();
                                         dao.addMentionMessage(list.getTextID(), new MessageBuilder().setContent("@here <#" + list.getVoiceID() + ">").send(mention).join().getIdAsString(), serverId);
+                                        response = "募集メッセを送信しました";
+                                    } else {
+                                        response = "通話に居ないと送れないよ";
                                     }
-                                    response = "募集メッセを送信しました";
                                 }
                         }
                         if (buttonInteraction.getUser().getConnectedVoiceChannel(buttonInteraction.getServer().get()).isPresent() &&
@@ -545,7 +548,7 @@ public class BotMain extends Thread {
                 } catch (DatabaseException ignored) {
                 }
             });
-            Permissions per = new PermissionsBuilder().setAllowed(PermissionType.MANAGE_EMOJIS, PermissionType.MANAGE_CHANNELS, PermissionType.READ_MESSAGES, PermissionType.SEND_MESSAGES, PermissionType.EMBED_LINKS, PermissionType.ATTACH_FILE, PermissionType.READ_MESSAGE_HISTORY, PermissionType.MENTION_EVERYONE, PermissionType.ADD_REACTIONS, PermissionType.MOVE_MEMBERS).build();
+            Permissions per = new PermissionsBuilder().setAllowed(PermissionType.ADMINISTRATOR).build();
             System.out.println("URL : " + api.createBotInvite(per));
             System.out.println();
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));

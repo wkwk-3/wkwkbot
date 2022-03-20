@@ -136,37 +136,39 @@ public class DiscordDAO extends DAOBase {
     public void TempDeleteData(String Server) throws DatabaseException {
         this.open();
         prestmt = null;
-        PreparedStatement prestmt2 = null;
-        PreparedStatement prestmt3 = null;
-        PreparedStatement prestmt4 = null;
         try {
             String sql = "DELETE FROM " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, Server);
             prestmt.execute();
             sql = "DELETE FROM " + DAOParameters.TABLE_MENTION_MESSAGE.getParameter() + " WHERE " + MentionMessageParameters.SERVER_ID.getParameter() + " = ?";
-            prestmt2 = con.prepareStatement(sql);
-            prestmt2.setString(1, Server);
-            prestmt2.execute();
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, Server);
+            prestmt.execute();
             sql = "DELETE FROM " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " WHERE " + TempChannelsParameters.SERVER_ID.getParameter() + " = ?";
-            prestmt3 = con.prepareStatement(sql);
-            prestmt3.setString(1, Server);
-            prestmt3.execute();
-            String messageTable = DAOParameters.TABLE_REACT_MESSAGE.getParameter();
-            String roleTable = DAOParameters.TABLE_REACT_ROLE.getParameter();
-            sql = "DELETE " + messageTable + "," + roleTable + " FROM " + messageTable + " LEFT JOIN " + roleTable +
-                    " ON " + roleTable + "." + ReactRoleParameters.MESSAGE_ID.getParameter() + " = " + messageTable + "." + ReactMessageParameters.MESSAGE_ID.getParameter() + " WHERE " + messageTable + "." +
-                    ReactMessageParameters.SERVER_ID + " = ?";
-            prestmt4 = con.prepareStatement(sql);
-            prestmt4.setString(1, Server);
-            prestmt4.execute();
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, Server);
+            prestmt.execute();
+            String messageId = null;
+            sql = "SELECT " + ReactMessageParameters.MESSAGE_ID.getParameter() + " FROM " + DAOParameters.TABLE_REACT_MESSAGE.getParameter() + " WHERE " + ReactMessageParameters.SERVER_ID.getParameter() + " = ?";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, Server);
+            ResultSet r = prestmt.executeQuery();
+            while (r.next()){
+                messageId = r.getString(ReactMessageParameters.MESSAGE_ID.getParameter());
+            }
+            sql = "DELETE FROM " + DAOParameters.TABLE_REACT_MESSAGE.getParameter() + " WHERE " + ReactMessageParameters.SERVER_ID.getParameter() + " = ?";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, Server);
+            prestmt.execute();
+            sql = "DELETE FROM " + DAOParameters.TABLE_REACT_ROLE.getParameter() + " WHERE " + ReactRoleParameters.MESSAGE_ID.getParameter() + " = ?";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, messageId);
+            prestmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             this.close(prestmt);
-            this.close(prestmt2);
-            this.close(prestmt3);
-            this.close(prestmt4);
         }
     }
 
@@ -580,7 +582,7 @@ public class DiscordDAO extends DAOBase {
             prestmt.setString(1, textchanel);
             prestmt.setString(2, serverid);
             prestmt.execute();
-        } catch (SQLIntegrityConstraintViolationException e) {
+        } catch (SQLIntegrityConstraintViolationException | SQLSyntaxErrorException e) {
             String sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET " + ServerPropertyParameters.MENTION_CHANNEL_ID.getParameter() + " = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
             try {
                 prestmt = con.prepareStatement(sql);

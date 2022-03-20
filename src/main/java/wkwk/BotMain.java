@@ -166,16 +166,17 @@ public class BotMain extends Thread {
                                 sendUser.sendMessage(createHelp(ServerPropertyParameters.DEFAULT_PREFIX.getParameter(), server.getName(), sendUser, isAdmin));
                             }
                         } else {
-                            if (messageContent.equalsIgnoreCase(">help") && isAdmin) {
+                            if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX.getParameter() + "help")) {
                                 e.getMessage().delete();
                                 sendUser.sendMessage(createHelp(prefix, server.getName(), sendUser, isAdmin));
                             }
-                            if (messageContent.equalsIgnoreCase(">show")) {
+                            if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX.getParameter() + "show") && isAdmin) {
                                 e.getMessage().delete();
                                 sendUser.sendMessage(createShow(serverId, sendUser, e, dao, api));
                             }
-                            if (messageContent.split(prefix).length > 1) {
-                                String[] cmd = messageContent.split(prefix)[1].split(" ");
+                            if (messageContent.substring(0, 1).equals(prefix)) {
+                                String commandHeadless = messageContent.substring(1);
+                                String[] cmd = commandHeadless.split(" ");
                                 if (cmd[0].equalsIgnoreCase("help")) {
                                     e.getMessage().delete();
                                     sendUser.sendMessage(createHelp(prefix, server.getName(), sendUser, isAdmin));
@@ -727,6 +728,23 @@ public class BotMain extends Thread {
                             k++;
                             dao.deleteMentions(text);
                             System.out.println("右のメンションデータを削除しました -> " + text);
+                        } else {
+                            ChannelList list = dao.TempGetChannelList(api.getServerTextChannelById(text).get().getIdAsString(),"t");
+                            if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent() && api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUserIds().size() < 1) {
+                                k++;
+                                api.getServerVoiceChannelById(list.getVoiceID()).get().delete();
+                                if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
+                                    api.getServerTextChannelById(list.getTextID()).get().delete();
+                                }
+                                dao.TempDeleteData(list.getServerID());
+                                if (api.getTextChannelById(dao.getMentionCannel(list.getServerID())).isPresent()) {
+                                    for (String message : dao.getMentionMessage(list.getTextID()).getMessages()) {
+                                        api.getMessageById(message, api.getTextChannelById(dao.getMentionCannel(list.getServerID())).get()).join().delete();
+                                    }
+                                    dao.deleteMentions(list.getTextID());
+                                }
+                                System.out.println("右の一時通話群を削除しました -> " + list.getVoiceID());
+                            }
                         }
                     for (String voice : dao.TempVoiceids())
                         if (!api.getServerVoiceChannelById(voice).isPresent()) {

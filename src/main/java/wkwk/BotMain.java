@@ -174,8 +174,8 @@ public class BotMain extends Thread {
                                 e.getMessage().delete();
                                 sendUser.sendMessage(createShow(serverId, sendUser, e, dao, api));
                             }
-                            if (messageContent.substring(0, 1).equals(prefix)) {
-                                String commandHeadless = messageContent.substring(1);
+                            if (messageContent.startsWith(prefix)) {
+                                String commandHeadless = messageContent.substring(prefix.length());
                                 String[] cmd = commandHeadless.split(" ");
                                 if (cmd[0].equalsIgnoreCase("help")) {
                                     e.getMessage().delete();
@@ -186,11 +186,12 @@ public class BotMain extends Thread {
                                         responseMessageString = "これ一覧に乗ってないよ";
                                     } else if (cmd[0].equalsIgnoreCase("set")) {
                                         if (cmd[1].equalsIgnoreCase("prefix")) {
-                                            if (cmd[2].length() == 1) {
+                                            int prefixLen = cmd[2].length();
+                                            if (0 < prefixLen && prefixLen <= 100) {
                                                 dao.BotSetDate("p", serverId, cmd[2]);
                                                 responseMessageString = "Prefix更新完了 ⇒ " + cmd[2];
                                             } else {
-                                                responseMessageString = "一文字だけ入力してください";
+                                                responseMessageString = "100文字以内で入力してください";
                                             }
                                         } else if (cmd[1].equalsIgnoreCase("vcat")) {
                                             if (api.getChannelCategoryById(cmd[2]).isPresent() && api.getChannelCategoryById(cmd[2]).get().getServer().getIdAsString().equalsIgnoreCase(serverId)) {

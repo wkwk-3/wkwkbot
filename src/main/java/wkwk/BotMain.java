@@ -6,6 +6,7 @@ import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.channel.*;
 import org.javacord.api.entity.emoji.Emoji;
+import org.javacord.api.entity.message.MessageAttachment;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.component.ActionRow;
 import org.javacord.api.entity.message.component.Button;
@@ -118,7 +119,8 @@ public class BotMain extends Thread {
                         String serverId = server.getIdAsString();
                         String prefix = dao.BotGetPrefix(serverId);
                         String messageContent = e.getMessageContent();
-                        String responseMessage = null;
+                        String responseMessageString = null;
+                        MessageBuilder responseMessage = null;
                         boolean isAdmin = server.getAllowedPermissions(sendUser).contains(PermissionType.ADMINISTRATOR);
                         if (prefix == null) {
                             if (isAdmin) {
@@ -133,7 +135,7 @@ public class BotMain extends Thread {
                                     data.setVoicecate(new ChannelCategoryBuilder(server).setName("Voice").setRawPosition(0).create().join().getIdAsString());
                                     data.setTextcate(new ChannelCategoryBuilder(server).setName("Text").setRawPosition(0).create().join().getIdAsString());
                                     dao.TempDataUpData(data);
-                                    responseMessage = "セットアップ完了";
+                                    responseMessageString = "セットアップ完了";
                                 } else if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX + "show")) {
                                     e.getMessage().delete();
                                     sendUser.sendMessage(createShow(serverId, sendUser, e, dao, api));
@@ -152,50 +154,50 @@ public class BotMain extends Thread {
                                 }
                                 if (isAdmin) {
                                     if (cmd[0].equalsIgnoreCase("ping")) {
-                                        responseMessage = "これ一覧に乗ってないよ";
+                                        responseMessageString = "これ一覧に乗ってないよ";
                                     } else if (cmd[0].equalsIgnoreCase("set")) {
                                         if (cmd[1].equalsIgnoreCase("prefix")) {
                                             if (cmd[2].length() == 1) {
                                                 dao.BotSetDate("p", serverId, cmd[2]);
-                                                responseMessage = "Prefix更新完了 ⇒ " + cmd[2];
+                                                responseMessageString = "Prefix更新完了 ⇒ " + cmd[2];
                                             } else {
-                                                responseMessage = "一文字だけ入力してください";
+                                                responseMessageString = "一文字だけ入力してください";
                                             }
                                         } else if (cmd[1].equalsIgnoreCase("vcat")) {
                                             if (api.getChannelCategoryById(cmd[2]).isPresent() && api.getChannelCategoryById(cmd[2]).get().getServer().getIdAsString().equalsIgnoreCase(serverId)) {
                                                 dao.BotSetDate("v", serverId, cmd[2]);
-                                                responseMessage = "VoiceCategory更新可能";
+                                                responseMessageString = "VoiceCategory更新可能";
                                             } else if (!api.getChannelCategoryById(cmd[2]).get().getServer().getIdAsString().equalsIgnoreCase(serverId)) {
-                                                responseMessage = "このサーバーのカテゴリを設定してください";
+                                                responseMessageString = "このサーバーのカテゴリを設定してください";
                                             } else if (!api.getChannelCategoryById(cmd[2]).isPresent()) {
-                                                responseMessage = "カテゴリIDを入力してください";
+                                                responseMessageString = "カテゴリIDを入力してください";
                                             }
                                         } else if (cmd[1].equalsIgnoreCase("tcat")) {
                                             if (api.getChannelCategoryById(cmd[2]).isPresent() && api.getChannelCategoryById(cmd[2]).get().getServer().getIdAsString().equalsIgnoreCase(serverId)) {
                                                 dao.BotSetDate("t", serverId, cmd[2]);
-                                                responseMessage = "TextCategory更新可能";
+                                                responseMessageString = "TextCategory更新可能";
                                             } else if (!api.getChannelCategoryById(cmd[2]).get().getServer().getIdAsString().equalsIgnoreCase(serverId)) {
-                                                responseMessage = "このサーバーのカテゴリを設定してください";
+                                                responseMessageString = "このサーバーのカテゴリを設定してください";
                                             } else if (!api.getChannelCategoryById(cmd[2]).isPresent()) {
-                                                responseMessage = "カテゴリIDを入力してください";
+                                                responseMessageString = "カテゴリIDを入力してください";
                                             }
                                         } else if (cmd[1].equalsIgnoreCase("men")) {
                                             if (api.getServerTextChannelById(cmd[2]).isPresent() && api.getServerTextChannelById(cmd[2]).get().getServer().getId() == e.getServer().get().getId()) {
                                                 dao.setMentionChannel(cmd[2], e.getServer().get().getIdAsString());
-                                                responseMessage = "メンション送信チャンネルを更新しました";
+                                                responseMessageString = "メンション送信チャンネルを更新しました";
                                             } else {
-                                                responseMessage = "テキストチャンネルを設定してください";
+                                                responseMessageString = "テキストチャンネルを設定してください";
                                             }
                                         } else if (cmd[1].equalsIgnoreCase("1stc")) {
                                             if (api.getServerVoiceChannelById(cmd[2]).isPresent()) {
                                                 if (api.getServerVoiceChannelById(cmd[2]).get().getServer().getIdAsString().equalsIgnoreCase(serverId)) {
                                                     dao.BotSetDate("f", serverId, cmd[2]);
-                                                    responseMessage = "FirstChannel更新可能";
+                                                    responseMessageString = "FirstChannel更新可能";
                                                 } else {
-                                                    responseMessage = "このサーバーの通話チャンネルを設定してください";
+                                                    responseMessageString = "このサーバーの通話チャンネルを設定してください";
                                                 }
                                             } else {
-                                                responseMessage = "通話チャンネルのIDを入力してください";
+                                                responseMessageString = "通話チャンネルのIDを入力してください";
                                             }
                                         } else if (cmd[1].equalsIgnoreCase("role")) {
                                             StringBuilder str = new StringBuilder();
@@ -212,17 +214,17 @@ public class BotMain extends Thread {
                                             } catch (NumberFormatException ignored) {
                                                 str.append("それは数字じゃない");
                                             }
-                                            responseMessage = str.toString();
+                                            responseMessageString = str.toString();
                                         } else if (cmd[1].equalsIgnoreCase("mess")) {
                                             if (cmd.length > 3 && api.getServerTextChannelById(cmd[3]).isPresent() && api.getServerTextChannelById(cmd[3]).get().getServer().getIdAsString().equalsIgnoreCase(serverId) && api.getMessageById(cmd[2], api.getServerTextChannelById(cmd[3]).get()).join().getServer().isPresent()) {
                                                 dao.setReactMessageData(serverId, cmd[3], cmd[2]);
-                                                responseMessage = "メッセージ設定完了";
+                                                responseMessageString = "メッセージ設定完了";
                                             } else if (!api.getServerTextChannelById(cmd[3]).isPresent()) {
-                                                responseMessage = "チャンネルIDを入力してください";
+                                                responseMessageString = "チャンネルIDを入力してください";
                                             } else if (!api.getServerTextChannelById(cmd[3]).get().getServer().getIdAsString().equalsIgnoreCase(serverId)) {
-                                                responseMessage = "このサーバーのチャンネルIDを入力してください";
+                                                responseMessageString = "このサーバーのチャンネルIDを入力してください";
                                             } else if (!api.getMessageById(cmd[2], api.getServerTextChannelById(cmd[3]).get()).join().getServer().isPresent()) {
-                                                responseMessage = "このサーバーのメッセージIDを入力してください";
+                                                responseMessageString = "このサーバーのメッセージIDを入力してください";
                                             }
                                         }
                                     } else if (cmd[0].equalsIgnoreCase("remove")) {
@@ -253,11 +255,16 @@ public class BotMain extends Thread {
                                             api.getServerVoiceChannelById(old.getFstchannel()).get().delete();
                                         if (api.getServerTextChannelById(old.getMentioncal()).isPresent())
                                             api.getServerTextChannelById(old.getMentioncal()).get().delete();
-                                        responseMessage = "セットアップ完了";
+                                        responseMessageString = "セットアップ完了";
                                     } else if (cmd[0].equalsIgnoreCase("mess")) {
                                         ArrayList<String> mess = new ArrayList<>(Arrays.asList(cmd));
                                         mess.remove("mess");
-                                        responseMessage = mess.stream().map(st -> st + "\n").collect(Collectors.joining());
+                                        String response;
+                                        response = mess.stream().map(st -> st + "\n").collect(Collectors.joining());
+                                        responseMessage = new MessageBuilder().setContent(response);
+                                        for (MessageAttachment attachment : e.getMessageAttachments()){
+                                            responseMessage.addAttachment(attachment.getUrl());
+                                        }
                                     } else if (cmd[0].equalsIgnoreCase("show")) {
                                         sendUser.sendMessage(createShow(serverId, sendUser, e, dao, api));
                                     }
@@ -273,14 +280,14 @@ public class BotMain extends Thread {
                                             if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
                                                 api.getServerTextChannelById(list.getTextID()).get().createUpdater().setName(cmd[1]).update();
                                             }
-                                            responseMessage = "NAME更新完了";
+                                            responseMessageString = "NAME更新完了";
                                         } else if (cmd[0].equalsIgnoreCase("size") || cmd[0].equalsIgnoreCase("s")) {
                                             if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
                                                 api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setUserLimit(Integer.parseInt(cmd[1])).update();
                                             }
-                                            responseMessage = "人数制限を" + cmd[1] + "に設定しました";
+                                            responseMessageString = "人数制限を" + cmd[1] + "に設定しました";
                                             if (Integer.parseInt(cmd[1]) == 0) {
-                                                responseMessage = "人数制限を0(limitless)に設定しました";
+                                                responseMessageString = "人数制限を0(limitless)に設定しました";
                                             }
                                         } else if (cmd[0].equalsIgnoreCase("men") || cmd[0].equalsIgnoreCase("m")) {
                                             StringBuilder mentionText = new StringBuilder("@here <#" + list.getVoiceID() + ">");
@@ -292,15 +299,17 @@ public class BotMain extends Thread {
                                                 ServerTextChannel mention = api.getServerTextChannelById(serverList.getMentioncal()).get();
                                                 dao.addMentionMessage(list.getTextID(), new MessageBuilder().setContent(mentionText.toString()).send(mention).join().getIdAsString(), serverId);
                                             }
-                                            responseMessage = "募集メッセを送信しました";
+                                            responseMessageString = "募集メッセを送信しました";
                                         }
                                     }
                                 }
                             }
                         }
-                        if (responseMessage != null) {
-                            e.getChannel().sendMessage(responseMessage).join();
+                        if (responseMessageString != null) {
+                            e.getChannel().sendMessage(responseMessageString).join();
                             e.getMessage().delete();
+                        } else if (responseMessage != null) {
+                            responseMessage.send(e.getChannel()).join();
                         }
                     }
                 } catch (SystemException | DatabaseException | IOException ex) {

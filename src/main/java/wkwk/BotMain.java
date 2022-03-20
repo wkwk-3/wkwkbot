@@ -56,6 +56,12 @@ public class BotMain extends Thread {
         } else {
             bys += "・一時テキストチェンネル作成切り替え : 無効化\n";
         }
+        String size = tempData.getDefaultSize();
+        if (size.equals("0")) {
+            bys += "・一時通話初期人数 : " + size + "(limitless)\n";
+        } else {
+            bys += "・一時通話初期人数 : " + size + "人\n";
+        }
         StringBuilder reacts = new StringBuilder();
         if (api.getServerTextChannelById(react.getTextChannelID()).isPresent()) {
             reacts.append("・リアクションロールメッセージ : ").append(api.getMessageById(react.getMessageID(), api.getServerTextChannelById(react.getTextChannelID()).get()).join().getLink()).append("\n");
@@ -73,7 +79,6 @@ public class BotMain extends Thread {
                         "・通話カテゴリ : <#" + tempData.getVoicecate() + ">\n" +
                         "・テキストカテゴリ : <#" + tempData.getTextcate() + ">\n" +
                         "・prefix : " + tempData.getPrefix() + "\n" + bys +
-                        "・一時通話初期人数 : " + tempData.getDefaultSize() + "\n"+
                         reacts)
                 .setColor(Color.cyan)
                 .setThumbnail("https://i.imgur.com/KHpjoiu.png");

@@ -166,7 +166,14 @@ public class BotMain extends Thread {
                                 sendUser.sendMessage(createHelp(ServerPropertyParameters.DEFAULT_PREFIX.getParameter(), server.getName(), sendUser, isAdmin));
                             }
                         } else {
-
+                            if (messageContent.equalsIgnoreCase(">help") && isAdmin) {
+                                e.getMessage().delete();
+                                sendUser.sendMessage(createHelp(prefix, server.getName(), sendUser, isAdmin));
+                            }
+                            if (messageContent.equalsIgnoreCase(">show")) {
+                                e.getMessage().delete();
+                                sendUser.sendMessage(createShow(serverId, sendUser, e, dao, api));
+                            }
                             if (messageContent.split(prefix).length > 1) {
                                 String[] cmd = messageContent.split(prefix)[1].split(" ");
                                 if (cmd[0].equalsIgnoreCase("help")) {

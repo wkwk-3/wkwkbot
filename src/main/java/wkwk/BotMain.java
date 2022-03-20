@@ -26,7 +26,7 @@ import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
 import wkwk.paramater.ServerPropertyParameters;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

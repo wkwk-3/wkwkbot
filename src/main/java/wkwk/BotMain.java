@@ -122,15 +122,6 @@ public class BotMain extends Thread {
             String token = dao.BotGetToken();
             DiscordApi api = new DiscordApiBuilder().setToken(token).login().join();
             api.updateActivity(ActivityType.PLAYING, ">help 現在稼働中");
-            for (String serverId : dao.getServerList()) {
-                if (!api.getServerById(serverId).isPresent()) dao.TempDeleteData(serverId);
-            }
-            for (String s : dao.getAllMentionText().getTextID()) {
-                if (!api.getServerTextChannelById(s).isPresent()) dao.deleteMentions(s);
-            }
-            for (String voice : dao.TempVoiceids()) {
-                if (!api.getServerVoiceChannelById(voice).isPresent()) dao.TempDeleteChannelList(voice, "v");
-            }
 
             api.addMessageCreateListener(e -> {
                 try {

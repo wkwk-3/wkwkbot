@@ -569,9 +569,10 @@ public class BotMain extends Thread {
                                     response = "あなたは管理者ではありません";
                                 }
                             }
+                            menuInteraction.getMessage().delete();
+                            menuInteraction.createImmediateResponder().setContent(response).respond();
                         }
                     }
-                    menuInteraction.createImmediateResponder().setContent(response).respond();
                 } catch (DatabaseException ex) {
                     ex.printStackTrace();
                 }

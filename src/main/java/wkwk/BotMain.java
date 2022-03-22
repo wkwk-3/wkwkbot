@@ -16,6 +16,7 @@ import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.permission.Permissions;
 import org.javacord.api.entity.permission.PermissionsBuilder;
+import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
@@ -603,7 +604,35 @@ public class BotMain extends Thread {
                                         } else if (lockIs == 1) {
                                             permissions.setDenied(PermissionType.CONNECT);
                                         }
-                                        api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(buttonInteraction.getServer().get().getEveryoneRole(), permissions.build()).update();
+
+                                        ArrayList<User> targetUser = new ArrayList<>();
+                                        ArrayList<Role> targetRole = new ArrayList<>();
+
+                                        for (Map.Entry<Long,Permissions> permissionMap: api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenRolePermissions().entrySet()){
+                                            for (PermissionType type : permissionMap.getValue().getAllowedPermission()) {
+                                                if (type.equals(PermissionType.READ_MESSAGES) && api.getRoleById(permissionMap.getKey()).isPresent()) {
+                                                    targetRole.add(api.getRoleById(permissionMap.getKey()).get());
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        for (Map.Entry<Long,Permissions> permissionMap: api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().entrySet()){
+                                            for (PermissionType type : permissionMap.getValue().getAllowedPermission()) {
+                                                if (type.equals(PermissionType.READ_MESSAGES)) {
+                                                    System.out.println(permissionMap.getKey());
+                                                    targetUser.add(api.getUserById(permissionMap.getKey()).join());
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        ServerVoiceChannelUpdater updater = api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater();
+                                        for (User target :targetUser){
+                                            updater.addPermissionOverwrite(target, permissions.build());
+                                        }
+                                        for (Role target :targetRole){
+                                            updater.addPermissionOverwrite(target, permissions.build());
+                                        }
+                                        updater.update();
                                         dao.UpdateChannelHide(textChannelId, hideIs);
                                     }
                                 } else if (id.equalsIgnoreCase("lock")) {
@@ -625,7 +654,34 @@ public class BotMain extends Thread {
                                         } else if (hideIs == 1) {
                                             permissions.setDenied(PermissionType.READ_MESSAGES);
                                         }
-                                        api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(buttonInteraction.getServer().get().getEveryoneRole(), permissions.build()).update();
+
+                                        ArrayList<User> targetUser = new ArrayList<>();
+                                        ArrayList<Role> targetRole = new ArrayList<>();
+
+                                        for (Map.Entry<Long,Permissions> permissionMap: api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenRolePermissions().entrySet()){
+                                            for (PermissionType type : permissionMap.getValue().getAllowedPermission()) {
+                                                if (type.equals(PermissionType.CONNECT) && api.getRoleById(permissionMap.getKey()).isPresent()) {
+                                                    targetRole.add(api.getRoleById(permissionMap.getKey()).get());
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        for (Map.Entry<Long,Permissions> permissionMap: api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().entrySet()){
+                                            for (PermissionType type : permissionMap.getValue().getAllowedPermission()) {
+                                                if (type.equals(PermissionType.CONNECT)) {
+                                                    targetUser.add(api.getUserById(permissionMap.getKey()).join());
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        ServerVoiceChannelUpdater updater = api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater();
+                                        for (User target :targetUser){
+                                            updater.addPermissionOverwrite(target, permissions.build());
+                                        }
+                                        for (Role target :targetRole){
+                                            updater.addPermissionOverwrite(target, permissions.build());
+                                        }
+                                        updater.update();
                                         dao.UpdateChannelLock(textChannelId, lockIs);
                                     }
                                 } else if (id.equalsIgnoreCase("mention")) {

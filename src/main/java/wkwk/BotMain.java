@@ -609,21 +609,39 @@ public class BotMain extends Thread {
                                         ArrayList<Role> targetRole = new ArrayList<>();
 
                                         for (Map.Entry<Long,Permissions> permissionMap: api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenRolePermissions().entrySet()){
-                                            for (PermissionType type : permissionMap.getValue().getAllowedPermission()) {
-                                                if (type.equals(PermissionType.READ_MESSAGES) && api.getRoleById(permissionMap.getKey()).isPresent()) {
-                                                    targetRole.add(api.getRoleById(permissionMap.getKey()).get());
-                                                    break;
+                                            if (hideIs  == 0) {
+                                                for (PermissionType deniType : permissionMap.getValue().getDeniedPermissions()) {
+                                                    if (deniType.equals(PermissionType.READ_MESSAGES) && api.getRoleById(permissionMap.getKey()).isPresent()) {
+                                                        targetRole.add(api.getRoleById(permissionMap.getKey()).get());
+                                                        break;
+                                                    }
+                                                }
+                                            } else if (hideIs  == 1) {
+                                                for (PermissionType allowType : permissionMap.getValue().getAllowedPermission()) {
+                                                    if (allowType.equals(PermissionType.READ_MESSAGES) && api.getRoleById(permissionMap.getKey()).isPresent()) {
+                                                        targetRole.add(api.getRoleById(permissionMap.getKey()).get());
+                                                        break;
+                                                    }
                                                 }
                                             }
                                         }
                                         for (Map.Entry<Long,Permissions> permissionMap: api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().entrySet()){
-                                            for (PermissionType type : permissionMap.getValue().getAllowedPermission()) {
-                                                if (type.equals(PermissionType.READ_MESSAGES)) {
-                                                    System.out.println(permissionMap.getKey());
-                                                    targetUser.add(api.getUserById(permissionMap.getKey()).join());
-                                                    break;
+                                            if (hideIs  == 0) {
+                                                for (PermissionType deniType : permissionMap.getValue().getDeniedPermissions()) {
+                                                    if (deniType.equals(PermissionType.READ_MESSAGES)) {
+                                                        targetUser.add(api.getUserById(permissionMap.getKey()).join());
+                                                        break;
+                                                    }
+                                                }
+                                            } else if (hideIs  == 1) {
+                                                for (PermissionType allowType : permissionMap.getValue().getAllowedPermission()) {
+                                                    if (allowType.equals(PermissionType.READ_MESSAGES)) {
+                                                        targetUser.add(api.getUserById(permissionMap.getKey()).join());
+                                                        break;
+                                                    }
                                                 }
                                             }
+
                                         }
                                         ServerVoiceChannelUpdater updater = api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater();
                                         for (User target :targetUser){
@@ -659,18 +677,37 @@ public class BotMain extends Thread {
                                         ArrayList<Role> targetRole = new ArrayList<>();
 
                                         for (Map.Entry<Long,Permissions> permissionMap: api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenRolePermissions().entrySet()){
-                                            for (PermissionType type : permissionMap.getValue().getAllowedPermission()) {
-                                                if (type.equals(PermissionType.CONNECT) && api.getRoleById(permissionMap.getKey()).isPresent()) {
-                                                    targetRole.add(api.getRoleById(permissionMap.getKey()).get());
-                                                    break;
+                                            if (lockIs == 0) {
+                                                for (PermissionType deniType : permissionMap.getValue().getDeniedPermissions()) {
+                                                    if (deniType.equals(PermissionType.CONNECT) && api.getRoleById(permissionMap.getKey()).isPresent()) {
+                                                        targetRole.add(api.getRoleById(permissionMap.getKey()).get());
+                                                        break;
+                                                    }
+                                                }
+                                            } else if (lockIs == 1) {
+                                                for (PermissionType allowType : permissionMap.getValue().getAllowedPermission()) {
+                                                    if (allowType.equals(PermissionType.CONNECT) && api.getRoleById(permissionMap.getKey()).isPresent()) {
+                                                        targetRole.add(api.getRoleById(permissionMap.getKey()).get());
+                                                        break;
+                                                    }
                                                 }
                                             }
                                         }
+
                                         for (Map.Entry<Long,Permissions> permissionMap: api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().entrySet()){
-                                            for (PermissionType type : permissionMap.getValue().getAllowedPermission()) {
-                                                if (type.equals(PermissionType.CONNECT)) {
-                                                    targetUser.add(api.getUserById(permissionMap.getKey()).join());
-                                                    break;
+                                            if (lockIs == 0) {
+                                                for (PermissionType deniType : permissionMap.getValue().getDeniedPermissions()) {
+                                                    if (deniType.equals(PermissionType.CONNECT)) {
+                                                        targetUser.add(api.getUserById(permissionMap.getKey()).join());
+                                                        break;
+                                                    }
+                                                }
+                                            } else if (lockIs == 1) {
+                                                for (PermissionType allowType : permissionMap.getValue().getAllowedPermission()) {
+                                                    if (allowType.equals(PermissionType.CONNECT)) {
+                                                        targetUser.add(api.getUserById(permissionMap.getKey()).join());
+                                                        break;
+                                                    }
                                                 }
                                             }
                                         }

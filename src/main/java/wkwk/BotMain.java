@@ -27,7 +27,7 @@ import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
 import wkwk.paramater.ServerPropertyParameters;
 
-import java.awt.Color;
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -151,7 +151,7 @@ public class BotMain extends Thread {
                                     responseMessageString = "セットアップ完了";
                                 } else if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX + "show")) {
                                     e.getMessage().delete();
-                                    sendUser.sendMessage(createShow(server.getName(),serverId, sendUser, e, dao, api));
+                                    sendUser.sendMessage(createShow(server.getName(), serverId, sendUser, e, dao, api));
                                 }
                             }
                             if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX + "help")) {
@@ -167,7 +167,7 @@ public class BotMain extends Thread {
                             if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX.getParameter() + "show") && isAdmin) {
                                 e.getMessage().delete();
                                 sw = false;
-                                sendUser.sendMessage(createShow(server.getName(),serverId, sendUser, e, dao, api));
+                                sendUser.sendMessage(createShow(server.getName(), serverId, sendUser, e, dao, api));
                             }
                             if (messageContent.startsWith(prefix)) {
                                 String commandHeadless = messageContent.substring(prefix.length());
@@ -277,11 +277,11 @@ public class BotMain extends Thread {
                                                 int size = Integer.parseInt(cmd[2]);
                                                 if (0 <= size && size < 100) {
                                                     dao.BotSetDate("size", serverId, cmd[2]);
-                                                    responseMessageString = "初期人数制限を"+cmd[2]+"人に設定しました";
+                                                    responseMessageString = "初期人数制限を" + cmd[2] + "人に設定しました";
                                                 } else {
                                                     responseMessageString = "0~99の範囲で入力して下さい";
                                                 }
-                                            } catch (NumberFormatException ex){
+                                            } catch (NumberFormatException ex) {
                                                 responseMessageString = "0~99の数字を入力して下さい";
                                             }
                                         }
@@ -324,7 +324,7 @@ public class BotMain extends Thread {
                                             responseMessage.addAttachment(attachment.getUrl());
                                         }
                                     } else if (cmd[0].equalsIgnoreCase("show") && sw) {
-                                        sendUser.sendMessage(createShow(server.getName(),serverId, sendUser, e, dao, api));
+                                        sendUser.sendMessage(createShow(server.getName(), serverId, sendUser, e, dao, api));
                                     }
                                 }
                                 ChannelList list = dao.TempGetChannelList(e.getChannel().getIdAsString(), "t");
@@ -608,15 +608,15 @@ public class BotMain extends Thread {
                                         ArrayList<User> targetUser = new ArrayList<>();
                                         ArrayList<Role> targetRole = new ArrayList<>();
 
-                                        for (Map.Entry<Long,Permissions> permissionMap: api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenRolePermissions().entrySet()){
-                                            if (hideIs  == 0) {
+                                        for (Map.Entry<Long, Permissions> permissionMap : api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenRolePermissions().entrySet()) {
+                                            if (hideIs == 0) {
                                                 for (PermissionType deniType : permissionMap.getValue().getDeniedPermissions()) {
                                                     if (deniType.equals(PermissionType.READ_MESSAGES) && api.getRoleById(permissionMap.getKey()).isPresent()) {
                                                         targetRole.add(api.getRoleById(permissionMap.getKey()).get());
                                                         break;
                                                     }
                                                 }
-                                            } else if (hideIs  == 1) {
+                                            } else if (hideIs == 1) {
                                                 for (PermissionType allowType : permissionMap.getValue().getAllowedPermission()) {
                                                     if (allowType.equals(PermissionType.READ_MESSAGES) && api.getRoleById(permissionMap.getKey()).isPresent()) {
                                                         targetRole.add(api.getRoleById(permissionMap.getKey()).get());
@@ -625,15 +625,15 @@ public class BotMain extends Thread {
                                                 }
                                             }
                                         }
-                                        for (Map.Entry<Long,Permissions> permissionMap: api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().entrySet()){
-                                            if (hideIs  == 0) {
+                                        for (Map.Entry<Long, Permissions> permissionMap : api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().entrySet()) {
+                                            if (hideIs == 0) {
                                                 for (PermissionType deniType : permissionMap.getValue().getDeniedPermissions()) {
                                                     if (deniType.equals(PermissionType.READ_MESSAGES)) {
                                                         targetUser.add(api.getUserById(permissionMap.getKey()).join());
                                                         break;
                                                     }
                                                 }
-                                            } else if (hideIs  == 1) {
+                                            } else if (hideIs == 1) {
                                                 for (PermissionType allowType : permissionMap.getValue().getAllowedPermission()) {
                                                     if (allowType.equals(PermissionType.READ_MESSAGES)) {
                                                         targetUser.add(api.getUserById(permissionMap.getKey()).join());
@@ -644,10 +644,10 @@ public class BotMain extends Thread {
 
                                         }
                                         ServerVoiceChannelUpdater updater = api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater();
-                                        for (User target :targetUser){
+                                        for (User target : targetUser) {
                                             updater.addPermissionOverwrite(target, permissions.build());
                                         }
-                                        for (Role target :targetRole){
+                                        for (Role target : targetRole) {
                                             updater.addPermissionOverwrite(target, permissions.build());
                                         }
                                         updater.update();
@@ -676,7 +676,7 @@ public class BotMain extends Thread {
                                         ArrayList<User> targetUser = new ArrayList<>();
                                         ArrayList<Role> targetRole = new ArrayList<>();
 
-                                        for (Map.Entry<Long,Permissions> permissionMap: api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenRolePermissions().entrySet()){
+                                        for (Map.Entry<Long, Permissions> permissionMap : api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenRolePermissions().entrySet()) {
                                             if (lockIs == 0) {
                                                 for (PermissionType deniType : permissionMap.getValue().getDeniedPermissions()) {
                                                     if (deniType.equals(PermissionType.CONNECT) && api.getRoleById(permissionMap.getKey()).isPresent()) {
@@ -694,7 +694,7 @@ public class BotMain extends Thread {
                                             }
                                         }
 
-                                        for (Map.Entry<Long,Permissions> permissionMap: api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().entrySet()){
+                                        for (Map.Entry<Long, Permissions> permissionMap : api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().entrySet()) {
                                             if (lockIs == 0) {
                                                 for (PermissionType deniType : permissionMap.getValue().getDeniedPermissions()) {
                                                     if (deniType.equals(PermissionType.CONNECT)) {
@@ -712,10 +712,10 @@ public class BotMain extends Thread {
                                             }
                                         }
                                         ServerVoiceChannelUpdater updater = api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater();
-                                        for (User target :targetUser){
+                                        for (User target : targetUser) {
                                             updater.addPermissionOverwrite(target, permissions.build());
                                         }
-                                        for (Role target :targetRole){
+                                        for (Role target : targetRole) {
                                             updater.addPermissionOverwrite(target, permissions.build());
                                         }
                                         updater.update();
@@ -818,7 +818,7 @@ public class BotMain extends Thread {
                             dao.deleteMentions(text);
                             System.out.println("右のメンションデータを削除しました -> " + text);
                         } else {
-                            ChannelList list = dao.TempGetChannelList(api.getServerTextChannelById(text).get().getIdAsString(),"t");
+                            ChannelList list = dao.TempGetChannelList(api.getServerTextChannelById(text).get().getIdAsString(), "t");
                             if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent() && api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUserIds().size() < 1) {
                                 k++;
                                 api.getServerVoiceChannelById(list.getVoiceID()).get().delete();

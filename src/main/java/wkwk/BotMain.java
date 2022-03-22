@@ -572,8 +572,8 @@ public class BotMain extends Thread {
 
             api.addButtonClickListener(e -> {
                 MessageBuilder messageBuilder = null;
-                String response = null;
                 ButtonInteraction buttonInteraction = e.getButtonInteraction();
+                String response = "<@"+buttonInteraction.getUser().getIdAsString()+">\n";
                 String id = buttonInteraction.getCustomId();
                 String serverId = buttonInteraction.getServer().get().getIdAsString();
                 if (buttonInteraction.getChannel().isPresent()) {
@@ -583,7 +583,8 @@ public class BotMain extends Thread {
                         String requestVoiceId = list.getVoiceID();
                         if (buttonInteraction.getUser().getConnectedVoiceChannel(buttonInteraction.getServer().get()).isPresent() &&
                                 requestVoiceId.equalsIgnoreCase(buttonInteraction.getUser().getConnectedVoiceChannel(buttonInteraction.getServer().get()).get().getIdAsString()) &&
-                                api.getServerVoiceChannelById(requestVoiceId).isPresent() && api.getServerVoiceChannelById(requestVoiceId).get().getEffectivePermissions(buttonInteraction.getUser()).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
+                                api.getServerVoiceChannelById(requestVoiceId).isPresent() && api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().get(buttonInteraction.getUser().getId()) != null &&
+                                api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().get(buttonInteraction.getUser().getId()).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
                             if (buttonInteraction.getServer().isPresent())
                                 if (id.equalsIgnoreCase("hide")) {
                                     if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
@@ -593,11 +594,11 @@ public class BotMain extends Thread {
                                         if (hideIs == 0) {
                                             hideIs = 1;
                                             permissions.setDenied(PermissionType.READ_MESSAGES);
-                                            response = "通話非表示完了";
+                                            response += "通話非表示完了";
                                         } else if (hideIs == 1) {
                                             hideIs = 0;
                                             permissions.setAllowed(PermissionType.READ_MESSAGES);
-                                            response = "通話非表示解除完了";
+                                            response += "通話非表示解除完了";
                                         }
                                         if (lockIs == 0) {
                                             permissions.setAllowed(PermissionType.CONNECT);
@@ -661,11 +662,11 @@ public class BotMain extends Thread {
                                         if (lockIs == 0) {
                                             lockIs = 1;
                                             permissions.setDenied(PermissionType.CONNECT);
-                                            response = "通話ロック完了";
+                                            response += "通話ロック完了";
                                         } else if (lockIs == 1) {
                                             lockIs = 0;
                                             permissions.setAllowed(PermissionType.CONNECT);
-                                            response = "通話ロック解除完了";
+                                            response += "通話ロック解除完了";
                                         }
                                         if (hideIs == 0) {
                                             permissions.setAllowed(PermissionType.READ_MESSAGES);
@@ -726,9 +727,9 @@ public class BotMain extends Thread {
                                     if (api.getServerTextChannelById(serverList.getMentioncal()).isPresent()) {
                                         ServerTextChannel mention = api.getServerTextChannelById(serverList.getMentioncal()).get();
                                         dao.addMentionMessage(list.getTextID(), new MessageBuilder().setContent("@here <#" + list.getVoiceID() + ">").send(mention).join().getIdAsString(), serverId);
-                                        response = "募集メッセを送信しました";
+                                        response += "募集メッセを送信しました";
                                     } else {
-                                        response = "通話に居ないと送れないよ";
+                                        response += "通話に居ないと送れないよ";
                                     }
                                 } else if (id.equalsIgnoreCase("transfer")) {
                                     SelectMenuBuilder selectMenuBuilder = new SelectMenuBuilder().setCustomId("transSelect").setPlaceholder("移譲ユーザーを選択してください").setMaximumValues(1).setMinimumValues(1);
@@ -739,6 +740,9 @@ public class BotMain extends Thread {
                                             .setContent("通話管理権限移譲")
                                             .addComponents(ActionRow.of(selectMenuBuilder.build()));
                                 }
+                        } else if (api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().get(buttonInteraction.getUser().getId()) == null ||
+                                !api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().get(buttonInteraction.getUser().getId()).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
+                            response += "あなたは管理者ではありません";
                         }
                         if (buttonInteraction.getUser().getConnectedVoiceChannel(buttonInteraction.getServer().get()).isPresent() &&
                                 requestVoiceId.equalsIgnoreCase(buttonInteraction.getUser().getConnectedVoiceChannel(buttonInteraction.getServer().get()).get().getIdAsString()) &&
@@ -760,11 +764,11 @@ public class BotMain extends Thread {
                                     api.getServerVoiceChannelById(requestVoiceId).get().createUpdater().addPermissionOverwrite(buttonInteraction.getUser(), new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS).build()).update();
                                     response = buttonInteraction.getUser().getName() + "が新しく通話管理者になりました";
                                 } else {
-                                    response = "通話管理者が通話にいらっしゃいます";
+                                    response += "通話管理者が通話にいらっしゃいます";
                                 }
                             }
                         }
-                        if (response != null) {
+                        if (!response.equalsIgnoreCase("<@"+buttonInteraction.getUser().getIdAsString()+">\n")) {
                             e.getInteraction().createImmediateResponder().setContent(response).respond();
                         } else if (messageBuilder != null) {
                             buttonInteraction.createImmediateResponder().respond();

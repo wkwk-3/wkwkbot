@@ -19,10 +19,9 @@ import org.javacord.api.entity.permission.PermissionsBuilder;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
-import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.interaction.ButtonInteraction;
 import org.javacord.api.interaction.SelectMenuInteraction;
-import org.javacord.api.interaction.UserContextMenuBuilder;
+import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import wkwk.dao.DiscordDAO;
 import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
@@ -41,7 +40,7 @@ import java.util.stream.Collectors;
 
 public class BotMain extends Thread {
 
-    private EmbedBuilder createShow(String serverName, String serverId, User sendUser, MessageCreateEvent e, DiscordDAO dao, DiscordApi api) throws SystemException, DatabaseException {
+    private EmbedBuilder createShow(String serverName, String serverId, User sendUser, DiscordDAO dao, DiscordApi api) throws SystemException, DatabaseException {
         ServerDataList tempData = dao.TempGetData(serverId);
         ReactionRoleRecord react = dao.getReactAllData(tempData.getServer());
         String[] emojis = react.getEmoji().toArray(new String[0]);
@@ -157,7 +156,7 @@ public class BotMain extends Thread {
                                     dao.TempDataUpData(data);
                                     responseMessageString = "セットアップ完了";
                                 } else if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX + "show")) {
-                                    sendUser.sendMessage(createShow(server.getName(), serverId, sendUser, e, dao, api));
+                                    sendUser.sendMessage(createShow(server.getName(), serverId, sendUser, dao, api));
                                 }
                             }
                             if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX + "help")) {
@@ -171,7 +170,7 @@ public class BotMain extends Thread {
                             }
                             if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX.getParameter() + "show") && isAdmin) {
                                 sw = false;
-                                sendUser.sendMessage(createShow(server.getName(), serverId, sendUser, e, dao, api));
+                                sendUser.sendMessage(createShow(server.getName(), serverId, sendUser, dao, api));
                             }
                             if (messageContent.startsWith(prefix)) {
                                 String commandHeadless = messageContent.substring(prefix.length());
@@ -334,7 +333,7 @@ public class BotMain extends Thread {
                                             responseMessage.addAttachment(attachment.getUrl());
                                         }
                                     } else if (cmd[0].equalsIgnoreCase("show") && sw) {
-                                        sendUser.sendMessage(createShow(server.getName(), serverId, sendUser, e, dao, api));
+                                        sendUser.sendMessage(createShow(server.getName(), serverId, sendUser, dao, api));
                                     }
                                 }
                                 ChannelList list = dao.TempGetChannelList(e.getChannel().getIdAsString(), "t");
@@ -589,7 +588,6 @@ public class BotMain extends Thread {
             });
 
             api.addButtonClickListener(e -> {
-                e.getButtonInteraction().getMessage().reply("test");
                 MessageBuilder messageBuilder = null;
                 ButtonInteraction buttonInteraction = e.getButtonInteraction();
                 String response = "<@"+buttonInteraction.getUser().getIdAsString()+">\n";
@@ -795,7 +793,7 @@ public class BotMain extends Thread {
                             }
                         }
                         if (!response.equalsIgnoreCase("<@"+buttonInteraction.getUser().getIdAsString()+">\n")) {
-                            e.getInteraction().createImmediateResponder().setContent(response).respond();
+                            e.getInteraction().createImmediateResponder().setFlags(InteractionCallbackDataFlag.EPHEMERAL).setContent(response).respond();
                         } else if (messageBuilder != null) {
                             buttonInteraction.createImmediateResponder().respond();
                             messageBuilder.send(buttonInteraction.getChannel().get());

@@ -104,6 +104,12 @@ public class BotMain extends Thread {
                             "・`" + prefix + "set role <ロールID> <絵文字>`↓\n　リアクションロールの付与ロールと絵文字を変更\n" +
                             "・`" + prefix + "set mess <メッセージID>　<チャンネルID>`↓\n　リアクションロールの対象メッセージを変更\n" +
                             "・`" + prefix + "remove role <絵文字>`↓\n　リアクションロールの絵文字を削除\n")
+                    .addField("[ADMIN]募集テンプレ設定", "・`" + prefix + "set stereo <テンプレ内容>` : テンプレ内で使える置換！\n" +
+                            "　　-`$user$` : 送信を選択したユーザーのメンションに置換\n" +
+                            "　　-`$text$` : 募集コマンドの募集内容で入力した内容に置換\n"+
+                            "　　-`$channel$` : 募集したい通話チャネルに置換\n" +
+                            "　　-`$everyone$` : Everyoneメンションに置換\n" +
+                            "　　-`$here$` : Hereメンションに置換")
                     .addField("[ADMIN]ユーティリティ", "・`" + prefix + "mess <文字><画像>` -> メッセージをBOTに送信させなおす\n");
 
 
@@ -284,6 +290,13 @@ public class BotMain extends Thread {
                                             } catch (NumberFormatException ex) {
                                                 responseMessageString = "0~99の数字を入力して下さい";
                                             }
+                                        } else if (cmd[1].equalsIgnoreCase("stereo")) {
+                                            StringBuilder setText = new StringBuilder();
+                                            for (int i = 2; i < cmd.length; i++) {
+                                                setText.append(cmd[i]);
+                                            }
+                                            dao.BotSetDate("stereo", serverId, setText.toString());
+                                            responseMessageString = "募集テンプレを編集しました\n"+setText;
                                         }
                                     } else if (cmd[0].equalsIgnoreCase("remove")) {
                                         if (cmd[1].equalsIgnoreCase("role")) {
@@ -347,15 +360,23 @@ public class BotMain extends Thread {
                                             if (Integer.parseInt(cmd[1]) == 0) {
                                                 responseMessageString = "人数制限を0(limitless)に設定しました";
                                             }
+
                                         } else if (cmd[0].equalsIgnoreCase("men") || cmd[0].equalsIgnoreCase("m")) {
-                                            StringBuilder mentionText = new StringBuilder("@here <#" + list.getVoiceID() + ">");
+                                            StringBuilder mentionText = new StringBuilder();
                                             for (int i = 1; i < cmd.length; i++) {
-                                                mentionText.append("\n").append(cmd[i]);
+                                                mentionText.append(cmd[i]).append("\n");
                                             }
                                             ServerDataList serverList = dao.TempGetData(serverId);
                                             if (api.getServerTextChannelById(serverList.getMentioncal()).isPresent()) {
                                                 ServerTextChannel mention = api.getServerTextChannelById(serverList.getMentioncal()).get();
-                                                dao.addMentionMessage(list.getTextID(), new MessageBuilder().setContent(mentionText.toString()).send(mention).join().getIdAsString(), serverId);
+                                                String mentionMessage = serverList.getStereotyped();
+                                                mentionMessage = mentionMessage.replaceAll("&user&", "<@"+e.getMessageAuthor().asUser().get().getIdAsString()+">")
+                                                        .replaceAll("&text&",mentionText.toString())
+                                                        .replaceAll("/n","\n")
+                                                        .replaceAll("&channel&","<#"+list.getVoiceID()+"> ")
+                                                        .replaceAll("&everyone&","@everyone ")
+                                                        .replaceAll("&here&","@here ");
+                                                dao.addMentionMessage(list.getTextID(), new MessageBuilder().setContent(mentionMessage).send(mention).join().getIdAsString(), serverId);
                                             }
                                             responseMessageString = "募集メッセを送信しました";
                                         }
@@ -726,7 +747,14 @@ public class BotMain extends Thread {
                                     ServerDataList serverList = dao.TempGetData(serverId);
                                     if (api.getServerTextChannelById(serverList.getMentioncal()).isPresent()) {
                                         ServerTextChannel mention = api.getServerTextChannelById(serverList.getMentioncal()).get();
-                                        dao.addMentionMessage(list.getTextID(), new MessageBuilder().setContent("@here <#" + list.getVoiceID() + ">").send(mention).join().getIdAsString(), serverId);
+                                        String mentionMessage = serverList.getStereotyped();
+                                        mentionMessage = mentionMessage.replaceAll("&user&", "<@"+buttonInteraction.getUser().getIdAsString()+">")
+                                                .replaceAll("&text&","")
+                                                .replaceAll("/n","\n")
+                                                .replaceAll("&channel&","<#"+list.getVoiceID()+"> ")
+                                                .replaceAll("&everyone&","@everyone ")
+                                                .replaceAll("&here&","@here ");
+                                        dao.addMentionMessage(list.getTextID(), new MessageBuilder().setContent(mentionMessage).send(mention).join().getIdAsString(), serverId);
                                         response += "募集メッセを送信しました";
                                     } else {
                                         response += "通話に居ないと送れないよ";

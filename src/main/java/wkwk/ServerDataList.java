@@ -13,6 +13,7 @@ public class ServerDataList {
     private String prefix;
     private String tempBy;
     private String textBy;
+    private String stereotyped;
     private String defaultSize;
 
     public ServerDataList() {
@@ -24,6 +25,7 @@ public class ServerDataList {
         prefix = null;
         tempBy = null;
         textBy = null;
+        stereotyped = null;
         defaultSize = null;
     }
 }

@@ -16,6 +16,7 @@ public enum ServerPropertyParameters {
     TEMP_BY("TEMPBY"),
     TEXT_BY("TEXTBY"),
     DEFAULT_SIZE("DEFAULTSIZE"),
+    STEREOTYPED("STEREOTYPED"),
     DEFAULT_PREFIX(">");
 
     private final String parameter;

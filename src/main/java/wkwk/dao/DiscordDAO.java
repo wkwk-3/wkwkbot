@@ -67,6 +67,7 @@ public class DiscordDAO extends DAOBase {
                 dataList.setTextcate(rs.getString(ServerPropertyParameters.TEXT_CATEGORY_ID.getParameter()));
                 dataList.setTempBy(rs.getString(ServerPropertyParameters.TEMP_BY.getParameter()));
                 dataList.setTextBy(rs.getString(ServerPropertyParameters.TEXT_BY.getParameter()));
+                dataList.setStereotyped(rs.getString((ServerPropertyParameters.STEREOTYPED.getParameter())));
                 dataList.setDefaultSize(rs.getString(ServerPropertyParameters.DEFAULT_SIZE.getParameter()));
             }
         } catch (SQLException e) {
@@ -98,6 +99,8 @@ public class DiscordDAO extends DAOBase {
                 sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET " + ServerPropertyParameters.TEXT_BY.getParameter() + " = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
             else if ("size".equals(idx))
                 sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET " + ServerPropertyParameters.DEFAULT_SIZE.getParameter() + " = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
+            else if ("stereo".equals(idx))
+                sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET " + ServerPropertyParameters.STEREOTYPED.getParameter() + " = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, value);
             prestmt.setString(2, select);

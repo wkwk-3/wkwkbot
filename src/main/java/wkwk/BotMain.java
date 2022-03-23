@@ -79,7 +79,7 @@ public class BotMain extends Thread {
                         "・一時作成チャネル : <#" + tempData.getFstchannel() + ">\n" +
                         "・通話カテゴリ : <#" + tempData.getVoicecate() + ">\n" +
                         "・テキストカテゴリ : <#" + tempData.getTextcate() + ">\n" +
-                        "・prefix : " + tempData.getPrefix() + "\n" + bys +
+                        "・prefix : " + tempData.getPrefix() + "\n・カスタム募集 : " + tempData.getStereotyped() + "\n" + bys +
                         reacts)
                 .setColor(Color.cyan)
                 .setThumbnail("https://i.imgur.com/KHpjoiu.png");
@@ -105,11 +105,12 @@ public class BotMain extends Thread {
                             "・`" + prefix + "set mess <メッセージID>　<チャンネルID>`↓\n　リアクションロールの対象メッセージを変更\n" +
                             "・`" + prefix + "remove role <絵文字>`↓\n　リアクションロールの絵文字を削除\n")
                     .addField("[ADMIN]募集テンプレ設定", "・`" + prefix + "set stereo <テンプレ内容>` : テンプレ内で使える置換！\n" +
-                            "　　-`$user$` : 送信を選択したユーザーのメンションに置換\n" +
-                            "　　-`$text$` : 募集コマンドの募集内容で入力した内容に置換\n"+
-                            "　　-`$channel$` : 募集したい通話チャネルに置換\n" +
-                            "　　-`$everyone$` : Everyoneメンションに置換\n" +
-                            "　　-`$here$` : Hereメンションに置換")
+                            "　　-`&user&` : 送信を選択したユーザーのメンションに置換\n" +
+                            "　　-`&text&` : 募集コマンドの募集内容で入力した内容に置換\n"+
+                            "　　-`&channel&` : 募集したい通話チャネルに置換\n" +
+                            "　　-`&everyone&` : Everyoneメンションに置換\n" +
+                            "　　-`&here&` : Hereメンションに置換\n" +
+                            "　　-`/n` : 改行")
                     .addField("[ADMIN]ユーティリティ", "・`" + prefix + "mess <文字><画像>` -> メッセージをBOTに送信させなおす\n");
 
 

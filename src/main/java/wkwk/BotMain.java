@@ -22,6 +22,7 @@ import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.interaction.ButtonInteraction;
 import org.javacord.api.interaction.SelectMenuInteraction;
+import org.javacord.api.interaction.UserContextMenuBuilder;
 import wkwk.dao.DiscordDAO;
 import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
@@ -43,7 +44,6 @@ public class BotMain extends Thread {
     private EmbedBuilder createShow(String serverName, String serverId, User sendUser, MessageCreateEvent e, DiscordDAO dao, DiscordApi api) throws SystemException, DatabaseException {
         ServerDataList tempData = dao.TempGetData(serverId);
         ReactionRoleRecord react = dao.getReactAllData(tempData.getServer());
-        e.getMessage().delete();
         String[] emojis = react.getEmoji().toArray(new String[0]);
         String[] roles = react.getRoleID().toArray(new String[0]);
         String bys = "";
@@ -157,7 +157,6 @@ public class BotMain extends Thread {
                                     dao.TempDataUpData(data);
                                     responseMessageString = "セットアップ完了";
                                 } else if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX + "show")) {
-                                    e.getMessage().delete();
                                     sendUser.sendMessage(createShow(server.getName(), serverId, sendUser, e, dao, api));
                                 }
                             }
@@ -167,12 +166,10 @@ public class BotMain extends Thread {
                         } else {
                             boolean sw = true;
                             if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX.getParameter() + "help")) {
-                                e.getMessage().delete();
                                 sw = false;
                                 sendUser.sendMessage(createHelp(prefix, server.getName(), sendUser, isAdmin));
                             }
                             if (messageContent.equalsIgnoreCase(ServerPropertyParameters.DEFAULT_PREFIX.getParameter() + "show") && isAdmin) {
-                                e.getMessage().delete();
                                 sw = false;
                                 sendUser.sendMessage(createShow(server.getName(), serverId, sendUser, e, dao, api));
                             }
@@ -180,7 +177,6 @@ public class BotMain extends Thread {
                                 String commandHeadless = messageContent.substring(prefix.length());
                                 String[] cmd = commandHeadless.split(" ");
                                 if (cmd[0].equalsIgnoreCase("help") && sw) {
-                                    e.getMessage().delete();
                                     sendUser.sendMessage(createHelp(prefix, server.getName(), sendUser, isAdmin));
                                 }
                                 if (isAdmin) {
@@ -386,9 +382,9 @@ public class BotMain extends Thread {
                             }
                         }
                         if (responseMessageString != null) {
-                            e.getChannel().sendMessage(responseMessageString).join();
-                            e.getMessage().delete();
+                            e.getMessage().reply(responseMessageString).join();
                         } else if (responseMessage != null) {
+                            e.getMessage().delete();
                             responseMessage.send(e.getChannel()).join();
                         }
                     }
@@ -593,6 +589,7 @@ public class BotMain extends Thread {
             });
 
             api.addButtonClickListener(e -> {
+                e.getButtonInteraction().getMessage().reply("test");
                 MessageBuilder messageBuilder = null;
                 ButtonInteraction buttonInteraction = e.getButtonInteraction();
                 String response = "<@"+buttonInteraction.getUser().getIdAsString()+">\n";

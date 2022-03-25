@@ -586,4 +586,37 @@ public class DiscordDAO extends DAOBase {
             this.close(prestmt);
         }
     }
+    public String GetServerCount() {
+        this.open();
+        String count = null;
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            String sql = "SELECT COUNT(" + ServerPropertyParameters.SERVER_ID.getParameter() + ") AS SERVERCOUNT FROM " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter();
+            ResultSet rs = stmt.executeQuery(sql);
+            while (rs.next()) count = String.format("%,d", rs.getInt("SERVERCOUNT"));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(stmt);
+        }
+        return count;
+    }
+
+    public String GetVoiceCount() {
+        this.open();
+        String count = null;
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            String sql = "SELECT COUNT(" + TempChannelsParameters.TEXT_CHANNEL_ID.getParameter() + ") AS VOICECOUNT FROM " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter();
+            ResultSet rs = stmt.executeQuery(sql);
+            while (rs.next()) count = String.format("%,d", rs.getInt("VOICECOUNT"));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(stmt);
+        }
+        return count;
+    }
 }

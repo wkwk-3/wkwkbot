@@ -128,7 +128,7 @@ public class BotMain extends Thread {
             DiscordDAO dao = new DiscordDAO();
             String token = dao.BotGetToken();
             DiscordApi api = new DiscordApiBuilder().setToken(token).login().join();
-            api.updateActivity(ActivityType.PLAYING, ">help 現在稼働中");
+            api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
 
             api.addMessageCreateListener(e -> {
                 try {
@@ -393,6 +393,7 @@ public class BotMain extends Thread {
             });
 
             api.addServerVoiceChannelMemberJoinListener(e -> {
+                api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
                 if (!e.getUser().isBot()) {
                     User joinUser = e.getUser();
                     ChannelCategory joinChannelCategory = null;
@@ -456,6 +457,7 @@ public class BotMain extends Thread {
                 }
             });
             api.addServerVoiceChannelMemberLeaveListener(e -> {
+                api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
                 ServerDataList data;
                 User user = e.getUser();
                 ChannelCategory leaveChannelCategory = null;
@@ -804,6 +806,7 @@ public class BotMain extends Thread {
             });
 
             api.addServerJoinListener(e -> {
+                api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
                 try {
                     if (e.getServer().getSystemChannel().isPresent()) {
                         e.getServer().getSystemChannel().get().sendMessage(">setup を打つと\nチャンネルとカテゴリを作成されます");
@@ -813,6 +816,7 @@ public class BotMain extends Thread {
                 }
             });
             api.addServerLeaveListener(e -> {
+                api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
                 try {
                     dao.TempDeleteData(e.getServer().getIdAsString());
                 } catch (DatabaseException ignored) {

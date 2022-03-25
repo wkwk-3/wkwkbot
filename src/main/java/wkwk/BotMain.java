@@ -393,7 +393,6 @@ public class BotMain extends Thread {
             });
 
             api.addServerVoiceChannelMemberJoinListener(e -> {
-                api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
                 if (!e.getUser().isBot()) {
                     User joinUser = e.getUser();
                     ChannelCategory joinChannelCategory = null;
@@ -455,9 +454,9 @@ public class BotMain extends Thread {
                         ex.printStackTrace();
                     }
                 }
+                api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
             });
             api.addServerVoiceChannelMemberLeaveListener(e -> {
-                api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
                 ServerDataList data;
                 User user = e.getUser();
                 ChannelCategory leaveChannelCategory = null;
@@ -503,6 +502,7 @@ public class BotMain extends Thread {
                     }
                 } catch (SystemException | DatabaseException ignored) {
                 }
+                api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
             });
 
             api.addReactionAddListener(e -> {
@@ -806,7 +806,6 @@ public class BotMain extends Thread {
             });
 
             api.addServerJoinListener(e -> {
-                api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
                 try {
                     if (e.getServer().getSystemChannel().isPresent()) {
                         e.getServer().getSystemChannel().get().sendMessage(">setup を打つと\nチャンネルとカテゴリを作成されます");
@@ -814,13 +813,14 @@ public class BotMain extends Thread {
                     dao.TempNewServer(e.getServer().getIdAsString());
                 } catch (DatabaseException ignored) {
                 }
+                api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
             });
             api.addServerLeaveListener(e -> {
-                api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
                 try {
                     dao.TempDeleteData(e.getServer().getIdAsString());
                 } catch (DatabaseException ignored) {
                 }
+                api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
             });
             Permissions per = new PermissionsBuilder().setAllowed(PermissionType.ADMINISTRATOR).build();
             System.out.println("URL : " + api.createBotInvite(per));

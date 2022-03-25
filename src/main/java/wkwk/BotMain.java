@@ -128,7 +128,7 @@ public class BotMain extends Thread {
             DiscordDAO dao = new DiscordDAO();
             String token = dao.BotGetToken();
             DiscordApi api = new DiscordApiBuilder().setToken(token).login().join();
-            api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
+            api.updateActivity(ActivityType.PLAYING , dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
 
             api.addMessageCreateListener(e -> {
                 try {

@@ -15,6 +15,7 @@ public class ServerDataList {
     private String textBy;
     private String stereotyped;
     private String defaultSize;
+    private String defaultName;
 
     public ServerDataList() {
         server = null;
@@ -27,5 +28,6 @@ public class ServerDataList {
         textBy = null;
         stereotyped = null;
         defaultSize = null;
+        defaultName = null;
     }
 }

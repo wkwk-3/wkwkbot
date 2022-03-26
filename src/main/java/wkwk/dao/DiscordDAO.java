@@ -69,6 +69,7 @@ public class DiscordDAO extends DAOBase {
                 dataList.setTextBy(rs.getString(ServerPropertyParameters.TEXT_BY.getParameter()));
                 dataList.setStereotyped(rs.getString((ServerPropertyParameters.STEREOTYPED.getParameter())));
                 dataList.setDefaultSize(rs.getString(ServerPropertyParameters.DEFAULT_SIZE.getParameter()));
+                dataList.setDefaultName(rs.getString(ServerPropertyParameters.DEFAULT_NAME.getParameter()));
             }
         } catch (SQLException e) {
             e.printStackTrace();

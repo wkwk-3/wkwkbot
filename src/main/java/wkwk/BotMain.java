@@ -32,11 +32,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 public class BotMain extends Thread {
 
@@ -324,10 +322,7 @@ public class BotMain extends Thread {
                                             api.getServerTextChannelById(old.getMentioncal()).get().delete();
                                         responseMessageString = "セットアップ完了";
                                     } else if (cmd[0].equalsIgnoreCase("mess")) {
-                                        ArrayList<String> mess = new ArrayList<>(Arrays.asList(cmd));
-                                        mess.remove("mess");
-                                        String response;
-                                        response = mess.stream().map(st -> st + "\n").collect(Collectors.joining());
+                                        String response = commandHeadless.substring(4);
                                         responseMessage = new MessageBuilder().setContent(response);
                                         for (MessageAttachment attachment : e.getMessageAttachments()) {
                                             responseMessage.addAttachment(attachment.getUrl());
@@ -413,7 +408,8 @@ public class BotMain extends Thread {
                                 ChannelCategory vcat = server.getChannelCategoryById(vcatId).get();
                                 ChannelList list = new ChannelList();
                                 if (data.getTextBy().equalsIgnoreCase("1")) {
-                                    ServerTextChannel text = new ServerTextChannelBuilder(server).setName(joinUser.getName() + " channel").setCategory(tcat).addPermissionOverwrite(server.getEveryoneRole(), new PermissionsBuilder().setAllDenied().build()).create().get();
+                                    String defaultName = data.getDefaultName().replaceAll("&user&", joinUser.getName()).replaceAll("&nick&", joinUser.getNickname(server).get());
+                                    ServerTextChannel text = new ServerTextChannelBuilder(server).setName(defaultName).setCategory(tcat).addPermissionOverwrite(server.getEveryoneRole(), new PermissionsBuilder().setAllDenied().build()).create().get();
                                     list.setTextID(text.getIdAsString());
                                     String prefix = data.getPrefix();
                                     new MessageBuilder().setContent("・`" + prefix + "name <文字>` か `" + prefix + "n <文字>` -> チャンネルの名前を変更\n" +

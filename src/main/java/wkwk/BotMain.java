@@ -408,7 +408,10 @@ public class BotMain extends Thread {
                                 ChannelCategory vcat = server.getChannelCategoryById(vcatId).get();
                                 ChannelList list = new ChannelList();
                                 if (data.getTextBy().equalsIgnoreCase("1")) {
-                                    String defaultName = data.getDefaultName().replaceAll("&user&", joinUser.getName()).replaceAll("&nick&", joinUser.getNickname(server).get());
+                                    String defaultName = data.getDefaultName().replaceAll("&user&", joinUser.getName());
+                                    if (joinUser.getNickname(server).isPresent()) {
+                                        defaultName = defaultName.replaceAll("&nick&", joinUser.getNickname(server).get());
+                                    }
                                     ServerTextChannel text = new ServerTextChannelBuilder(server).setName(defaultName).setCategory(tcat).addPermissionOverwrite(server.getEveryoneRole(), new PermissionsBuilder().setAllDenied().build()).create().get();
                                     list.setTextID(text.getIdAsString());
                                     String prefix = data.getPrefix();
@@ -437,12 +440,25 @@ public class BotMain extends Thread {
                                         .setAllowed(PermissionType.READ_MESSAGES,
                                                 PermissionType.READ_MESSAGE_HISTORY,
                                                 PermissionType.SEND_MESSAGES,
-                                                PermissionType.ADD_REACTIONS).build();
+                                                PermissionType.ADD_REACTIONS,
+                                                PermissionType.ATTACH_FILE,
+                                                PermissionType.USE_APPLICATION_COMMANDS,
+                                                PermissionType.USE_EXTERNAL_STICKERS,
+                                                PermissionType.USE_EXTERNAL_EMOJIS).build();
                                 tx.createUpdater().addPermissionOverwrite(joinUser, per).update();
                                 if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent())
                                     if (api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUserIds().size() == 1) {
                                         api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(joinUser, new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS).build()).update();
-                                        api.getServerTextChannelById(list.getTextID()).get().createUpdater().addPermissionOverwrite(joinUser, new PermissionsBuilder().setAllowed(PermissionType.READ_MESSAGES, PermissionType.READ_MESSAGE_HISTORY, PermissionType.SEND_MESSAGES, PermissionType.MANAGE_CHANNELS, PermissionType.ADD_REACTIONS).build()).update();
+                                        api.getServerTextChannelById(list.getTextID()).get().createUpdater().addPermissionOverwrite(joinUser, new PermissionsBuilder().setAllowed(PermissionType.READ_MESSAGES,
+                                                PermissionType.READ_MESSAGE_HISTORY,
+                                                PermissionType.SEND_MESSAGES,
+                                                PermissionType.ADD_REACTIONS,
+                                                PermissionType.ATTACH_FILE,
+                                                PermissionType.USE_APPLICATION_COMMANDS,
+                                                PermissionType.USE_EXTERNAL_STICKERS,
+                                                PermissionType.USE_EXTERNAL_EMOJIS,
+                                                PermissionType.MANAGE_MESSAGES,
+                                                PermissionType.MANAGE_CHANNELS).build()).update();
                                     }
                             }
                         }
@@ -863,12 +879,13 @@ public class BotMain extends Thread {
                                 System.out.println("右の一時通話群を削除しました -> " + list.getVoiceID());
                             }
                         }
-                    for (String voice : dao.TempVoiceids())
+                    for (String voice : dao.TempVoiceids()) {
                         if (!api.getServerVoiceChannelById(voice).isPresent()) {
                             j++;
                             dao.TempDeleteChannelList(voice, "v");
                             System.out.println("右の一時データを削除しました -> " + voice);
                         }
+                    }
                     if (i > 0) outServer = "サーバーデータ削除完了";
                     if (k > 0) outMention = "メンションデータ削除完了";
                     if (j > 0) outTemp = "一時データ削除完了";

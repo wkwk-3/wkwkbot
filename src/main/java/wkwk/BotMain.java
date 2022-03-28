@@ -108,6 +108,8 @@ public class BotMain extends Thread {
                             "　　-`&everyone&` : Everyoneメンションに置換\n" +
                             "　　-`&here&` : Hereメンションに置換\n" +
                             "　　-`/n` : 改行")
+                    .addField("[ADMIN]一時通話初期ネーム設定", "・`" + prefix + "set defname <名前>` : 名前内で使える置換！\n" +
+                            "　　-`&user&` : 通話を作ったユーザーの名前に置換")
                     .addField("[ADMIN]ユーティリティ", "・`" + prefix + "mess <文字><画像>` -> メッセージをBOTに送信させなおす\n");
 
 
@@ -291,6 +293,13 @@ public class BotMain extends Thread {
                                             }
                                             dao.BotSetDate("stereo", serverId, setText.toString());
                                             responseMessageString = "募集テンプレを編集しました\n"+setText;
+                                        } else if (cmd[1].equalsIgnoreCase("defname")) {
+                                            StringBuilder setText = new StringBuilder();
+                                            for (int i = 2; i < cmd.length; i++) {
+                                                setText.append(cmd[i]);
+                                            }
+                                            dao.BotSetDate("defname", serverId, setText.toString());
+                                            responseMessageString = "一時通話の初期ネームを編集しました\n"+setText;
                                         }
                                     } else if (cmd[0].equalsIgnoreCase("remove")) {
                                         if (cmd[1].equalsIgnoreCase("role")) {
@@ -407,11 +416,13 @@ public class BotMain extends Thread {
                                 ChannelCategory tcat = server.getChannelCategoryById(tcatId).get();
                                 ChannelCategory vcat = server.getChannelCategoryById(vcatId).get();
                                 ChannelList list = new ChannelList();
+                                String defaultName = data.getDefaultName().replaceAll("&user&", joinUser.getName());
+                                if (server.getNickname(joinUser).isPresent()) {
+                                    defaultName = defaultName.replaceAll("&nick&", server.getNickname(joinUser).get());
+                                } else {
+                                    defaultName = defaultName.replaceAll("&nick&", joinUser.getName());
+                                }
                                 if (data.getTextBy().equalsIgnoreCase("1")) {
-                                    String defaultName = data.getDefaultName().replaceAll("&user&", joinUser.getName());
-                                    if (joinUser.getNickname(server).isPresent()) {
-                                        defaultName = defaultName.replaceAll("&nick&", joinUser.getNickname(server).get());
-                                    }
                                     ServerTextChannel text = new ServerTextChannelBuilder(server).setName(defaultName).setCategory(tcat).addPermissionOverwrite(server.getEveryoneRole(), new PermissionsBuilder().setAllDenied().build()).create().get();
                                     list.setTextID(text.getIdAsString());
                                     String prefix = data.getPrefix();
@@ -426,7 +437,7 @@ public class BotMain extends Thread {
                                 } else {
                                     list.setTextID("NULL");
                                 }
-                                ServerVoiceChannel voice = new ServerVoiceChannelBuilder(server).setName(joinUser.getName() + " channel").setCategory(vcat).setUserlimit(Integer.parseInt(data.getDefaultSize())).setBitrate(64000).create().get();
+                                ServerVoiceChannel voice = new ServerVoiceChannelBuilder(server).setName(defaultName).setCategory(vcat).setUserlimit(Integer.parseInt(data.getDefaultSize())).setBitrate(64000).create().get();
                                 list.setVoiceID(voice.getIdAsString());
                                 list.setServerID(serverId);
                                 dao.TempSetChannelList(list);

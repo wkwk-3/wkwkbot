@@ -31,9 +31,8 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class BotMain extends Thread {
@@ -832,7 +831,20 @@ public class BotMain extends Thread {
                 try {
                     if (e.getServer().getSystemChannel().isPresent()) {
                         e.getServer().getSystemChannel().get().sendMessage(">setup を打つと\nチャンネルとカテゴリを作成されます");
+                        e.getServer().getSystemChannel().get().sendMessage("困ったことがありましたら、下記リンクからサポートサーバーに入り、お聞きください。\nhttps://discord.gg/6Z7jabh983");
+                    }else if (e.getServer().getOwner().isPresent()) {
+                        e.getServer().getOwner().get().sendMessage(">setup を打つと\nチャンネルとカテゴリを作成されます");
+                        e.getServer().getOwner().get().sendMessage("困ったことがありましたら、下記リンクからサポートサーバーに入り、お聞きください。\nhttps://discord.gg/6Z7jabh983").join();
+                    } else {
+                        for (Channel channel : e.getServer().getChannels()) {
+                            if (channel.asServerTextChannel().isPresent()) {
+                                channel.asServerTextChannel().get().sendMessage(">setup を打つと\nチャンネルとカテゴリを作成されます");
+                                channel.asServerTextChannel().get().sendMessage("困ったことがありましたら、下記リンクからサポートサーバーに入り、お聞きください。\nhttps://discord.gg/6Z7jabh983").join();
+                                break;
+                            }
+                        }
                     }
+
                     dao.TempNewServer(e.getServer().getIdAsString());
                 } catch (DatabaseException ignored) {
                 }

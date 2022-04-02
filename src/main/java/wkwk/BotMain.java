@@ -32,7 +32,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class BotMain extends Thread {
@@ -98,7 +97,7 @@ public class BotMain extends Thread {
                             "・`" + prefix + "set text <true or false>`↓\n　一時テキストチャンネル作成切替\n" +
                             "・`" + prefix + "set size <0~99の数字>` -> 一時通話初期人数変更\n" +
                             "・`" + prefix + "set role <ロールID> <絵文字>`↓\n　リアクションロールの付与ロールと絵文字を変更\n" +
-                            "・`" + prefix + "set mess <メッセージID>　<チャンネルID>`↓\n　リアクションロールの対象メッセージを変更\n" +
+                            "・`" + prefix + "set mess <メッセージID> <チャンネルID>`↓\n　リアクションロールの対象メッセージを変更\n" +
                             "・`" + prefix + "remove role <絵文字>`↓\n　リアクションロールの絵文字を削除\n")
                     .addField("[ADMIN]募集テンプレ設定", "・`" + prefix + "set stereo <テンプレ内容>` : テンプレ内で使える置換！\n" +
                             "　　-`&user&` : 送信を選択したユーザーのメンションに置換\n" +
@@ -229,14 +228,20 @@ public class BotMain extends Thread {
                                             StringBuilder str = new StringBuilder();
                                             try {
                                                 ReactionRoleRecord record = dao.getReactMessageData(serverId);
-                                                if (api.getRoleById(cmd[2]).isPresent() && EmojiManager.isEmoji(cmd[3].split("️")[0]) && record.getServerID().equalsIgnoreCase(serverId) && api.getServerTextChannelById(record.getTextChannelID()).isPresent()) {
+                                                if (record.getServerID() != null && api.getRoleById(cmd[2]).isPresent() && EmojiManager.isEmoji(cmd[3].split("️")[0]) && record.getServerID().equalsIgnoreCase(serverId) && api.getServerTextChannelById(record.getTextChannelID()).isPresent()) {
                                                     dao.setReactRoleData(record.getMessageID(), cmd[2], cmd[3]);
                                                     api.getMessageById(record.getMessageID(), api.getServerTextChannelById(record.getTextChannelID()).get()).join().addReaction(cmd[3]).join();
                                                     str.append("リアクションロール設定完了");
-                                                } else if (!EmojiManager.isEmoji(cmd[3]))
-                                                    str.append("それは絵文字ではない\n");
-                                                else if (!api.getRoleById(cmd[2]).isPresent())
-                                                    str.append("それはロールではない\n");
+                                                }
+                                                if (!EmojiManager.isEmoji(cmd[3].split("️")[0])) {
+                                                    str.append(cmd[3].split("️")[0]).append("は絵文字ではない\n");
+                                                }
+                                                if (!api.getRoleById(cmd[2]).isPresent()) {
+                                                    str.append(cmd[2]).append("はロールではない\n");
+                                                }
+                                                if (record.getServerID() == null) {
+                                                    str.append("リアクションロールの対象メッセージを設定してください\n");
+                                                }
                                             } catch (NumberFormatException ignored) {
                                                 str.append("それは数字じゃない");
                                             }

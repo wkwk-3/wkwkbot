@@ -11,8 +11,8 @@ public class ServerDataList {
     private String voicecate;
     private String textcate;
     private String prefix;
-    private String tempBy;
-    private String textBy;
+    private boolean tempBy;
+    private boolean textBy;
     private String stereotyped;
     private String defaultSize;
     private String defaultName;
@@ -24,10 +24,17 @@ public class ServerDataList {
         voicecate = null;
         textcate = null;
         prefix = null;
-        tempBy = null;
-        textBy = null;
+        tempBy = false;
+        textBy = false;
         stereotyped = null;
         defaultSize = null;
         defaultName = null;
+    }
+
+    public boolean getTempBy() {
+        return tempBy;
+    }
+    public boolean getTextBy() {
+        return textBy;
     }
 }

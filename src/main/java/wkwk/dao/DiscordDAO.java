@@ -65,8 +65,8 @@ public class DiscordDAO extends DAOBase {
                 dataList.setFstchannel(rs.getString(ServerPropertyParameters.FIRST_CHANNEL_ID.getParameter()));
                 dataList.setVoicecate(rs.getString(ServerPropertyParameters.VOICE_CATEGORY_ID.getParameter()));
                 dataList.setTextcate(rs.getString(ServerPropertyParameters.TEXT_CATEGORY_ID.getParameter()));
-                dataList.setTempBy(rs.getString(ServerPropertyParameters.TEMP_BY.getParameter()));
-                dataList.setTextBy(rs.getString(ServerPropertyParameters.TEXT_BY.getParameter()));
+                dataList.setTempBy(rs.getBoolean(ServerPropertyParameters.TEMP_BY.getParameter()));
+                dataList.setTextBy(rs.getBoolean(ServerPropertyParameters.TEXT_BY.getParameter()));
                 dataList.setStereotyped(rs.getString((ServerPropertyParameters.STEREOTYPED.getParameter())));
                 dataList.setDefaultSize(rs.getString(ServerPropertyParameters.DEFAULT_SIZE.getParameter()));
                 dataList.setDefaultName(rs.getString(ServerPropertyParameters.DEFAULT_NAME.getParameter()));
@@ -271,16 +271,16 @@ public class DiscordDAO extends DAOBase {
         }
     }
 
-    public int GetChannelHide(String id) {
+    public boolean GetChannelHide(String id) {
         this.open();
         prestmt = null;
-        int sw = -1;
+        boolean sw = false;
         try {
             String sql = "SELECT " + TempChannelsParameters.HIDE_BY.getParameter() + " FROM " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " WHERE " + TempChannelsParameters.TEXT_CHANNEL_ID.getParameter() + " = ?";
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, id);
             ResultSet rs = prestmt.executeQuery();
-            while (rs.next()) sw = rs.getInt(TempChannelsParameters.HIDE_BY.getParameter());
+            while (rs.next()) sw = rs.getBoolean(TempChannelsParameters.HIDE_BY.getParameter());
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -289,34 +289,32 @@ public class DiscordDAO extends DAOBase {
         return sw;
     }
 
-    public void UpdateChannelHide(String id, int num) {
-        if (num != -1) {
-            this.open();
-            prestmt = null;
-            try {
-                String sql = "UPDATE " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " SET " + TempChannelsParameters.HIDE_BY.getParameter() + " = ? WHERE " + TempChannelsParameters.TEXT_CHANNEL_ID.getParameter() + " = ?";
-                prestmt = con.prepareStatement(sql);
-                prestmt.setInt(1, num);
-                prestmt.setString(2, id);
-                prestmt.execute();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } finally {
-                this.close(prestmt);
-            }
+    public void UpdateChannelHide(String id, boolean num) {
+        this.open();
+        prestmt = null;
+        try {
+            String sql = "UPDATE " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " SET " + TempChannelsParameters.HIDE_BY.getParameter() + " = ? WHERE " + TempChannelsParameters.TEXT_CHANNEL_ID.getParameter() + " = ?";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setBoolean(1, num);
+            prestmt.setString(2, id);
+            prestmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
         }
     }
 
-    public int GetChannelLock(String id) {
+    public boolean GetChannelLock(String id) {
         this.open();
         prestmt = null;
-        int sw = -1;
+        boolean sw = false;
         try {
             String sql = "SELECT " + TempChannelsParameters.LOCK_BY.getParameter() + " FROM " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " WHERE " + TempChannelsParameters.TEXT_CHANNEL_ID.getParameter() + " = ?";
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, id);
             ResultSet rs = prestmt.executeQuery();
-            while (rs.next()) sw = rs.getInt(TempChannelsParameters.LOCK_BY.getParameter());
+            while (rs.next()) sw = rs.getBoolean(TempChannelsParameters.LOCK_BY.getParameter());
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -325,21 +323,19 @@ public class DiscordDAO extends DAOBase {
         return sw;
     }
 
-    public void UpdateChannelLock(String id, int num) {
-        if (num != -1) {
-            this.open();
-            prestmt = null;
-            try {
-                String sql = "UPDATE " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " SET " + TempChannelsParameters.LOCK_BY.getParameter() + " = ? WHERE " + TempChannelsParameters.TEXT_CHANNEL_ID.getParameter() + " = ?";
-                prestmt = con.prepareStatement(sql);
-                prestmt.setInt(1, num);
-                prestmt.setString(2, id);
-                prestmt.execute();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } finally {
-                this.close(prestmt);
-            }
+    public void UpdateChannelLock(String id, boolean num) {
+        this.open();
+        prestmt = null;
+        try {
+            String sql = "UPDATE " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " SET " + TempChannelsParameters.LOCK_BY.getParameter() + " = ? WHERE " + TempChannelsParameters.TEXT_CHANNEL_ID.getParameter() + " = ?";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setBoolean(1, num);
+            prestmt.setString(2, id);
+            prestmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
         }
     }
 
@@ -621,5 +617,56 @@ public class DiscordDAO extends DAOBase {
             this.close(stmt);
         }
         return count;
+    }
+
+    public void addNamePreset(String serverid,String name) {
+        this.open();
+        prestmt = null;
+        try {
+            String sql = "INSERT INTO " + DAOParameters.TABLE_NAME_PRESET.getParameter() + " VALUES (?,?)";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, serverid);
+            prestmt.setString(2, name);
+            prestmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
+        }
+    }
+
+    public ArrayList<String> GetNamePreset(String serverId) {
+        this.open();
+        ArrayList<String> names = new ArrayList<>();
+        prestmt = null;
+        try {
+            String sql = "SELECT " + NamePresetParameters.NAME.getParameter() + " FROM " + DAOParameters.TABLE_NAME_PRESET.getParameter() + " WHERE " + NamePresetParameters.SERVER_ID.getParameter() + " = ?";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, serverId);
+            ResultSet rs = prestmt.executeQuery();
+            while (rs.next()) {
+                names.add(rs.getString(NamePresetParameters.NAME.getParameter()));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
+        }
+        return names;
+    }
+    public void deleteNamePreset(String serverId,String name) {
+        this.open();
+        prestmt = null;
+        try {
+            String sql = "DELETE FROM " + DAOParameters.TABLE_NAME_PRESET.getParameter() + " WHERE " + NamePresetParameters.SERVER_ID.getParameter() + " = ? AND " + NamePresetParameters.NAME.getParameter() + " = ?";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, serverId);
+            prestmt.setString(2, name);
+            prestmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
+        }
     }
 }

@@ -1,9 +1,6 @@
 package wkwk.dao;
 
-import wkwk.ChannelList;
-import wkwk.MentionList;
-import wkwk.ReactionRoleRecord;
-import wkwk.ServerDataList;
+import wkwk.*;
 import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
 import wkwk.paramater.*;
@@ -668,5 +665,27 @@ public class DiscordDAO extends DAOBase {
         } finally {
             this.close(prestmt);
         }
+    }
+
+    public TweetAPIList getAutoTweetApis(){
+        this.open();
+        TweetAPIList apis = new TweetAPIList();
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            String sql = "SELECT * FROM " + DAOParameters.TABLE_BOT_DATA.getParameter();
+            ResultSet rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                apis.setApi(rs.getString(BotDataParameters.API_KEY.getParameter()));
+                apis.setApiSecret(rs.getString(BotDataParameters.API_SECRET_KEY.getParameter()));
+                apis.setToken(rs.getString(BotDataParameters.ACCESS_TOKEN.getParameter()));
+                apis.setTokenSecret(rs.getString(BotDataParameters.ACCESS_TOKEN_SECRET.getParameter()));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(stmt);
+        }
+        return apis;
     }
 }

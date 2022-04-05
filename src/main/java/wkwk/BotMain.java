@@ -127,7 +127,7 @@ public class BotMain extends Thread {
             String token = dao.BotGetToken();
             DiscordApi api = new DiscordApiBuilder().setToken(token).login().join();
             api.updateActivity(ActivityType.PLAYING , dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
-            AutoTweet autoTweet = new AutoTweet();
+            AutoTweet autoTweet = new AutoTweet(dao.getAutoTweetApis());
 
             api.addMessageCreateListener(e -> {
                 try {
@@ -642,8 +642,12 @@ public class BotMain extends Thread {
                         } else if (cmd.equalsIgnoreCase("removeName")) {
                             if (api.getServerById(list.getServerID()).isPresent() && api.getServerById(list.getServerID()).get().getPermissions(menuInteraction.getUser()).getAllowedPermission().contains(PermissionType.ADMINISTRATOR) || menuInteraction.getUser().isBotOwner()) {
                                 String name = menuInteraction.getChosenOptions().get(0).getValue();
-                                dao.deleteNamePreset(menuInteraction.getServer().get().getIdAsString(),name);
-                                response = name + "を削除しました";
+                                if (menuInteraction.getServer().isPresent()) {
+                                    dao.deleteNamePreset(menuInteraction.getServer().get().getIdAsString(),name);
+                                    response = name + "を削除しました";
+                                } else {
+                                    response = "削除に失敗しました";
+                                }
                             }
                         }
                         if (response != null) {

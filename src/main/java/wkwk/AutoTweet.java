@@ -8,12 +8,7 @@ import java.util.*;
 
 public class AutoTweet {
     int oldTime = -1;
-    TwitterClient twitterClient = new TwitterClient(TwitterCredentials.builder()
-            .accessToken("1508645209659539461-F2UOABrdn3J96agoRcKg3sTwezrli4")
-            .accessTokenSecret("5b2K17q6iwU4zq30fmKdaD9ZBQQZVJPyZQcF2W5icR2yW")
-            .apiKey("RX43IbR41acv5QQouPUp0mIVW")
-            .apiSecretKey("C0VMnwryjTd6ZoCSS6unrpGWfUvILXMoq3bxISaXyOBtqzQN2g")
-            .build());
+    TwitterClient twitterClient;
     String tweetText = "困ったことがあったら、下記サーバーに参加し\n" +
             "気軽にご質問ください。\n" +
             "BOT招待 : \n" +
@@ -25,6 +20,14 @@ public class AutoTweet {
     String[] emojis = {"🌝","🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘","🌙","🌚","🌛","🌜","☀","🌞","⭐","🌟","🌠","☄","🌈","☂","❄","🔥","💧"};
     TimerTask task;
     Timer timer = new Timer();
+    public AutoTweet(TweetAPIList list){
+        twitterClient = new TwitterClient(TwitterCredentials.builder()
+                .accessToken(list.getToken())
+                .accessTokenSecret(list.getTokenSecret())
+                .apiKey(list.getApi())
+                .apiSecretKey(list.getApiSecret())
+                .build());
+    }
     public void start(){
         task = new TimerTask() {
             public void run() {

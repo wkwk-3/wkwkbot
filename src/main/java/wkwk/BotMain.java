@@ -91,7 +91,7 @@ public class BotMain extends Thread {
                             "・`" + prefix + "set prefix <1~100文字>` -> コマンドの前に打つ文字を変更\n" +
                             "・`" + prefix + "set vcat <カテゴリID>` -> 一時通話の作成先を変更\n" +
                             "・`" + prefix + "set tcat <カテゴリID>` -> 一時チャットの作成先を変更\n" +
-                            "・`" + prefix + "set first <チャンネルID>` -> 最初に入るチャンネルを変更\n" +
+                            "・`" + prefix + "set first <チャンネルID>` -> 通話作成用チャンネルを変更\n" +
                             "・`" + prefix + "set men <チャンネルID>` -> 募集送信チャンネル変更\n" +
                             "・`" + prefix + "set enable <true or false>`↓\n　一時通話チャンネル作成切替\n" +
                             "・`" + prefix + "set text <true or false>`↓\n　一時テキストチャンネル作成切替\n" +
@@ -108,8 +108,6 @@ public class BotMain extends Thread {
                             "　　-`&everyone&` : Everyoneメンションに置換\n" +
                             "　　-`&here&` : Hereメンションに置換\n" +
                             "　　-`/n` : 改行")
-                    .addField("[ADMIN]一時通話初期ネーム設定", "・`" + prefix + "set defname <名前>` : 名前内で使える置換！\n" +
-                            "　　-`&user&` : 通話を作ったユーザーの名前に置換")
                     .addField("[ADMIN]ユーティリティ", "・`" + prefix + "mess <文字><画像>` -> メッセージをBOTに送信させなおす\n");
 
 

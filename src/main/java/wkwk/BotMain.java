@@ -127,6 +127,7 @@ public class BotMain extends Thread {
             String token = dao.BotGetToken();
             DiscordApi api = new DiscordApiBuilder().setToken(token).login().join();
             api.updateActivity(ActivityType.PLAYING , dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
+            AutoTweet autoTweet = new AutoTweet();
 
             api.addMessageCreateListener(e -> {
                 try {
@@ -910,6 +911,10 @@ public class BotMain extends Thread {
                     if (k > 0) outMention = "メンションデータ削除完了";
                     if (j > 0) outTemp = "一時データ削除完了";
                     System.out.println(outServer + "\n" + outMention + "\n" + outTemp);
+                } else if (cmd.equalsIgnoreCase("twstart")) {
+                    autoTweet.start();
+                }else if (cmd.equalsIgnoreCase("twstop")) {
+                    autoTweet.stop();
                 }
             }
         } catch (DatabaseException | SystemException | IOException ignored) {

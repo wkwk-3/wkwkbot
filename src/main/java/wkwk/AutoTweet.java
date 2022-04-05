@@ -45,7 +45,6 @@ public class AutoTweet {
         Date date = new Date();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        calendar.set(Calendar.HOUR_OF_DAY,22);
         calendar.add(Calendar.HOUR_OF_DAY,1);
         calendar.set(Calendar.MINUTE,0);
         calendar.set(Calendar.SECOND,0);

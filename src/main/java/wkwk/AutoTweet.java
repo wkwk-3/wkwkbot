@@ -36,8 +36,8 @@ public class AutoTweet {
                 int newTime = Integer.parseInt(sdf.format(date));
                 if (oldTime != newTime) {
                     oldTime = newTime;
-                    tweetText = tweetText.replaceFirst("::emoji::", emojis[newTime]);
-                    twitterClient.postTweet(tweetText);
+                    String tweet = tweetText.replaceFirst("::emoji::", emojis[newTime]);
+                    twitterClient.postTweet(tweet);
                     System.out.println(date+"にツイート");
                 }
             }
@@ -53,8 +53,8 @@ public class AutoTweet {
         timer.schedule(task, calendar.getTime() ,3600000L);
         SimpleDateFormat sdf = new SimpleDateFormat("H");
         int newTime = Integer.parseInt(sdf.format(calendar.getTime()));
-        tweetText = tweetText.replaceFirst("::emoji::", emojis[newTime]);
-        twitterClient.postTweet(tweetText);
+        String tweet = tweetText.replaceFirst("::emoji::", emojis[newTime]);
+        twitterClient.postTweet(tweet);
         System.out.println(calendar.getTime()+"にタイマー開始");
     }
     public void stop(){

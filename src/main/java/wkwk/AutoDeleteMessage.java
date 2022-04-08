@@ -24,8 +24,8 @@ public class AutoDeleteMessage {
                     for (DeleteMessage message : messages) {
                         if (api.getTextChannelById(message.getChannelId()).isPresent()) {
                             api.getMessageById(message.getMessageId(),api.getTextChannelById(message.getChannelId()).get()).join().delete();
-                            dao.deleteMessage(message.getMessageId());
                         }
+                        dao.deleteMessage(message.getMessageId());
                     }
                 }
             }

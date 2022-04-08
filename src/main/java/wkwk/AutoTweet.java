@@ -9,7 +9,7 @@ import java.util.*;
 public class AutoTweet {
     int oldTime = -1;
     TwitterClient twitterClient;
-    String tweetText = "困ったことがあったら、下記サーバーに参加し\n" +
+    String tweetText = "当BOTで困ったことがあったら、下記サーバーに参加し\n" +
             "気軽にご質問ください。\n" +
             "BOT招待 : \n" +
             "https://wkb.page.link/bot\n" +
@@ -61,5 +61,4 @@ public class AutoTweet {
         timer.cancel();
         System.out.println(new Date()+"にタイマー停止");
     }
-
 }

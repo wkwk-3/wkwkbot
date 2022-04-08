@@ -7,10 +7,12 @@ import wkwk.paramater.*;
 
 import java.io.IOException;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 public class DiscordDAO extends DAOBase {
 
+    final SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     public String BotGetToken() throws DatabaseException, SystemException {
         this.open();
         String token = null;
@@ -505,16 +507,17 @@ public class DiscordDAO extends DAOBase {
         return record;
     }
 
-    public void setReactRoleData(String messageid, String roleid, String emoji) {
+    public void setReactRoleData(String serverID,String messageid, String roleid, String emoji) {
         this.open();
         prestmt = null;
         String sql;
         try {
-            sql = "INSERT INTO " + DAOParameters.TABLE_REACT_ROLE.getParameter() + " VALUES (?,?,?)";
+            sql = "INSERT INTO " + DAOParameters.TABLE_REACT_ROLE.getParameter() + " VALUES (?,?,?,?)";
             prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, messageid);
-            prestmt.setString(2, roleid);
-            prestmt.setString(3, emoji);
+            prestmt.setString(1,serverID);
+            prestmt.setString(2, messageid);
+            prestmt.setString(3, roleid);
+            prestmt.setString(4, emoji);
             prestmt.execute();
         } catch (SQLIntegrityConstraintViolationException e) {
             try {
@@ -687,5 +690,150 @@ public class DiscordDAO extends DAOBase {
             this.close(stmt);
         }
         return apis;
+    }
+
+    public boolean addDeleteTimes(DeleteTimeRecord record){
+        this.open();
+        prestmt = null;
+        boolean exc = false;
+        String unit = record.getTimeUnit();
+        if (unit.equals("s") || unit.equals("m") || unit.equals("h") || unit.equals("d") && record.getDeleteTime() > 0) {
+            try {
+                String sql = "INSERT INTO " + DAOParameters.TABLE_DELETE_TIMES.getParameter() + " VALUES (?,?,?,?)";
+                prestmt = con.prepareStatement(sql);
+                prestmt.setString(1, record.getServerId());
+                prestmt.setString(2, record.getTextChannelId());
+                prestmt.setInt(3, record.getDeleteTime());
+                prestmt.setString(4, record.getTimeUnit());
+                prestmt.execute();
+                exc = true;
+            } catch (SQLIntegrityConstraintViolationException e) {
+                String sql = "UPDATE " + DAOParameters.TABLE_DELETE_TIMES.getParameter() + " SET " + DeleteTimesParameters.DELETE_TIME.getParameter() + " = ?," + DeleteTimesParameters.TIME_UNIT.getParameter() + " = ? WHERE " + DeleteTimesParameters.TEXT_CHANNEL_ID.getParameter() + " = ?";
+                try {
+                    prestmt = con.prepareStatement(sql);
+                    prestmt.setInt(1, record.getDeleteTime());
+                    prestmt.setString(2, record.getTimeUnit());
+                    prestmt.setString(3, record.getTextChannelId());
+                    prestmt.execute();
+                    exc = true;
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                this.close(prestmt);
+            }
+        }
+        return exc;
+    }
+
+    public void removeDeleteTimes(String channelId){
+        this.open();
+        prestmt = null;
+        try {
+            String sql = "DELETE FROM " + DAOParameters.TABLE_DELETE_TIMES.getParameter() + " WHERE " + DeleteTimesParameters.TEXT_CHANNEL_ID.getParameter() + " = ?";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, channelId);
+            prestmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
+        }
+    }
+    public void deleteDeleteTimes(String serverId){
+        this.open();
+        prestmt = null;
+        try {
+            String sql = "DELETE FROM " + DAOParameters.TABLE_DELETE_TIMES.getParameter() + " WHERE " + DeleteTimesParameters.SERVER_ID.getParameter() + " = ?";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, serverId);
+            prestmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
+        }
+    }
+
+    public ArrayList<DeleteTimeRecord> getDeleteTimes(String serverId){
+        ArrayList<DeleteTimeRecord> list = new ArrayList<>();
+        this.open();
+        prestmt = null;
+        try {
+            String sql = "SELECT * FROM " + DAOParameters.TABLE_DELETE_TIMES.getParameter() + " WHERE " + DeleteTimesParameters.SERVER_ID.getParameter() + " = ?";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1,serverId);
+            ResultSet rs = prestmt.executeQuery();
+            while (rs.next()) {
+                DeleteTimeRecord record = new DeleteTimeRecord();
+                record.setServerId(rs.getString(DeleteTimesParameters.SERVER_ID.getParameter()));
+                record.setTextChannelId(rs.getString(DeleteTimesParameters.TEXT_CHANNEL_ID.getParameter()));
+                record.setDeleteTime(rs.getInt(DeleteTimesParameters.DELETE_TIME.getParameter()));
+                record.setTimeUnit(rs.getString(DeleteTimesParameters.TIME_UNIT.getParameter()));
+                list.add(record);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
+        }
+        return list;
+    }
+    public void addDeleteMessage(DeleteMessage message){
+        this.open();
+        prestmt = null;
+        try {
+            String sql = "INSERT INTO " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " VALUES (?,?,?,?)";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, message.getServerId());
+            prestmt.setString(2, message.getMessageId());
+            prestmt.setString(3, message.getDeleteTime());
+            prestmt.setString(4,message.getChannelId());
+            prestmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
+        }
+    }
+
+    public ArrayList<DeleteMessage> getDeleteMessage(String date){
+        ArrayList<DeleteMessage> list = new ArrayList<>();
+        this.open();
+        prestmt = null;
+        try {
+            String sql = "SELECT * FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.DELETE_TIME.getParameter() + " = ?";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1,date);
+            ResultSet rs = prestmt.executeQuery();
+            while (rs.next()) {
+                DeleteMessage message = new DeleteMessage();
+                message.setMessageId(rs.getString(DeleteMessagesParameters.MESSAGE_ID.getParameter()));
+                message.setChannelId(rs.getString(DeleteMessagesParameters.TEXT_CHANNEL_ID.getParameter()));
+                list.add(message);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
+        }
+        return list;
+    }
+
+    public void deleteMessage (String messageId) {
+        this.open();
+        prestmt = null;
+        try {
+            String sql = "DELETE FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.MESSAGE_ID.getParameter() + " = ?";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, messageId);
+            prestmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
+        }
     }
 }

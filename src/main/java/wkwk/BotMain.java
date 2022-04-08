@@ -6,6 +6,7 @@ import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.channel.*;
 import org.javacord.api.entity.emoji.Emoji;
+
 import org.javacord.api.entity.message.MessageAttachment;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.component.ActionRow;
@@ -31,6 +32,8 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -99,8 +102,10 @@ public class BotMain extends Thread {
                             "・`" + prefix + "set role <ロールID> <絵文字>`↓\n　リアクションロールの付与ロールと絵文字を変更\n" +
                             "・`" + prefix + "set mess <メッセージID> <チャンネルID>`↓\n　リアクションロールの対象メッセージを変更\n" +
                             "・`" + prefix + "set namepreset <100文字以内>`->　チャンネルネーム候補を追加\n" +
+                            "・`" + prefix + "start delete <削除までの時間><単位>`↓\nコマンドを打ったチャンネルで自動削除を有効化します \n単位には s m h d が使用できます\n" +
                             "・`" + prefix + "remove role <絵文字>`↓\n　リアクションロールの絵文字を削除\n" +
-                            "・`" + prefix + "remove namepreset`->　名前を選んで削除\n")
+                            "・`" + prefix + "remove namepreset`->　名前を選んで削除\n" +
+                            "・`" + prefix + "stop delete`->　コマンドを打ったチャンネルの自動削除を停止します\n")
                     .addField("[ADMIN]募集テンプレ設定", "・`" + prefix + "set stereo <テンプレ内容>` : テンプレ内で使える置換！\n" +
                             "　　-`&user&` : 送信を選択したユーザーのメンションに置換\n" +
                             "　　-`&text&` : 募集コマンドの募集内容で入力した内容に置換\n"+
@@ -126,10 +131,12 @@ public class BotMain extends Thread {
             DiscordDAO dao = new DiscordDAO();
             String token = dao.BotGetToken();
             DiscordApi api = new DiscordApiBuilder().setToken(token).login().join();
+            new AutoDeleteMessage().start(api,dao);
             api.updateActivity(ActivityType.PLAYING , dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
             AutoTweet autoTweet = new AutoTweet(dao.getAutoTweetApis());
 
             api.addMessageCreateListener(e -> {
+                long nowTime = new Date().getTime();
                 try {
                     if (e.getMessageAuthor().asUser().isPresent() && !e.getMessageAuthor().asUser().get().isBot() && e.getServer().isPresent()) {
                         User sendUser = e.getMessageAuthor().asUser().get();
@@ -171,6 +178,7 @@ public class BotMain extends Thread {
                                 sw = false;
                                 sendUser.sendMessage(createShow(server.getName(), serverId, sendUser, dao, api));
                             }
+
                             if (messageContent.startsWith(prefix)) {
                                 String commandHeadless = messageContent.substring(prefix.length());
                                 String[] cmd = commandHeadless.split(" ");
@@ -179,7 +187,9 @@ public class BotMain extends Thread {
                                 }
                                 if (isAdmin) {
                                     if (cmd[0].equalsIgnoreCase("ping")) {
-                                        responseMessageString = "これ一覧に乗ってないよ";
+                                        Instant messageCreate = e.getMessage().getCreationTimestamp();
+                                        Date oldTime = Date.from(messageCreate);
+                                        responseMessageString = oldTime.getTime() - nowTime  +"ms";
                                     } else if (cmd[0].equalsIgnoreCase("set")) {
                                         if (cmd[1].equalsIgnoreCase("prefix")) {
                                             int prefixLen = cmd[2].length();
@@ -231,7 +241,7 @@ public class BotMain extends Thread {
                                                 cmd[3] = cmd[3].replaceFirst("️","");
                                                 ReactionRoleRecord record = dao.getReactMessageData(serverId);
                                                 if (record.getServerID() != null && api.getRoleById(cmd[2]).isPresent() && EmojiManager.isEmoji(cmd[3]) && record.getServerID().equalsIgnoreCase(serverId) && api.getServerTextChannelById(record.getTextChannelID()).isPresent()) {
-                                                    dao.setReactRoleData(record.getMessageID(), cmd[2], cmd[3]);
+                                                    dao.setReactRoleData(serverId,record.getMessageID(), cmd[2], cmd[3]);
                                                     api.getMessageById(record.getMessageID(), api.getServerTextChannelById(record.getTextChannelID()).get()).join().addReaction(cmd[3]).join();
                                                     str.append("リアクションロール設定完了");
                                                 }
@@ -331,6 +341,45 @@ public class BotMain extends Thread {
                                                     .setContent("通話名前削除")
                                                     .addComponents(ActionRow.of(selectMenuBuilder.build()));
                                         }
+                                    } else if(cmd[0].equalsIgnoreCase("start")) {
+                                        if (cmd[1].equalsIgnoreCase("delete") && cmd.length == 3) {
+                                            try {
+                                                String unit = cmd[2].substring(cmd[2].length() - 1);
+                                                int time = Integer.parseInt(cmd[2].substring(0, cmd[2].length() - 1));
+                                                DeleteTimeRecord times = new DeleteTimeRecord();
+                                                times.setServerId(serverId);
+                                                times.setTextChannelId(e.getChannel().getIdAsString());
+                                                times.setDeleteTime(time);
+                                                times.setTimeUnit(unit);
+                                                if (dao.addDeleteTimes(times)) {
+                                                    responseMessageString = Integer.toString(time);
+                                                    switch (unit) {
+                                                        case "s":
+                                                            responseMessageString += "秒";
+                                                            break;
+                                                        case "m":
+                                                            responseMessageString += "分";
+                                                            break;
+                                                        case "h":
+                                                            responseMessageString += "時間";
+                                                            break;
+                                                        case "d":
+                                                            responseMessageString += "日";
+                                                            break;
+                                                    }
+                                                    responseMessageString += "後削除に設定しました";
+                                                } else {
+                                                    responseMessageString = "設定に失敗しました";
+                                                }
+                                            } catch (NumberFormatException ex) {
+                                                responseMessageString = "削除時間は数字で指定してください";
+                                            }
+                                        }
+                                    } else if (cmd[0].equalsIgnoreCase("stop")) {
+                                        if (cmd[1].equalsIgnoreCase("delete")) {
+                                            dao.removeDeleteTimes(e.getChannel().getIdAsString());
+                                            responseMessageString = "自動削除を停止しました";
+                                        }
                                     } else if (cmd[0].equalsIgnoreCase("setup")) {
                                         ServerDataList old = dao.TempGetData(serverId);
                                         ServerDataList data;
@@ -402,6 +451,36 @@ public class BotMain extends Thread {
                                             }
                                             responseMessageString = "募集メッセを送信しました";
                                         }
+                                    }
+                                }
+                            } else {
+                                ArrayList<DeleteTimeRecord> deletelist = dao.getDeleteTimes(serverId);
+                                for (DeleteTimeRecord record : deletelist) {
+                                    if (record.getTextChannelId().equalsIgnoreCase(e.getChannel().getIdAsString())) {
+                                        DeleteMessage message = new DeleteMessage();
+                                        message.setServerId(serverId);
+                                        message.setChannelId(e.getChannel().getIdAsString());
+                                        message.setMessageId(e.getMessage().getIdAsString());
+                                        Date date = new Date();
+                                        Calendar calendar = Calendar.getInstance();
+                                        calendar.setTime(date);
+                                        switch (record.getTimeUnit()) {
+                                            case "s":
+                                                calendar.add(Calendar.SECOND,record.getDeleteTime());
+                                                break;
+                                            case "m":
+                                                calendar.add(Calendar.MINUTE,record.getDeleteTime());
+                                                break;
+                                            case "h":
+                                                calendar.add(Calendar.HOUR,record.getDeleteTime());
+                                                break;
+                                            case "d":
+                                                calendar.add(Calendar.DAY_OF_MONTH,record.getDeleteTime());
+                                                break;
+                                        }
+                                        message.setDeleteTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
+                                        dao.addDeleteMessage(message);
+                                        break;
                                     }
                                 }
                             }

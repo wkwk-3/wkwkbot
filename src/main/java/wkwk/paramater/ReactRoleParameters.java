@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 public enum ReactRoleParameters {
 
+    SERVER_ID(ReactMessageParameters.SERVER_ID.getParameter()),
     MESSAGE_ID(ReactMessageParameters.MESSAGE_ID.getParameter()),
     ROLE_ID("ROLEID"),
     EMOJI("EMOJI");

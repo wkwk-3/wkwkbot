@@ -51,10 +51,6 @@ public class AutoTweet {
         calendar.set(Calendar.MILLISECOND,0);
         timer = new Timer();
         timer.schedule(task, calendar.getTime() ,3600000L);
-        SimpleDateFormat sdf = new SimpleDateFormat("H");
-        int newTime = Integer.parseInt(sdf.format(date));
-        String tweet = tweetText.replaceFirst("::emoji::", emojis[newTime]);
-        twitterClient.postTweet(tweet);
         System.out.println(calendar.getTime()+"にタイマー開始");
     }
     public void stop(){

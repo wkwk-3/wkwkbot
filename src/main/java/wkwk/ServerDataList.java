@@ -6,10 +6,10 @@ import lombok.Data;
 public class ServerDataList {
 
     private String server;
-    private String mentioncal;
-    private String fstchannel;
-    private String voicecate;
-    private String textcate;
+    private String mentionChannel;
+    private String fstChannel;
+    private String voiceCategory;
+    private String textCategory;
     private String prefix;
     private boolean tempBy;
     private boolean textBy;
@@ -19,10 +19,10 @@ public class ServerDataList {
 
     public ServerDataList() {
         server = null;
-        fstchannel = null;
-        mentioncal = null;
-        voicecate = null;
-        textcate = null;
+        fstChannel = null;
+        mentionChannel = null;
+        voiceCategory = null;
+        textCategory = null;
         prefix = null;
         tempBy = false;
         textBy = false;
@@ -34,6 +34,7 @@ public class ServerDataList {
     public boolean getTempBy() {
         return tempBy;
     }
+
     public boolean getTextBy() {
         return textBy;
     }

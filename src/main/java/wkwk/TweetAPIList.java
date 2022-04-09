@@ -10,7 +10,7 @@ public class TweetAPIList {
     private String api;
     private String apiSecret;
 
-    public TweetAPIList(){
+    public TweetAPIList() {
         token = null;
         tokenSecret = null;
         api = null;

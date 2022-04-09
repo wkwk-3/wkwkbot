@@ -11,21 +11,22 @@ public class AutoDeleteMessage {
     Timer timer;
     DiscordApi api = null;
     DiscordDAO dao = null;
-    public void start(DiscordApi api, DiscordDAO dao){
+
+    public void start(DiscordApi api, DiscordDAO dao) {
         task = new TimerTask() {
             public void run() {
                 if (api != null && dao != null) {
                     Date date = new Date();
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTime(date);
-                    calendar.set(Calendar.MILLISECOND,0);
+                    calendar.set(Calendar.MILLISECOND, 0);
 
                     ArrayList<DeleteMessage> messages = dao.getDeleteMessage(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
                     for (DeleteMessage message : messages) {
                         if (api.getTextChannelById(message.getChannelId()).isPresent()) {
-                            api.getMessageById(message.getMessageId(),api.getTextChannelById(message.getChannelId()).get()).join().delete();
+                            api.getMessageById(message.getMessageId(), api.getTextChannelById(message.getChannelId()).get()).join().delete();
                         }
-                        dao.deleteMessage(message.getMessageId());
+                        dao.deleteMessage("m", message.getMessageId());
                     }
                 }
             }
@@ -36,8 +37,8 @@ public class AutoDeleteMessage {
         Date date = new Date();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        calendar.add(Calendar.SECOND,1);
-        calendar.set(Calendar.MILLISECOND,0);
-        timer.schedule(task, calendar.getTime() ,1000L);
+        calendar.add(Calendar.SECOND, 1);
+        calendar.set(Calendar.MILLISECOND, 0);
+        timer.schedule(task, calendar.getTime(), 1000L);
     }
 }

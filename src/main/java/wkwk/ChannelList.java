@@ -8,5 +8,5 @@ public class ChannelList {
     private String voiceID;
     private String textID;
     private String serverID;
-    
+
 }

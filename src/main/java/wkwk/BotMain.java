@@ -31,6 +31,7 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
@@ -106,7 +107,7 @@ public class BotMain extends Thread {
                             "・`" + prefix + "remove namepreset`->　名前を選んで削除\n" +
                             "・`" + prefix + "stop delete`->　コマンドを打ったチャンネルの自動削除を停止します\n")
                     .addField("[ADMIN]ログ設定コマンド一覧" , "・`" + prefix + "set logging <ログを保存したいチャンネルID1> CHAT`↓\n　入力したチャンネルに対象のチャンネルで消された\n　メッセージのログを出力します\n" +
-                            "・`" + prefix + "set logging CHAT`↓\n　入力したチャンネルにサーバーの\n　ユーザー入退室ログを出力します\n" +
+                            "・`" + prefix + "set logging USER`↓\n　入力したチャンネルにサーバーの\n　ユーザー入退室ログを出力します\n" +
                             "・`" + prefix + "remove logging` -> 選択したログ設定を削除します")
                     .addField("[ADMIN]募集テンプレ設定", "・`" + prefix + "set stereo <テンプレ内容>` : テンプレ内で使える置換！\n" +
                             "　　-`&user&` : 送信を選択したユーザーのメンションに置換\n" +
@@ -244,9 +245,22 @@ public class BotMain extends Thread {
                                 }
                                 if (isAdmin) {
                                     if (cmd[0].equalsIgnoreCase("ping")) {
-                                        Instant messageCreate = e.getMessage().getCreationTimestamp();
-                                        Date oldTime = Date.from(messageCreate);
-                                        responseMessageString = oldTime.getTime() - nowTime + "ms";
+                                        long ping = 0L;
+                                        try {
+                                            InetAddress address = InetAddress.getByName("8.8.8.8");
+                                            for (int n = 0;n < 5;n++){
+                                                long start = System.currentTimeMillis();
+                                                boolean ena = address.isReachable(5000);
+                                                long end = System.currentTimeMillis();
+                                                if (ena) {
+                                                    ping += (end - start);
+                                                }
+                                            }
+                                            ping /= 5L;
+                                        } catch (IOException ex) {
+                                            ex.printStackTrace();
+                                        }
+                                        responseMessageString = ping + "ms";
                                     } else if (cmd[0].equalsIgnoreCase("set")) {
                                         if (cmd[1].equalsIgnoreCase("prefix")) {
                                             int prefixLen = cmd[2].length();

@@ -1,6 +1,6 @@
 package wkwk.dao;
 
-import wkwk.paramater.DAOParameters;
+import wkwk.parameter.DAOParameters;
 
 import java.sql.*;
 

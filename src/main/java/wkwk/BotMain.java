@@ -25,7 +25,7 @@ import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import wkwk.dao.DiscordDAO;
 import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
-import wkwk.paramater.ServerPropertyParameters;
+import wkwk.parameter.ServerPropertyParameters;
 
 import java.awt.*;
 import java.io.BufferedReader;
@@ -105,6 +105,9 @@ public class BotMain extends Thread {
                             "・`" + prefix + "remove role <絵文字>`↓\n　リアクションロールの絵文字を削除\n" +
                             "・`" + prefix + "remove namepreset`->　名前を選んで削除\n" +
                             "・`" + prefix + "stop delete`->　コマンドを打ったチャンネルの自動削除を停止します\n")
+                    .addField("[ADMIN]ログ設定コマンド一覧" , "・`" + prefix + "set logging <ログを保存したいチャンネルID1> CHAT`↓\n　入力したチャンネルに対象のチャンネルで消された\n　メッセージのログを出力します\n" +
+                            "・`" + prefix + "set logging CHAT`↓\n　入力したチャンネルにサーバーの\n　ユーザー入退室ログを出力します\n" +
+                            "・`" + prefix + "remove logging` -> 選択したログ設定を削除します")
                     .addField("[ADMIN]募集テンプレ設定", "・`" + prefix + "set stereo <テンプレ内容>` : テンプレ内で使える置換！\n" +
                             "　　-`&user&` : 送信を選択したユーザーのメンションに置換\n" +
                             "　　-`&text&` : 募集コマンドの募集内容で入力した内容に置換\n" +
@@ -129,12 +132,64 @@ public class BotMain extends Thread {
         try {
             DiscordDAO dao = new DiscordDAO();
             String token = dao.BotGetToken();
-            DiscordApi api = new DiscordApiBuilder().setToken(token).login().join();
+            DiscordApi api = new DiscordApiBuilder().setAllIntents().setToken(token).login().join();
             new AutoDeleteMessage().start(api, dao);
             api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
             AutoTweet autoTweet = new AutoTweet(dao.getAutoTweetApis());
             User wkwk = api.getYourself();
 
+            api.addServerMemberJoinListener(e -> {
+                ArrayList<LoggingRecord> logRecord = dao.getLogging("s",e.getServer().getIdAsString());
+                for (LoggingRecord record : logRecord) {
+                    if (record.getLogType().equalsIgnoreCase("USER") && api.getServerTextChannelById(record.getChannelId()).isPresent()) {
+                        ServerTextChannel textChannel = api.getServerTextChannelById(record.getChannelId()).get();
+                        Date date = Date.from(e.getUser().getCreationTimestamp());
+                        SimpleDateFormat sd = new SimpleDateFormat("yyyy/MM/dd hh:mm:ss");
+                        EmbedBuilder embed =  new EmbedBuilder()
+                                .setTitle(e.getUser().getName() + " が加入")
+                                .setAuthor(e.getUser())
+                                .addInlineField("@" + e.getUser().getIdAsString(), "<@" + e.getUser().getIdAsString() + ">")
+                                .addInlineField("アカウント作成日時", sd.format(date))
+                                .setColor(Color.BLACK);
+                        textChannel.sendMessage(embed).join();
+                    }
+                }
+            });
+
+            api.addServerMemberLeaveListener(e ->{
+                ArrayList<LoggingRecord> logRecord = dao.getLogging("s",e.getServer().getIdAsString());
+                for (LoggingRecord record : logRecord){
+                    if (record.getLogType().equalsIgnoreCase("USER") && api.getServerTextChannelById(record.getChannelId()).isPresent()) {
+                        ServerTextChannel textChannel = api.getServerTextChannelById(record.getChannelId()).get();
+                        EmbedBuilder embed =  new EmbedBuilder()
+                                .setTitle(e.getUser().getName() + "が脱退")
+                                .setAuthor(e.getUser())
+                                .addInlineField("@" + e.getUser().getIdAsString(), "<@" + e.getUser().getIdAsString() + ">")
+                                .setColor(Color.BLACK);
+                        textChannel.sendMessage(embed).join();
+                    }
+                }
+            });
+
+
+            api.addMessageDeleteListener(e ->{
+                if (e.getMessageAuthor().isPresent() && e.getMessageAuthor().get().asUser().isPresent() && !e.getMessageAuthor().get().asUser().get().isBot() && e.getServer().isPresent()) {
+                    TextChannel channel = e.getChannel();
+                    User user = e.getMessageAuthor().get().asUser().get();
+                    ArrayList<LoggingRecord> log = dao.getLogging("c",channel.getIdAsString());
+                    for (LoggingRecord record : log) {
+                        if (api.getTextChannelById(record.getChannelId()).isPresent() && record.getLogType().equalsIgnoreCase("CHAT")) {
+                            if (channel.getIdAsString().equalsIgnoreCase(record.getTargetChannelId()) && e.getMessageContent().isPresent()) {
+                                EmbedBuilder embed =  new EmbedBuilder()
+                                        .setAuthor(user)
+                                        .addField("削除LOG", e.getMessageContent().get())
+                                        .setColor(Color.BLACK);
+                                api.getTextChannelById(record.getChannelId()).get().sendMessage(embed).join();
+                            }
+                        }
+                    }
+                }
+            });
             api.addMessageCreateListener(e -> {
                 long nowTime = new Date().getTime();
                 try {
@@ -147,6 +202,7 @@ public class BotMain extends Thread {
                         String responseMessageString = null;
                         MessageBuilder responseMessage = null;
                         Role everyone = e.getServer().get().getEveryoneRole();
+                        TextChannel channel = e.getChannel();
                         boolean isAdmin = server.getAllowedPermissions(sendUser).contains(PermissionType.ADMINISTRATOR);
                         if (prefix == null) {
                             if (isAdmin) {
@@ -324,6 +380,32 @@ public class BotMain extends Thread {
                                             } else {
                                                 responseMessageString = "100文字以内にしてください。";
                                             }
+                                        } else if (cmd[1].equalsIgnoreCase("logging")) {
+                                            ArrayList<LoggingRecord> records = new ArrayList<>();
+                                            LoggingRecord logging = new LoggingRecord();
+                                            logging.setServerId(serverId);
+                                            logging.setChannelId(channel.getIdAsString());
+                                            logging.setLogType(cmd[cmd.length - 1]);
+                                            ArrayList<String> targets;
+                                            targets = new ArrayList<>(Arrays.asList(cmd).subList(2, cmd.length - 1));
+                                            System.out.println(targets.size());
+                                            if (cmd[cmd.length - 1].equalsIgnoreCase("USER") && targets.size() == 0) {
+                                                logging.setTargetChannelId(channel.getIdAsString());
+                                                records.add(logging);
+                                                dao.addLogging(records);
+                                                responseMessageString = "ユーザー加入・脱退履歴を設定";
+                                            } else if (cmd[cmd.length - 1].equalsIgnoreCase("CHAT") && targets.size() > 0) {
+                                                for (String id : targets) {
+                                                    logging.setTargetChannelId(id);
+                                                    records.add(logging);
+                                                }
+                                                dao.addLogging(records);
+                                                responseMessageString = "チャット履歴を設定";
+                                            } else if (cmd[cmd.length-1].equalsIgnoreCase("USER") && targets.size() > 0) {
+                                                responseMessageString = "ユーザーlogの時はターゲットチャンネルを入力しないでください。";
+                                            } else if (cmd[cmd.length-1].equalsIgnoreCase("CHAT") && targets.size() == 0) {
+                                                responseMessageString = "チャットlogの時はターゲットチャンネルを指定してください。";
+                                            }
                                         }
                                     } else if (cmd[0].equalsIgnoreCase("remove")) {
                                         if (cmd[1].equalsIgnoreCase("role")) {
@@ -341,6 +423,23 @@ public class BotMain extends Thread {
                                             responseMessage = new MessageBuilder()
                                                     .setContent("通話名前削除")
                                                     .addComponents(ActionRow.of(selectMenuBuilder.build()));
+                                        } else if (cmd[1].equalsIgnoreCase("logging")) {
+                                            ArrayList<LoggingRecord> logRecord = dao.getLogging("s", serverId);
+                                            if (logRecord.size() > 0) {
+                                                SelectMenuBuilder selectMenuBuilder = new SelectMenuBuilder().setCustomId("removeLogging").setPlaceholder("削除したいlog設定を選んでください").setMaximumValues(1).setMinimumValues(1);
+                                                for (LoggingRecord record : logRecord) {
+                                                    if (api.getServerTextChannelById(record.getTargetChannelId()).isPresent() && record.getLogType().equalsIgnoreCase("CHAT")) {
+                                                        selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(record.getLogType()+":"+api.getServerTextChannelById(record.getTargetChannelId()).get().getName()).setValue(record.getTargetChannelId()+" "+record.getLogType()+" "+record.getChannelId()).build());
+                                                    } else if (api.getServerTextChannelById(record.getTargetChannelId()).isPresent() && record.getLogType().equalsIgnoreCase("USER")){
+                                                        selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(record.getLogType()+":"+api.getServerTextChannelById(record.getTargetChannelId()).get().getName()).setValue(record.getTargetChannelId()+" "+record.getLogType()+" "+record.getChannelId()).build());
+                                                    } else if (!api.getServerTextChannelById(record.getTargetChannelId()).isPresent()) {
+                                                        selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(record.getLogType()+":"+record.getTargetChannelId()).setValue(record.getChannelId()+" "+record.getLogType()+" "+record.getChannelId()).build());
+                                                    }
+                                                }
+                                                responseMessage = new MessageBuilder()
+                                                        .setContent("履歴チャンネル削除")
+                                                        .addComponents(ActionRow.of(selectMenuBuilder.build()));
+                                            }
                                         }
                                     } else if (cmd[0].equalsIgnoreCase("start")) {
                                         if (cmd[1].equalsIgnoreCase("delete") && cmd.length == 3) {
@@ -349,7 +448,7 @@ public class BotMain extends Thread {
                                                 int time = Integer.parseInt(cmd[2].substring(0, cmd[2].length() - 1));
                                                 DeleteTimeRecord times = new DeleteTimeRecord();
                                                 times.setServerId(serverId);
-                                                times.setTextChannelId(e.getChannel().getIdAsString());
+                                                times.setTextChannelId(channel.getIdAsString());
                                                 times.setDeleteTime(time);
                                                 times.setTimeUnit(unit);
                                                 if (dao.addDeleteTimes(times)) {
@@ -378,7 +477,7 @@ public class BotMain extends Thread {
                                         }
                                     } else if (cmd[0].equalsIgnoreCase("stop")) {
                                         if (cmd[1].equalsIgnoreCase("delete")) {
-                                            dao.removeDeleteTimes(e.getChannel().getIdAsString());
+                                            dao.removeDeleteTimes(channel.getIdAsString());
                                             responseMessageString = "自動削除を停止しました";
                                         }
                                     } else if (cmd[0].equalsIgnoreCase("setup")) {
@@ -412,9 +511,9 @@ public class BotMain extends Thread {
                                         sendUser.sendMessage(createShow(server.getName(), serverId, sendUser, dao, api));
                                     }
                                 }
-                                ChannelList list = dao.TempGetChannelList(e.getChannel().getIdAsString(), "t");
+                                ChannelList list = dao.TempGetChannelList(channel.getIdAsString(), "t");
                                 if (sendUser.getConnectedVoiceChannel(server).isPresent() && list.getVoiceID() != null) {
-                                    String requestVoiceId = dao.TempGetChannelList(e.getChannel().getIdAsString(), "t").getVoiceID();
+                                    String requestVoiceId = dao.TempGetChannelList(channel.getIdAsString(), "t").getVoiceID();
                                     if (requestVoiceId.equalsIgnoreCase(sendUser.getConnectedVoiceChannel(server).get().getIdAsString()) && api.getServerVoiceChannelById(requestVoiceId).isPresent() && api.getServerVoiceChannelById(requestVoiceId).get().getEffectivePermissions(sendUser).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
                                         if (cmd[0].equalsIgnoreCase("name") || cmd[0].equalsIgnoreCase("n")) {//ここから
                                             if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
@@ -457,11 +556,11 @@ public class BotMain extends Thread {
                             } else {
                                 ArrayList<DeleteTimeRecord> deleteList = dao.getDeleteTimes(serverId);
                                 for (DeleteTimeRecord record : deleteList) {
-                                    if (record.getTextChannelId().equalsIgnoreCase(e.getChannel().getIdAsString())) {
+                                    if (record.getTextChannelId().equalsIgnoreCase(channel.getIdAsString())) {
                                         DeleteMessage message = new DeleteMessage();
                                         message.setServerId(serverId);
-                                        message.setChannelId(e.getChannel().getIdAsString());
-                                        message.setMessageId(e.getMessage().getIdAsString());
+                                        message.setChannelId(channel.getIdAsString());
+                                        message.setMessageId(channel.getIdAsString());
                                         Date date = new Date();
                                         Calendar calendar = Calendar.getInstance();
                                         calendar.setTime(date);
@@ -489,7 +588,7 @@ public class BotMain extends Thread {
                         if (responseMessageString != null) {
                             e.getMessage().reply(responseMessageString).join();
                         } else if (responseMessage != null) {
-                            responseMessage.send(e.getChannel()).join();
+                            responseMessage.send(channel).join();
                         }
                     }
                 } catch (SystemException | DatabaseException | IOException ex) {
@@ -728,6 +827,13 @@ public class BotMain extends Thread {
                                     response = "削除に失敗しました";
                                 }
                             }
+                        } else if (cmd.equalsIgnoreCase("removeLogging")) {
+                            String[] inputs = menuInteraction.getChosenOptions().get(0).getValue().split(" ");
+                            System.out.println(inputs[0]);
+                            System.out.println(inputs[1]);
+                            System.out.println(inputs[2]);
+                            dao.deleteLogging(inputs[0],inputs[1],inputs[2]);
+                            response = "削除しました";
                         }
                         if (response != null) {
                             menuInteraction.getMessage().delete();
@@ -938,6 +1044,7 @@ public class BotMain extends Thread {
                     dao.deleteDeleteTimes(serverId);
                     dao.deleteMessage("s", serverId);
                     dao.deleteNamePreset(serverId);
+                    dao.deleteLogging(serverId);
                 } catch (DatabaseException ignored) {
                 }
                 api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");

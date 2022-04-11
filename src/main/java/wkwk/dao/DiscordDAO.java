@@ -3,7 +3,7 @@ package wkwk.dao;
 import wkwk.*;
 import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
-import wkwk.paramater.*;
+import wkwk.parameter.*;
 
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -779,12 +779,12 @@ public class DiscordDAO extends DAOBase {
         this.open();
         prestmt = null;
         try {
-            String sql = "SELECT EXISTS(SELECT * FROM " + DAOParameters.TABLE_DELETE_TIMES.getParameter() + " WHERE " + DeleteTimesParameters.SERVER_ID.getParameter() + " = ?) AS time_check";
+            String sql = "SELECT EXISTS(SELECT * FROM " + DAOParameters.TABLE_DELETE_TIMES.getParameter() + " WHERE " + DeleteTimesParameters.SERVER_ID.getParameter() + " = ?) AS TIME_CHECK";
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, serverId);
             ResultSet rs = prestmt.executeQuery();
             while (rs.next()) {
-                if (rs.getInt("time_check") == 1) {
+                if (rs.getInt("TIME_CHECK") == 1) {
                     sql = "SELECT * FROM " + DAOParameters.TABLE_DELETE_TIMES.getParameter() + " WHERE " + DeleteTimesParameters.SERVER_ID.getParameter() + " = ?";
                     prestmt = con.prepareStatement(sql);
                     prestmt.setString(1, serverId);
@@ -831,13 +831,13 @@ public class DiscordDAO extends DAOBase {
         prestmt = null;
 
 
-        String sql = "SELECT EXISTS(SELECT * FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.DELETE_TIME.getParameter() + " = ?) AS message_check";
+        String sql = "SELECT EXISTS(SELECT * FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.DELETE_TIME.getParameter() + " = ?) AS MESSAGE_CHECK";
         try {
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, date);
             ResultSet rs = prestmt.executeQuery();
             while (rs.next()) {
-                if (rs.getInt("message_check") == 1) {
+                if (rs.getInt("MESSAGE_CHECK") == 1) {
                     sql = "SELECT * FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.DELETE_TIME.getParameter() + " = ?";
                     prestmt = con.prepareStatement(sql);
                     try {
@@ -852,6 +852,8 @@ public class DiscordDAO extends DAOBase {
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
+                } else {
+                    break;
                 }
             }
         } catch (SQLException e) {
@@ -875,6 +877,133 @@ public class DiscordDAO extends DAOBase {
                 prestmt.setString(1, id);
                 prestmt.execute();
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
+        }
+    }
+
+    public void addLogging(ArrayList<LoggingRecord> records){
+        this.open();
+        try {
+            for (LoggingRecord record : records) {
+                try {
+                    prestmt = null;
+                    String sql = "INSERT INTO " + DAOParameters.TABLE_LOGGING.getParameter() + " VALUES (?,?,?,?)";
+                    prestmt = con.prepareStatement(sql);
+                    prestmt.setString(1, record.getServerId());
+                    prestmt.setString(2, record.getChannelId());
+                    prestmt.setString(3, record.getLogType());
+                    prestmt.setString(4, record.getTargetChannelId());
+                    prestmt.execute();
+                } catch (SQLIntegrityConstraintViolationException ignored) {
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
+        }
+    }
+
+    public ArrayList<LoggingRecord> getLogging(String select ,String id) {
+        this.open();
+        prestmt = null;
+        ArrayList<LoggingRecord> records = new ArrayList<>();
+        switch (select){
+            case "c":
+                String sql = "SELECT EXISTS(SELECT * FROM " + DAOParameters.TABLE_LOGGING.getParameter() + " WHERE " + LoggingParameters.TARGET_CHANNEL_ID.getParameter() + " = ?) AS TARGET_CHECK";
+                try {
+                    prestmt = con.prepareStatement(sql);
+                    prestmt.setString(1, id);
+                    ResultSet rs = prestmt.executeQuery();
+                    while (rs.next()) {
+                        if (rs.getInt("TARGET_CHECK") == 1) {
+                            sql = "SELECT * FROM " + DAOParameters.TABLE_LOGGING.getParameter() + " WHERE " + LoggingParameters.TARGET_CHANNEL_ID.getParameter() + " = ?";
+                            prestmt = con.prepareStatement(sql);
+                            try {
+                                prestmt.setString(1, id);
+                                ResultSet rsx = prestmt.executeQuery();
+                                while (rsx.next()) {
+                                    LoggingRecord record = new LoggingRecord();
+                                    record.setServerId(rsx.getString(LoggingParameters.SERVER_ID.getParameter()));
+                                    record.setChannelId(rsx.getString(LoggingParameters.CHANNEL_ID.getParameter()));
+                                    record.setLogType(rsx.getString(LoggingParameters.LOG_TYPE.getParameter()));
+                                    record.setTargetChannelId(rsx.getString(LoggingParameters.TARGET_CHANNEL_ID.getParameter()));
+                                    records.add(record);
+                                }
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "s":
+                sql = "SELECT EXISTS(SELECT * FROM " + DAOParameters.TABLE_LOGGING.getParameter() + " WHERE " + LoggingParameters.SERVER_ID.getParameter() + " = ?) AS SERVER_CHECK";
+                try {
+                    prestmt = con.prepareStatement(sql);
+                    prestmt.setString(1, id);
+                    ResultSet rs = prestmt.executeQuery();
+                    while (rs.next()) {
+                        if (rs.getInt("SERVER_CHECK") == 1) {
+                            sql = "SELECT * FROM " + DAOParameters.TABLE_LOGGING.getParameter() + " WHERE " + LoggingParameters.SERVER_ID.getParameter() + " = ?";
+                            prestmt = con.prepareStatement(sql);
+                            try {
+                                prestmt.setString(1, id);
+                                ResultSet rsx = prestmt.executeQuery();
+                                while (rsx.next()) {
+                                    LoggingRecord record = new LoggingRecord();
+                                    record.setServerId(rsx.getString(LoggingParameters.SERVER_ID.getParameter()));
+                                    record.setChannelId(rsx.getString(LoggingParameters.CHANNEL_ID.getParameter()));
+                                    record.setLogType(rsx.getString(LoggingParameters.LOG_TYPE.getParameter()));
+                                    record.setTargetChannelId(rsx.getString(LoggingParameters.TARGET_CHANNEL_ID.getParameter()));
+                                    records.add(record);
+                                }
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                break;
+        }
+        return records;
+    }
+
+    public void deleteLogging(String target, String type, String channel) {
+        this.open();
+        prestmt = null;
+        try {
+            String sql = "DELETE FROM " + DAOParameters.TABLE_LOGGING.getParameter() + " WHERE " + LoggingParameters.TARGET_CHANNEL_ID.getParameter() + " = ? AND " + LoggingParameters.CHANNEL_ID.getParameter() + " = ? AND " + LoggingParameters.LOG_TYPE.getParameter() + " = ?";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, target);
+            prestmt.setString(2, channel);
+            prestmt.setString(3, type);
+            prestmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
+        }
+    }
+    public void deleteLogging(String server) {
+        this.open();
+        prestmt = null;
+        try {
+            String sql = "DELETE FROM " + DAOParameters.TABLE_LOGGING.getParameter() + " WHERE " + LoggingParameters.SERVER_ID.getParameter() + " = ?";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, server);
+            prestmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {

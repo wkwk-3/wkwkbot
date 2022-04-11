@@ -1,4 +1,4 @@
-package wkwk.paramater;
+package wkwk.parameter;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

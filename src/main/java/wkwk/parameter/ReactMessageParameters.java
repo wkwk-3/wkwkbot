@@ -1,16 +1,15 @@
-package wkwk.paramater;
+package wkwk.parameter;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum DeleteTimesParameters {
+public enum ReactMessageParameters {
 
-    SERVER_ID("SERVERID"),
+    SERVER_ID(ServerPropertyParameters.SERVER_ID.getParameter()),
     TEXT_CHANNEL_ID("TEXTCHANNELID"),
-    DELETE_TIME("DELETETIME"),
-    TIME_UNIT("TIMEUNIT");
+    MESSAGE_ID("MESSAGEID");
 
     private final String parameter;
 

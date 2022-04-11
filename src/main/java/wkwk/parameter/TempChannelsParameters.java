@@ -1,14 +1,17 @@
-package wkwk.paramater;
+package wkwk.parameter;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum NamePresetParameters {
+public enum TempChannelsParameters {
 
+    VOICE_CHANNEL_ID("VOICECHANNELID"),
+    TEXT_CHANNEL_ID("TEXTCHANNELID"),
     SERVER_ID(ServerPropertyParameters.SERVER_ID.getParameter()),
-    NAME("NAME");
+    HIDE_BY("HIDEBY"),
+    LOCK_BY("LOCKBY");
 
     private final String parameter;
 

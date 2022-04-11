@@ -89,7 +89,8 @@ public class BotMain extends Thread {
                 .setAuthor(user);
         if (admin) {
             embed.addField("[ADMIN]確認用コマンド一覧", "・`" + prefix + "help` -> コマンド一覧を表示\n" +
-                            "・`" + prefix + "show` -> サーバーの設定状況を確認\n")
+                            "・`" + prefix + "show` -> サーバーの設定状況を確認\n" +
+                            "・`" + prefix + "ping` -> サーバーの回線速度を表示します")
                     .addField("[ADMIN]設定コマンド一覧", "・`" + prefix + "setup` -> 必要なチャンネルとカテゴリを自動作成\n" +
                             "・`" + prefix + "set prefix <1~100文字>` -> コマンドの前に打つ文字を変更\n" +
                             "・`" + prefix + "set vcat <カテゴリID>` -> 一時通話の作成先を変更\n" +
@@ -192,7 +193,6 @@ public class BotMain extends Thread {
                 }
             });
             api.addMessageCreateListener(e -> {
-                long nowTime = new Date().getTime();
                 try {
                     if (e.getMessageAuthor().asUser().isPresent() && !e.getMessageAuthor().asUser().get().isBot() && e.getServer().isPresent()) {
                         User sendUser = e.getMessageAuthor().asUser().get();
@@ -250,7 +250,7 @@ public class BotMain extends Thread {
                                             InetAddress address = InetAddress.getByName("8.8.8.8");
                                             for (int n = 0;n < 5;n++){
                                                 long start = System.currentTimeMillis();
-                                                boolean ena = address.isReachable(5000);
+                                                boolean ena = address.isReachable(100);
                                                 long end = System.currentTimeMillis();
                                                 if (ena) {
                                                     ping += (end - start);
@@ -402,7 +402,6 @@ public class BotMain extends Thread {
                                             logging.setLogType(cmd[cmd.length - 1]);
                                             ArrayList<String> targets;
                                             targets = new ArrayList<>(Arrays.asList(cmd).subList(2, cmd.length - 1));
-                                            System.out.println(targets.size());
                                             if (cmd[cmd.length - 1].equalsIgnoreCase("USER") && targets.size() == 0) {
                                                 logging.setTargetChannelId(channel.getIdAsString());
                                                 records.add(logging);
@@ -843,9 +842,6 @@ public class BotMain extends Thread {
                             }
                         } else if (cmd.equalsIgnoreCase("removeLogging")) {
                             String[] inputs = menuInteraction.getChosenOptions().get(0).getValue().split(" ");
-                            System.out.println(inputs[0]);
-                            System.out.println(inputs[1]);
-                            System.out.println(inputs[2]);
                             dao.deleteLogging(inputs[0],inputs[1],inputs[2]);
                             response = "削除しました";
                         }

@@ -165,7 +165,7 @@ public class BotMain extends Thread {
                         EmbedBuilder embed = new EmbedBuilder()
                                 .setTitle(e.getUser().getName() + " が加入")
                                 .setAuthor(e.getUser())
-                                .addInlineField("@" + e.getUser().getIdAsString(), "<@" + e.getUser().getIdAsString() + ">")
+                                .addInlineField("@" + e.getUser().getIdAsString(), e.getUser().getMentionTag())
                                 .addInlineField("アカウント作成日時", sd.format(date))
                                 .setColor(Color.BLACK);
                         textChannel.sendMessage(embed).join();
@@ -181,7 +181,7 @@ public class BotMain extends Thread {
                         EmbedBuilder embed = new EmbedBuilder()
                                 .setTitle(e.getUser().getName() + "が脱退")
                                 .setAuthor(e.getUser())
-                                .addInlineField("@" + e.getUser().getIdAsString(), "<@" + e.getUser().getIdAsString() + ">")
+                                .addInlineField("@" + e.getUser().getIdAsString(), e.getUser().getMentionTag())
                                 .setColor(Color.BLACK);
                         textChannel.sendMessage(embed).join();
                     }
@@ -957,6 +957,17 @@ public class BotMain extends Thread {
                             String[] inputs = menuInteraction.getChosenOptions().get(0).getValue().split(" ");
                             dao.deleteLogging(inputs[0], inputs[1], inputs[2]);
                             response = "削除しました";
+                        } else if (cmd.equalsIgnoreCase("removeRole")) {
+                            String selectEmoji = menuInteraction.getChosenOptions().get(0).getValue();
+                            ReactionRoleRecord record = dao.getReactAllData(menuInteraction.getServer().get().getIdAsString());
+                            for (String emoji : record.getEmoji()){
+                                if (selectEmoji.equals(emoji)){
+                                    dao.deleteRoles(emoji,record.getMessageID());
+                                    response = emoji + "を削除しました";
+                                    break;
+                                }
+                            }
+
                         }
                         if (response != null) {
                             menuInteraction.getMessage().delete();
@@ -971,7 +982,7 @@ public class BotMain extends Thread {
             api.addButtonClickListener(e -> {
                 MessageBuilder messageBuilder = null;
                 ButtonInteraction buttonInteraction = e.getButtonInteraction();
-                String response = "<@" + buttonInteraction.getUser().getIdAsString() + ">\n";
+                String response = buttonInteraction.getUser().getMentionTag() + "\n";
                 String id = buttonInteraction.getCustomId();
                 if (buttonInteraction.getChannel().isPresent()) {
                     String textChannelId = buttonInteraction.getChannel().get().getIdAsString();
@@ -1126,7 +1137,7 @@ public class BotMain extends Thread {
                                 }
                             }
                         }
-                        if (!response.equalsIgnoreCase("<@" + buttonInteraction.getUser().getIdAsString() + ">\n")) {
+                        if (!response.equalsIgnoreCase(buttonInteraction.getUser().getMentionTag() + "\n")) {
                             e.getInteraction().createImmediateResponder().setFlags(InteractionCallbackDataFlag.EPHEMERAL).setContent(response).respond();
                         } else if (messageBuilder != null) {
                             messageBuilder.send(buttonInteraction.getChannel().get());
@@ -1234,12 +1245,16 @@ public class BotMain extends Thread {
                     autoTweet.stop();
                 } else if (cmd.equalsIgnoreCase("commandCreate")) {
                     wkwkSlashCommand.createCommand();
+                    System.out.println("Command新規作成完了");
                 } else if (cmd.equalsIgnoreCase("AllCommandDelete")) {
                     wkwkSlashCommand.allDeleteCommands();
+                    System.out.println("全削除完了");
                 } else if (cmd.equalsIgnoreCase("AllCommandReload")) {
                     wkwkSlashCommand.allDeleteCommands();
                     wkwkSlashCommand.createCommand();
+                    System.out.println("リロード完了");
                 } else if (cmd.equalsIgnoreCase("commandShow")) {
+                    System.out.println("\n");
                     wkwkSlashCommand.commandShow();
                 }
             }

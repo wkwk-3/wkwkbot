@@ -11,11 +11,6 @@ public class WkwkSlashCommand {
     DiscordApi api;
     public WkwkSlashCommand(DiscordApi api) {
         this.api = api;
-
-        List<SlashCommand> commands = api.getGlobalSlashCommands().join();
-        for (SlashCommand command : commands) {
-            System.out.println(command.getName());
-        }
     }
 
     public void createCommand(){

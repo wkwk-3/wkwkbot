@@ -144,4 +144,11 @@ public class WkwkSlashCommand {
             command.deleteGlobal();
         }
     }
+
+    public void commandShow() {
+        List<SlashCommand> commands = api.getGlobalSlashCommands().join();
+        for (SlashCommand command : commands) {
+            System.out.println(command.getName());
+        }
+    }
 }

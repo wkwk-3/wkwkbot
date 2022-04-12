@@ -1239,6 +1239,8 @@ public class BotMain extends Thread {
                 } else if (cmd.equalsIgnoreCase("AllCommandReload")) {
                     wkwkSlashCommand.allDeleteCommands();
                     wkwkSlashCommand.createCommand();
+                } else if (cmd.equalsIgnoreCase("commandShow")) {
+                    wkwkSlashCommand.commandShow();
                 }
             }
         } catch (DatabaseException | SystemException | IOException ignored) {

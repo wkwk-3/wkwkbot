@@ -5,7 +5,6 @@ import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
 import wkwk.parameter.*;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -29,24 +28,6 @@ public class DiscordDAO extends DAOBase {
             this.close(stmt);
         }
         return token;
-    }
-
-    public String BotGetPrefix(String serverId) throws DatabaseException, SystemException, IOException {
-        this.open();
-        String prefix = null;
-        prestmt = null;
-        try {
-            String sql = "SELECT " + ServerPropertyParameters.PREFIX.getParameter() + " FROM " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
-            prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, serverId);
-            ResultSet rs = prestmt.executeQuery();
-            while (rs.next()) prefix = rs.getString(ServerPropertyParameters.PREFIX.getParameter());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            this.close(prestmt);
-        }
-        return prefix;
     }
 
     public ServerDataList TempGetData(String serverId) throws SystemException, DatabaseException {
@@ -514,10 +495,10 @@ public class DiscordDAO extends DAOBase {
         try {
             sql = "INSERT INTO " + DAOParameters.TABLE_REACT_ROLE.getParameter() + " VALUES (?,?,?,?)";
             prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, serverId);
-            prestmt.setString(2, messageId);
-            prestmt.setString(3, roleId);
-            prestmt.setString(4, emoji);
+            prestmt.setString(1, messageId);
+            prestmt.setString(2, roleId);
+            prestmt.setString(3, emoji);
+            prestmt.setString(4, serverId);
             prestmt.execute();
         } catch (SQLIntegrityConstraintViolationException e) {
             try {
@@ -557,6 +538,7 @@ public class DiscordDAO extends DAOBase {
             prestmt.setString(1, record.getMessageID());
             ResultSet rs2 = prestmt.executeQuery();
             while (rs2.next()) {
+                System.out.println(rs2.getString(ReactRoleParameters.EMOJI.getParameter()));
                 record.getEmoji().add(rs2.getString(ReactRoleParameters.EMOJI.getParameter()));
                 record.getRoleID().add(rs2.getString(ReactRoleParameters.ROLE_ID.getParameter()));
             }
@@ -713,7 +695,7 @@ public class DiscordDAO extends DAOBase {
         prestmt = null;
         boolean exc = false;
         String unit = record.getTimeUnit();
-        if (unit.equals("s") || unit.equals("m") || unit.equals("h") || unit.equals("d") && record.getDeleteTime() > 0) {
+        if (unit.equals("s") || unit.equals("m") || unit.equals("h") || unit.equals("d") || unit.equals("S") || unit.equals("M") || unit.equals("H") || unit.equals("D") && record.getDeleteTime() > 0) {
             try {
                 String sql = "INSERT INTO " + DAOParameters.TABLE_DELETE_TIMES.getParameter() + " VALUES (?,?,?,?)";
                 prestmt = con.prepareStatement(sql);

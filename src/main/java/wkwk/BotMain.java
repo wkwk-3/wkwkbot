@@ -31,6 +31,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -108,21 +110,21 @@ public class BotMain extends Thread {
                             "・`" + prefix + "ping` -> サーバーの回線速度を表示します")
                     .addField("[ADMIN]設定コマンド一覧", "・`" + prefix + "setup` -> 必要なチャンネルとカテゴリを自動作成\n" +
                             "・`" + prefix + "set prefix <1~100文字>` -> コマンドの前に打つ文字を変更\n" +
-                            "・`" + prefix + "set vcat <カテゴリID>` -> 一時通話の作成先を変更\n" +
-                            "・`" + prefix + "set tcat <カテゴリID>` -> 一時チャットの作成先を変更\n" +
-                            "・`" + prefix + "set first <チャンネルID>` -> 通話作成用チャンネルを変更\n" +
-                            "・`" + prefix + "set men <チャンネルID>` -> 募集送信チャンネル変更\n" +
-                            "・`" + prefix + "set enable <true or false>`↓\n　一時通話チャンネル作成切替\n" +
-                            "・`" + prefix + "set text <true or false>`↓\n　一時テキストチャンネル作成切替\n" +
+                            "・`" + prefix + "set vcat <カテゴリ>` -> 一時通話の作成先を変更\n" +
+                            "・`" + prefix + "set tcat <カテゴリ>` -> 一時チャットの作成先を変更\n" +
+                            "・`" + prefix + "set first <チャンネル>` -> 通話作成用チャンネルを変更\n" +
+                            "・`" + prefix + "set men <チャンネル>` -> 募集送信チャンネル変更\n" +
+                            "・`" + prefix + "set enable temp <true or false>`↓\n　一時通話チャンネル作成切替\n" +
+                            "・`" + prefix + "set enable text <true or false>`↓\n　一時テキストチャンネル作成切替\n" +
                             "・`" + prefix + "set size <0~99の数字>` -> 一時通話初期人数変更\n" +
-                            "・`" + prefix + "set role <ロールID> <絵文字>`↓\n　リアクションロールの付与ロールと絵文字を変更\n" +
-                            "・`" + prefix + "set mess <メッセージID> <チャンネルID>`↓\n　リアクションロールの対象メッセージを変更\n" +
+                            "・`" + prefix + "set role <ロール> <絵文字>`↓\n　リアクションロールの付与ロールと絵文字を変更\n" +
+                            "・`" + prefix + "set mess <メッセージID> <チャンネル>`↓\n　リアクションロールの対象メッセージを変更\n" +
                             "・`" + prefix + "set namepreset <100文字以内>`->　チャンネルネーム候補を追加\n" +
-                            "・`" + prefix + "start delete <削除までの時間><単位>`↓\nコマンドを打ったチャンネルで自動削除を有効化します \n単位には s m h d が使用できます\n" +
-                            "・`" + prefix + "remove role <絵文字>`↓\n　リアクションロールの絵文字を削除\n" +
+                            "・`" + prefix + "remove role`↓\n　リアクションロールを選んで削除\n" +
                             "・`" + prefix + "remove namepreset`->　名前を選んで削除\n" +
+                            "・`" + prefix + "start delete <削除までの時間> <単位>`↓\nコマンドを打ったチャンネルで自動削除を有効化します \n単位には s m h d が使用できます\n" +
                             "・`" + prefix + "stop delete`->　コマンドを打ったチャンネルの自動削除を停止します\n")
-                    .addField("[ADMIN]ログ設定コマンド一覧", "・`" + prefix + "set logging CHAT <ログを保存したいチャンネルID>`↓\n　入力したチャンネルに対象のチャンネルで消された\n　メッセージのログを出力します\n" +
+                    .addField("[ADMIN]ログ設定コマンド一覧", "・`" + prefix + "set logging CHAT <ログを保存したいチャンネル>`↓\n　入力したチャンネルに対象のチャンネルで消された\n　メッセージのログを出力します\n" +
                             "・`" + prefix + "set logging USER`↓\n　入力したチャンネルにサーバーの\n　ユーザー入退室ログを出力します\n" +
                             "・`" + prefix + "remove logging` -> 選択したログ設定を削除します")
                     .addField("[ADMIN]募集テンプレ設定", "・`" + prefix + "set stereo <テンプレ内容>` : テンプレ内で使える置換！\n" +
@@ -132,7 +134,7 @@ public class BotMain extends Thread {
                             "　　-`&everyone&` : Everyoneメンションに置換\n" +
                             "　　-`&here&` : Hereメンションに置換\n" +
                             "　　-`/n` : 改行")
-                    .addField("[ADMIN]ユーティリティ", "・`" + prefix + "mess <文字><画像>` -> メッセージをBOTに送信させなおす\n");
+                    .addField("[ADMIN]ユーティリティ", "・`" + prefix + "mess <文字>` -> メッセージをBOTに送信させなおす\n");
 
 
         }
@@ -346,17 +348,22 @@ public class BotMain extends Thread {
                                                 }
                                                 break;
                                             case "size":
-                                                if (interaction.getOptionLongValueByName("size").isPresent()) {
+                                                System.out.println("1");
+                                                if (interaction.getOptionByIndex(0).isPresent() && interaction.getOptionByIndex(0).get().getOptionLongValueByName("num").isPresent()) {
+                                                    System.out.println("2");
                                                     try {
-                                                        int size = Math.toIntExact(interaction.getOptionLongValueByName("size").get());
+                                                        int size = Math.toIntExact(interaction.getOptionByIndex(0).get().getOptionLongValueByName("num").get());
                                                         if (0 <= size && size < 100) {
+                                                            System.out.println("3");
                                                             dao.BotSetDate("size", serverId, Integer.toString(size));
                                                             resPonseString = "初期人数制限を" + size + "人に設定しました";
                                                         } else {
+                                                            System.out.println("4");
                                                             resPonseString = "0~99の範囲で入力して下さい";
                                                         }
                                                         response = true;
                                                     } catch (ArithmeticException ex) {
+                                                        System.out.println("5");
                                                         resPonseString = "0~99の範囲で入力して下さい";
                                                         response = true;
                                                     }
@@ -402,7 +409,7 @@ public class BotMain extends Thread {
                                                     }
                                                 }
                                                 break;
-                                            case "namePreset":
+                                            case "namepreset":
                                                 if (interaction.getOptionByIndex(0).isPresent() && interaction.getOptionByIndex(0).get().getOptionStringValueByName("name").isPresent()) {
                                                     String name = interaction.getOptionByIndex(0).get().getOptionStringValueByName("name").get();
                                                     if (name.length() <= 100) {
@@ -576,12 +583,20 @@ public class BotMain extends Thread {
                                     break;
                                 case "mess":
                                     if (interaction.getOptionStringValueByName("text").isPresent()) {
-                                        String[] split = interaction.getOptionStringValueByName("text").get().split(" ");
+                                        String[] splitMessage = interaction.getOptionStringValueByName("text").get().split(" ");
                                         StringBuilder message = new StringBuilder();
-                                        for (String simple : split) {
+                                        for (String simple : splitMessage) {
                                             message.append(simple).append("\n");
                                         }
                                         resPonseMessage = new MessageBuilder().setContent(message.toString());
+                                        String[] splitUrls = interaction.getOptionStringValueByName("url").get().split(" ");
+                                        for (String url: splitUrls){
+                                            try {
+                                                resPonseMessage.addAttachment(new URL(url));
+                                            } catch (MalformedURLException ex) {
+                                                resPonseString += url + "は画像URLではない";
+                                            }
+                                        }
                                         resPonseString = "送信代行成功";
                                         response = true;
                                     }
@@ -751,7 +766,6 @@ public class BotMain extends Thread {
                                 if (data.getTextBy()) {
                                     ServerTextChannel text = new ServerTextChannelBuilder(server).setName(defaultName).setCategory(tcat).addPermissionOverwrite(server.getEveryoneRole(), new PermissionsBuilder().setAllDenied().build()).create().get();
                                     list.setTextID(text.getIdAsString());
-                                    String prefix = data.getPrefix();
                                     new MessageBuilder().setContent("通話名前変更、通話最大人数変更、募集メッセージ送信はスラッシュコマンドになりました\n").addComponents(
                                             ActionRow.of(Button.success("claim", "管理権限獲得"),
                                                     Button.success("hide", "非表示切替"),
@@ -1149,15 +1163,15 @@ public class BotMain extends Thread {
             api.addServerJoinListener(e -> {
                 try {
                     if (e.getServer().getSystemChannel().isPresent()) {
-                        e.getServer().getSystemChannel().get().sendMessage(">setup を打つと\nチャンネルとカテゴリを作成されます");
+                        e.getServer().getSystemChannel().get().sendMessage("/setup を打つと\nチャンネルとカテゴリを作成されます");
                         e.getServer().getSystemChannel().get().sendMessage("困ったことがありましたら、下記リンクからサポートサーバーに入り、お聞きください。\nhttps://discord.gg/6Z7jabh983");
                     } else if (e.getServer().getOwner().isPresent()) {
-                        e.getServer().getOwner().get().sendMessage(">setup を打つと\nチャンネルとカテゴリを作成されます");
+                        e.getServer().getOwner().get().sendMessage("/setup を打つと\nチャンネルとカテゴリを作成されます");
                         e.getServer().getOwner().get().sendMessage("困ったことがありましたら、下記リンクからサポートサーバーに入り、お聞きください。\nhttps://discord.gg/6Z7jabh983").join();
                     } else {
                         for (Channel channel : e.getServer().getChannels()) {
                             if (channel.asServerTextChannel().isPresent()) {
-                                channel.asServerTextChannel().get().sendMessage(">setup を打つと\nチャンネルとカテゴリを作成されます");
+                                channel.asServerTextChannel().get().sendMessage("/setup を打つと\nチャンネルとカテゴリを作成されます");
                                 channel.asServerTextChannel().get().sendMessage("困ったことがありましたら、下記リンクからサポートサーバーに入り、お聞きください。\nhttps://discord.gg/6Z7jabh983").join();
                                 break;
                             }

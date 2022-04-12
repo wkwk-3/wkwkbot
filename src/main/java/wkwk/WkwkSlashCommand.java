@@ -50,9 +50,9 @@ public class WkwkSlashCommand {
                                                 )),
                                         SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "size", "通話初期制限人数変更",
                                                 Collections.singletonList(
-                                                        SlashCommandOption.create(SlashCommandOptionType.LONG, "size", "人数", true)
+                                                        SlashCommandOption.create(SlashCommandOptionType.LONG, "num", "人数", true)
                                                 )),
-                                        SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "role", "通話制限人数変更",
+                                        SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "role", "リアクションロール",
                                                 Arrays.asList(
                                                         SlashCommandOption.create(SlashCommandOptionType.ROLE, "role", "付与ロール", true),
                                                         SlashCommandOption.create(SlashCommandOptionType.STRING, "emoji", "対象絵文字", true)

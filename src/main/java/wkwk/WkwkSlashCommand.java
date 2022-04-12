@@ -131,6 +131,24 @@ public class WkwkSlashCommand {
                                 SlashCommandOption.create(SlashCommandOptionType.STRING, "text", "募集内容")
                         )
                 ).createGlobal(api).join();
+        SlashCommand nameS =
+                SlashCommand.with("n", "チャンネル名前変更",
+                        Collections.singletonList(
+                                SlashCommandOption.create(SlashCommandOptionType.STRING, "name", "チャンネル名")
+                        )
+                ).createGlobal(api).join();
+        SlashCommand sizeS =
+                SlashCommand.with("s", "チャンネル人数変更",
+                        Collections.singletonList(
+                                SlashCommandOption.create(SlashCommandOptionType.LONG, "size", "チャンネル最大人数")
+                        )
+                ).createGlobal(api).join();
+        SlashCommand menS =
+                SlashCommand.with("m", "チャンネル募集送信",
+                        Collections.singletonList(
+                                SlashCommandOption.create(SlashCommandOptionType.STRING, "text", "募集内容")
+                        )
+                ).createGlobal(api).join();
     }
 
     public void allDeleteCommands() {

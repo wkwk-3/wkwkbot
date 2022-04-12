@@ -18,9 +18,7 @@ import org.javacord.api.entity.permission.PermissionsBuilder;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
-import org.javacord.api.interaction.ButtonInteraction;
-import org.javacord.api.interaction.SelectMenuInteraction;
-import org.javacord.api.interaction.SlashCommandInteraction;
+import org.javacord.api.interaction.*;
 import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import wkwk.dao.DiscordDAO;
 import wkwk.exception.DatabaseException;
@@ -35,6 +33,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class BotMain extends Thread {
@@ -43,6 +42,7 @@ public class BotMain extends Thread {
         ServerDataList tempData = null;
         String bys = null;
         StringBuilder reacts = null;
+
         try {
             tempData = dao.TempGetData(serverId);
             ReactionRoleRecord react = dao.getReactAllData(tempData.getServer());
@@ -597,6 +597,19 @@ public class BotMain extends Thread {
                                     }
                                     break;
                             }
+                        } else {
+                            switch (cmd) {
+                                case "setup":
+                                case "set":
+                                case "remove":
+                                case "start":
+                                case "stop":
+                                case "show":
+                                case "mess":
+                                    resPonseString = new StringBuilder("そのコマンドは管理者用です");
+                                    response = true;
+                                    break;
+                            }
                         }
                         switch (cmd) {
                             case "ping":
@@ -624,12 +637,12 @@ public class BotMain extends Thread {
                                 response = true;
                                 break;
                         }
-                        if (cmd.equalsIgnoreCase("name") || cmd.equalsIgnoreCase("size") || cmd.equalsIgnoreCase("men")) {
+                        if (cmd.equalsIgnoreCase("name") || cmd.equalsIgnoreCase("size") || cmd.equalsIgnoreCase("men") || cmd.equalsIgnoreCase("n") || cmd.equalsIgnoreCase("s") || cmd.equalsIgnoreCase("m")) {
                             ChannelList list = dao.TempGetChannelList(channel.getIdAsString(), "t");
                             if (sendUser.getConnectedVoiceChannel(server).isPresent() && list.getVoiceID() != null) {
                                 String requestVoiceId = dao.TempGetChannelList(channel.getIdAsString(), "t").getVoiceID();
                                 if (requestVoiceId.equalsIgnoreCase(sendUser.getConnectedVoiceChannel(server).get().getIdAsString()) && api.getServerVoiceChannelById(requestVoiceId).isPresent() && api.getServerVoiceChannelById(requestVoiceId).get().getEffectivePermissions(sendUser).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
-                                    if (cmd.equalsIgnoreCase("name") && interaction.getOptionStringValueByName("name").isPresent()) {//ここから
+                                    if (cmd.equalsIgnoreCase("n") || cmd.equalsIgnoreCase("name") && interaction.getOptionStringValueByName("name").isPresent()) {
                                         String name = interaction.getOptionStringValueByName("name").get();
                                         if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
                                             api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setName(name).update();
@@ -641,7 +654,7 @@ public class BotMain extends Thread {
                                             resPonseString = new StringBuilder("NAME更新完了");
                                             response = true;
                                         }
-                                    } else if (cmd.equalsIgnoreCase("size") && interaction.getOptionLongValueByName("size").isPresent()) {
+                                    } else if (cmd.equalsIgnoreCase("s") || cmd.equalsIgnoreCase("size") && interaction.getOptionLongValueByName("size").isPresent()) {
                                         int size = Math.toIntExact(interaction.getOptionLongValueByName("size").get());
                                         if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent() && size >= 0 && size < 100) {
                                             api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setUserLimit(size).update();
@@ -653,7 +666,7 @@ public class BotMain extends Thread {
                                         } else if (size > 99) {
                                             resPonseString = new StringBuilder("99 以内で入力してください");
                                         }
-                                    } else if (cmd.equalsIgnoreCase("men") && interaction.getOptionStringValueByName("text").isPresent()) {
+                                    } else if (cmd.equalsIgnoreCase("m") || cmd.equalsIgnoreCase("men") && interaction.getOptionStringValueByName("text").isPresent()) {
                                         StringBuilder mentionText = new StringBuilder();
                                         mentionText.append(interaction.getOptionStringValueByName("text").get()).append("\n");
                                         ServerDataList serverList = dao.TempGetData(serverId);
@@ -1157,15 +1170,16 @@ public class BotMain extends Thread {
             });
 
             api.addServerJoinListener(e -> {
+                Server server = e.getServer();
                 try {
-                    if (e.getServer().getSystemChannel().isPresent()) {
-                        e.getServer().getSystemChannel().get().sendMessage("/setup を打つと\nチャンネルとカテゴリを作成されます");
-                        e.getServer().getSystemChannel().get().sendMessage("困ったことがありましたら、下記リンクからサポートサーバーに入り、お聞きください。\nhttps://discord.gg/6Z7jabh983");
-                    } else if (e.getServer().getOwner().isPresent()) {
-                        e.getServer().getOwner().get().sendMessage("/setup を打つと\nチャンネルとカテゴリを作成されます");
-                        e.getServer().getOwner().get().sendMessage("困ったことがありましたら、下記リンクからサポートサーバーに入り、お聞きください。\nhttps://discord.gg/6Z7jabh983").join();
+                    if (server.getSystemChannel().isPresent()) {
+                        server.getSystemChannel().get().sendMessage("/setup を打つと\nチャンネルとカテゴリを作成されます");
+                        server.getSystemChannel().get().sendMessage("困ったことがありましたら、下記リンクからサポートサーバーに入り、お聞きください。\nhttps://discord.gg/6Z7jabh983");
+                    } else if (server.getOwner().isPresent()) {
+                        server.getOwner().get().sendMessage("/setup を打つと\nチャンネルとカテゴリを作成されます");
+                        server.getOwner().get().sendMessage("困ったことがありましたら、下記リンクからサポートサーバーに入り、お聞きください。\nhttps://discord.gg/6Z7jabh983").join();
                     } else {
-                        for (Channel channel : e.getServer().getChannels()) {
+                        for (Channel channel : server.getChannels()) {
                             if (channel.asServerTextChannel().isPresent()) {
                                 channel.asServerTextChannel().get().sendMessage("/setup を打つと\nチャンネルとカテゴリを作成されます");
                                 channel.asServerTextChannel().get().sendMessage("困ったことがありましたら、下記リンクからサポートサーバーに入り、お聞きください。\nhttps://discord.gg/6Z7jabh983").join();
@@ -1173,8 +1187,7 @@ public class BotMain extends Thread {
                             }
                         }
                     }
-
-                    dao.TempNewServer(e.getServer().getIdAsString());
+                    dao.TempNewServer(server.getIdAsString());
                 } catch (DatabaseException ignored) {
                 }
                 api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");

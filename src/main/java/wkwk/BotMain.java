@@ -752,9 +752,7 @@ public class BotMain extends Thread {
                                     ServerTextChannel text = new ServerTextChannelBuilder(server).setName(defaultName).setCategory(tcat).addPermissionOverwrite(server.getEveryoneRole(), new PermissionsBuilder().setAllDenied().build()).create().get();
                                     list.setTextID(text.getIdAsString());
                                     String prefix = data.getPrefix();
-                                    new MessageBuilder().setContent("・`" + prefix + "name <文字>` か `" + prefix + "n <文字>` -> チャンネルの名前を変更\n" +
-                                            "・`" + prefix + "size <数字>` か `" + prefix + "s <数字>` -> 通話参加人数を変更\n" +
-                                            "・`" + prefix + "men <募集内容>` か `" + prefix + "m <募集内容>` -> 募集チャットの内容を書いて送信\n").addComponents(
+                                    new MessageBuilder().setContent("通話名前変更、通話最大人数変更、募集メッセージ送信はスラッシュコマンドになりました\n").addComponents(
                                             ActionRow.of(Button.success("claim", "管理権限獲得"),
                                                     Button.success("hide", "非表示切替"),
                                                     Button.success("lock", "参加許可切替"),

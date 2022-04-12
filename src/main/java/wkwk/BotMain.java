@@ -214,7 +214,7 @@ public class BotMain extends Thread {
                 try {
                     SlashCommandInteraction interaction = e.getSlashCommandInteraction();
                     boolean response = false;
-                    String resPonseString = "";
+                    StringBuilder resPonseString = new StringBuilder();
                     MessageBuilder resPonseMessage = null;
                     TextChannel channel = null;
                     String cmd;
@@ -248,7 +248,7 @@ public class BotMain extends Thread {
                                         api.getServerVoiceChannelById(old.getFstChannel()).get().delete();
                                     if (api.getServerTextChannelById(old.getMentionChannel()).isPresent())
                                         api.getServerTextChannelById(old.getMentionChannel()).get().delete();
-                                    resPonseString = "セットアップ完了";
+                                    resPonseString = new StringBuilder("セットアップ完了");
                                     response = true;
                                     break;
                                 case "set":
@@ -261,12 +261,12 @@ public class BotMain extends Thread {
                                                     if (api.getChannelCategoryById(category).isPresent()) {
                                                         if (api.getChannelCategoryById(category).get().getServer().getIdAsString().equalsIgnoreCase(serverId)) {
                                                             dao.BotSetDate("v", serverId, category);
-                                                            resPonseString = "VoiceCategory更新完了";
+                                                            resPonseString = new StringBuilder("VoiceCategory更新完了");
                                                         } else {
-                                                            resPonseString = "このサーバーのカテゴリを入力してください";
+                                                            resPonseString = new StringBuilder("このサーバーのカテゴリを入力してください");
                                                         }
                                                     } else {
-                                                        resPonseString = "カテゴリを入力してください";
+                                                        resPonseString = new StringBuilder("カテゴリを入力してください");
                                                     }
                                                     response = true;
                                                 }
@@ -277,12 +277,12 @@ public class BotMain extends Thread {
                                                     if (api.getChannelCategoryById(category).isPresent()) {
                                                         if (api.getChannelCategoryById(category).get().getServer().getIdAsString().equalsIgnoreCase(serverId)) {
                                                             dao.BotSetDate("t", serverId, category);
-                                                            resPonseString = "TextCategory更新完了";
+                                                            resPonseString = new StringBuilder("TextCategory更新完了");
                                                         } else {
-                                                            resPonseString = "このサーバーのカテゴリを入力してください";
+                                                            resPonseString = new StringBuilder("このサーバーのカテゴリを入力してください");
                                                         }
                                                     } else {
-                                                        resPonseString = "カテゴリを入力してください";
+                                                        resPonseString = new StringBuilder("カテゴリを入力してください");
                                                     }
                                                     response = true;
                                                 }
@@ -293,12 +293,12 @@ public class BotMain extends Thread {
                                                     if (api.getServerVoiceChannelById(voiceChannel).isPresent()) {
                                                         if (api.getServerVoiceChannelById(voiceChannel).get().getServer().getIdAsString().equalsIgnoreCase(serverId)) {
                                                             dao.BotSetDate("f", serverId, voiceChannel);
-                                                            resPonseString = "FirstChannel更新完了";
+                                                            resPonseString = new StringBuilder("FirstChannel更新完了");
                                                         } else {
-                                                            resPonseString = "このサーバーの通話チャンネルを入力してください";
+                                                            resPonseString = new StringBuilder("このサーバーの通話チャンネルを入力してください");
                                                         }
                                                     } else {
-                                                        resPonseString = "通話チャンネルを入力してください";
+                                                        resPonseString = new StringBuilder("通話チャンネルを入力してください");
                                                     }
                                                     response = true;
                                                 }
@@ -309,12 +309,12 @@ public class BotMain extends Thread {
                                                     if (api.getServerTextChannelById(textChannel).isPresent()) {
                                                         if (api.getServerTextChannelById(textChannel).get().getServer().getIdAsString().equalsIgnoreCase(serverId)) {
                                                             dao.BotSetDate("m", serverId, textChannel);
-                                                            resPonseString = "メンション送信チャンネル更新完了";
+                                                            resPonseString = new StringBuilder("メンション送信チャンネル更新完了");
                                                         } else {
-                                                            resPonseString = "このサーバーのテキストチャンネルを入力してください";
+                                                            resPonseString = new StringBuilder("このサーバーのテキストチャンネルを入力してください");
                                                         }
                                                     } else {
-                                                        resPonseString = "テキストチャンネルを入力してください";
+                                                        resPonseString = new StringBuilder("テキストチャンネルを入力してください");
                                                     }
                                                     response = true;
                                                 }
@@ -327,20 +327,20 @@ public class BotMain extends Thread {
                                                         case "temp":
                                                             if (enable) {
                                                                 dao.BotSetDate("tmpby", serverId, "1");
-                                                                resPonseString = "通話作成を有効化しました";
+                                                                resPonseString = new StringBuilder("通話作成を有効化しました");
                                                             } else {
                                                                 dao.BotSetDate("tmpby", serverId, "0");
-                                                                resPonseString = "通話作成を無効化しました";
+                                                                resPonseString = new StringBuilder("通話作成を無効化しました");
                                                             }
                                                             response = true;
                                                             break;
                                                         case "text":
                                                             if (enable) {
                                                                 dao.BotSetDate("txtby", serverId, "1");
-                                                                resPonseString = "チャット作成を有効化しました";
+                                                                resPonseString = new StringBuilder("チャット作成を有効化しました");
                                                             } else {
                                                                 dao.BotSetDate("txtby", serverId, "0");
-                                                                resPonseString = "チャット作成を無効化しました";
+                                                                resPonseString = new StringBuilder("チャット作成を無効化しました");
                                                             }
                                                             response = true;
                                                             break;
@@ -348,23 +348,18 @@ public class BotMain extends Thread {
                                                 }
                                                 break;
                                             case "size":
-                                                System.out.println("1");
                                                 if (interaction.getOptionByIndex(0).isPresent() && interaction.getOptionByIndex(0).get().getOptionLongValueByName("num").isPresent()) {
-                                                    System.out.println("2");
                                                     try {
                                                         int size = Math.toIntExact(interaction.getOptionByIndex(0).get().getOptionLongValueByName("num").get());
                                                         if (0 <= size && size < 100) {
-                                                            System.out.println("3");
                                                             dao.BotSetDate("size", serverId, Integer.toString(size));
-                                                            resPonseString = "初期人数制限を" + size + "人に設定しました";
+                                                            resPonseString = new StringBuilder("初期人数制限を" + size + "人に設定しました");
                                                         } else {
-                                                            System.out.println("4");
-                                                            resPonseString = "0~99の範囲で入力して下さい";
+                                                            resPonseString = new StringBuilder("0~99の範囲で入力して下さい");
                                                         }
                                                         response = true;
                                                     } catch (ArithmeticException ex) {
-                                                        System.out.println("5");
-                                                        resPonseString = "0~99の範囲で入力して下さい";
+                                                        resPonseString = new StringBuilder("0~99の範囲で入力して下さい");
                                                         response = true;
                                                     }
                                                 }
@@ -385,7 +380,7 @@ public class BotMain extends Thread {
                                                     if (!EmojiManager.isEmoji(emoji)) {
                                                         str.append(emoji).append("は絵文字ではない\n");
                                                     }
-                                                    resPonseString = str.toString();
+                                                    resPonseString = new StringBuilder(str.toString());
                                                     response = true;
                                                 }
                                                 break;
@@ -395,16 +390,16 @@ public class BotMain extends Thread {
                                                     ServerChannel target = interaction.getOptionByIndex(0).get().getOptionChannelValueByName("textChannel").get();
                                                     if (api.getServerTextChannelById(target.getId()).isPresent() && api.getServerTextChannelById(target.getId()).get().getServer().getIdAsString().equalsIgnoreCase(serverId) && api.getMessageById(messageId, api.getServerTextChannelById(target.getId()).get()).join().getServer().isPresent()) {
                                                         dao.setReactMessageData(serverId, target.getIdAsString(), messageId);
-                                                        resPonseString = "メッセージ設定完了";
+                                                        resPonseString = new StringBuilder("メッセージ設定完了");
                                                         response = true;
                                                     } else if (!api.getServerTextChannelById(target.getId()).isPresent()) {
-                                                        resPonseString = "チャンネルIDを入力してください";
+                                                        resPonseString = new StringBuilder("チャンネルIDを入力してください");
                                                         response = true;
                                                     } else if (!api.getServerTextChannelById(target.getId()).get().getServer().getIdAsString().equalsIgnoreCase(serverId)) {
-                                                        resPonseString = "このサーバーのチャンネルIDを入力してください";
+                                                        resPonseString = new StringBuilder("このサーバーのチャンネルIDを入力してください");
                                                         response = true;
                                                     } else if (!api.getMessageById(messageId, api.getServerTextChannelById(target.getId()).get()).join().getServer().isPresent()) {
-                                                        resPonseString = "このサーバーのメッセージIDを入力してください";
+                                                        resPonseString = new StringBuilder("このサーバーのメッセージIDを入力してください");
                                                         response = true;
                                                     }
                                                 }
@@ -414,9 +409,9 @@ public class BotMain extends Thread {
                                                     String name = interaction.getOptionByIndex(0).get().getOptionStringValueByName("name").get();
                                                     if (name.length() <= 100) {
                                                         dao.addNamePreset(serverId, name);
-                                                        resPonseString = "名前変更候補を追加しました";
+                                                        resPonseString = new StringBuilder("名前変更候補を追加しました");
                                                     } else {
-                                                        resPonseString = "100文字以内にしてください。";
+                                                        resPonseString = new StringBuilder("100文字以内にしてください。");
                                                     }
                                                     response = true;
                                                 }
@@ -434,7 +429,7 @@ public class BotMain extends Thread {
                                                         logging.setTargetChannelId(channel.getIdAsString());
                                                         records.add(logging);
                                                         dao.addLogging(records);
-                                                        resPonseString = "ユーザー加入・脱退履歴を設定";
+                                                        resPonseString = new StringBuilder("ユーザー加入・脱退履歴を設定");
                                                         response = true;
                                                     } else if (subCommand.equalsIgnoreCase("CHAT") && interaction.getOptionByIndex(0).get().getOptionByIndex(0).get().getOptionChannelValueByName("textChannel").isPresent()) {
                                                         targets = new ArrayList<>();
@@ -444,7 +439,7 @@ public class BotMain extends Thread {
                                                             records.add(logging);
                                                         }
                                                         dao.addLogging(records);
-                                                        resPonseString = "チャット履歴を設定";
+                                                        resPonseString = new StringBuilder("チャット履歴を設定");
                                                         response = true;
                                                     }
                                                 }
@@ -453,7 +448,7 @@ public class BotMain extends Thread {
                                                 if (interaction.getOptionByIndex(0).isPresent() && interaction.getOptionByIndex(0).get().getOptionStringValueByName("template").isPresent()) {
                                                     String template = interaction.getOptionByIndex(0).get().getOptionStringValueByName("template").get();
                                                     dao.BotSetDate("stereo", serverId, template);
-                                                    resPonseString = "募集テンプレを編集しました\n" + template;
+                                                    resPonseString = new StringBuilder("募集テンプレを編集しました\n" + template);
                                                     response = true;
                                                 }
                                                 break;
@@ -474,9 +469,9 @@ public class BotMain extends Thread {
                                                     resPonseMessage = new MessageBuilder()
                                                             .setContent("リアクションロール削除")
                                                             .addComponents(ActionRow.of(roleMenuBuilder.build()));
-                                                    resPonseString = "選択形式を送信";
+                                                    resPonseString = new StringBuilder("選択形式を送信");
                                                 } else {
-                                                    resPonseString = "候補がありません";
+                                                    resPonseString = new StringBuilder("候補がありません");
                                                 }
                                                 response = true;
                                                 break;
@@ -490,9 +485,9 @@ public class BotMain extends Thread {
                                                     resPonseMessage = new MessageBuilder()
                                                             .setContent("通話名前削除")
                                                             .addComponents(ActionRow.of(nameMenuBuilder.build()));
-                                                    resPonseString = "選択形式を送信";
+                                                    resPonseString = new StringBuilder("選択形式を送信");
                                                 } else {
-                                                    resPonseString = "候補がありません";
+                                                    resPonseString = new StringBuilder("候補がありません");
                                                 }
                                                 response = true;
                                                 break;
@@ -512,9 +507,9 @@ public class BotMain extends Thread {
                                                     resPonseMessage = new MessageBuilder()
                                                             .setContent("履歴チャンネル削除")
                                                             .addComponents(ActionRow.of(selectMenuBuilder.build()));
-                                                    resPonseString = "選択形式を送信";
+                                                    resPonseString = new StringBuilder("選択形式を送信");
                                                 } else {
-                                                    resPonseString = "候補がありません";
+                                                    resPonseString = new StringBuilder("候補がありません");
                                                 }
                                                 response = true;
                                                 break;
@@ -535,32 +530,32 @@ public class BotMain extends Thread {
                                                 times.setDeleteTime(time);
                                                 times.setTimeUnit(unit);
                                                 if (dao.addDeleteTimes(times)) {
-                                                    resPonseString = Integer.toString(time);
+                                                    resPonseString = new StringBuilder(Integer.toString(time));
                                                     switch (unit) {
                                                         case "s":
                                                         case "S":
-                                                            resPonseString += "秒";
+                                                            resPonseString.append("秒");
                                                             break;
                                                         case "m":
                                                         case "M":
-                                                            resPonseString += "分";
+                                                            resPonseString.append("分");
                                                             break;
                                                         case "h":
                                                         case "H":
-                                                            resPonseString += "時間";
+                                                            resPonseString.append("時間");
                                                             break;
                                                         case "d":
                                                         case "D":
-                                                            resPonseString += "日";
+                                                            resPonseString.append("日");
                                                             break;
                                                     }
-                                                    resPonseString += "後削除に設定しました";
+                                                    resPonseString.append("後削除に設定しました");
                                                 } else {
-                                                    resPonseString = "設定に失敗しました";
+                                                    resPonseString = new StringBuilder("設定に失敗しました");
                                                 }
                                                 response = true;
                                             } catch (ArithmeticException ex) {
-                                                resPonseString = "桁数が多すぎます";
+                                                resPonseString = new StringBuilder("桁数が多すぎます");
                                                 response = true;
                                             }
                                         }
@@ -571,18 +566,18 @@ public class BotMain extends Thread {
                                         String subCommandGroup = interaction.getOptionByIndex(0).get().getName();
                                         if ("delete".equals(subCommandGroup)) {
                                             dao.removeDeleteTimes(channel.getIdAsString());
-                                            resPonseString = "自動削除を停止しました";
+                                            resPonseString = new StringBuilder("自動削除を停止しました");
                                             response = true;
                                         }
                                     }
                                     break;
                                 case "show":
                                     sendUser.sendMessage(createShow(server.getName(), serverId, sendUser, dao, api));
-                                    resPonseString = "個チャに送信";
+                                    resPonseString = new StringBuilder("個チャに送信");
                                     response = true;
                                     break;
                                 case "mess":
-                                    if (interaction.getOptionStringValueByName("text").isPresent()) {
+                                    if (interaction.getOptionStringValueByName("text").isPresent() && interaction.getOptionStringValueByName("url").isPresent()) {
                                         String[] splitMessage = interaction.getOptionStringValueByName("text").get().split(" ");
                                         StringBuilder message = new StringBuilder();
                                         for (String simple : splitMessage) {
@@ -594,10 +589,10 @@ public class BotMain extends Thread {
                                             try {
                                                 resPonseMessage.addAttachment(new URL(url));
                                             } catch (MalformedURLException ex) {
-                                                resPonseString += url + "は画像URLではない";
+                                                resPonseString.append(url).append("は画像URLではない");
                                             }
                                         }
-                                        resPonseString = "送信代行成功";
+                                        resPonseString = new StringBuilder("送信代行成功");
                                         response = true;
                                     }
                                     break;
@@ -620,12 +615,12 @@ public class BotMain extends Thread {
                                 } catch (IOException ex) {
                                     ex.printStackTrace();
                                 }
-                                resPonseString = ping + "ms";
+                                resPonseString = new StringBuilder(ping + "ms");
                                 response = true;
                                 break;
                             case "help":
                                 sendUser.sendMessage(createHelp(server.getName(), sendUser, isAdmin));
-                                resPonseString = "個チャに送信";
+                                resPonseString = new StringBuilder("個チャに送信");
                                 response = true;
                                 break;
                         }
@@ -638,25 +633,25 @@ public class BotMain extends Thread {
                                         String name = interaction.getOptionStringValueByName("name").get();
                                         if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
                                             api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setName(name).update();
-                                            resPonseString = "NAME更新完了";
+                                            resPonseString = new StringBuilder("NAME更新完了");
                                             response = true;
                                         }
                                         if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
                                             api.getServerTextChannelById(list.getTextID()).get().createUpdater().setName(name).update();
-                                            resPonseString = "NAME更新完了";
+                                            resPonseString = new StringBuilder("NAME更新完了");
                                             response = true;
                                         }
                                     } else if (cmd.equalsIgnoreCase("size") && interaction.getOptionLongValueByName("size").isPresent()) {
                                         int size = Math.toIntExact(interaction.getOptionLongValueByName("size").get());
                                         if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent() && size >= 0 && size < 100) {
                                             api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setUserLimit(size).update();
-                                            resPonseString = "人数制限を" + interaction.getOptionLongValueByName("size") + "に設定しました";
+                                            resPonseString = new StringBuilder("人数制限を" + interaction.getOptionLongValueByName("size") + "に設定しました");
                                             response = true;
                                             if (size == 0L) {
-                                                resPonseString = "人数制限を0(limitless)に設定しました";
+                                                resPonseString = new StringBuilder("人数制限を0(limitless)に設定しました");
                                             }
                                         } else if (size > 99) {
-                                            resPonseString = "99 以内で入力してください";
+                                            resPonseString = new StringBuilder("99 以内で入力してください");
                                         }
                                     } else if (cmd.equalsIgnoreCase("men") && interaction.getOptionStringValueByName("text").isPresent()) {
                                         StringBuilder mentionText = new StringBuilder();
@@ -672,16 +667,16 @@ public class BotMain extends Thread {
                                                     .replaceAll("&everyone&", "@everyone ")
                                                     .replaceAll("&here&", "@here ");
                                             dao.addMentionMessage(list.getTextID(), new MessageBuilder().setContent(mentionMessage).send(mention).join().getIdAsString(), serverId);
-                                            resPonseString = "募集メッセを送信しました";
+                                            resPonseString = new StringBuilder("募集メッセを送信しました");
                                             response = true;
                                         }
                                     }
                                 } else {
-                                    resPonseString = "一時通話リンクしているテキストチャンネルでしか、送信できません";
+                                    resPonseString = new StringBuilder("一時通話リンクしているテキストチャンネルでしか、送信できません");
                                     response = true;
                                 }
                             } else {
-                                resPonseString = "一時通話に接続しているかつ、通話管理権限が無いと使用できません";
+                                resPonseString = new StringBuilder("一時通話に接続しているかつ、通話管理権限が無いと使用できません");
                                 response = true;
                             }
                         }
@@ -690,7 +685,7 @@ public class BotMain extends Thread {
                         if (resPonseMessage != null) {
                             resPonseMessage.send(channel).join();
                         }
-                        interaction.createImmediateResponder().setFlags(InteractionCallbackDataFlag.EPHEMERAL).setContent(resPonseString).respond();
+                        interaction.createImmediateResponder().setFlags(InteractionCallbackDataFlag.EPHEMERAL).setContent(resPonseString.toString()).respond();
                     }
                 } catch (SystemException | DatabaseException ex) {
                     ex.printStackTrace();
@@ -702,6 +697,7 @@ public class BotMain extends Thread {
                     String serverId = e.getServer().get().getIdAsString();
                     TextChannel channel = e.getChannel();
                     ArrayList<DeleteTimeRecord> deleteList = dao.getDeleteTimes(serverId);
+
                     for (DeleteTimeRecord record : deleteList) {
                         if (record.getTextChannelId().equalsIgnoreCase(channel.getIdAsString())) {
                             DeleteMessage message = new DeleteMessage();
@@ -1268,6 +1264,21 @@ public class BotMain extends Thread {
                 } else if (cmd.equalsIgnoreCase("commandShow")) {
                     System.out.println("\n");
                     wkwkSlashCommand.commandShow();
+                } else if (cmd.equalsIgnoreCase("updateAnnounce")) {
+                    System.out.println("送信開始");
+                    for (ServerDataList list : dao.getNoSlashCommandServer()) {
+                        if (api.getServerById(list.getServer()).isPresent()) {
+                            new MessageBuilder().setContent("wkwkBOTをお使いいただき誠にありがとうございます。" +
+                                    "\n当BOTは4/12 12:00 を持って全機能が\nスラッシュコマンドに移行いたしました" +
+                                    "\nそれに伴い、BOTの招待リンクがスラッシュコマンド対応の物に変更されました" +
+                                    "\n※新招待リンク(https://wkb.page.link/bot)"+
+                                    "\nお手数ですが、機能を使うにはBOTを再導入して頂く必要があります。" +
+                                    "\n対象サーバー -> " + api.getServerById(list.getServer()).get().getName() +
+                                    "\n複数回送られている場合があります。申し訳ございません。" +
+                                    "\n今後とも当BOTをよろしくお願いします。").send(api.getServerById(list.getServer()).get().getOwner().get()).join();
+                        }
+                    }
+                    System.out.println("送信完了");
                 }
             }
         } catch (DatabaseException | SystemException | IOException ignored) {

@@ -57,7 +57,7 @@ public class WkwkSlashCommand {
                                                         SlashCommandOption.create(SlashCommandOptionType.ROLE, "role", "付与ロール", true),
                                                         SlashCommandOption.create(SlashCommandOptionType.STRING, "emoji", "対象絵文字", true)
                                                 )),
-                                        SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "mess", "通話制限人数変更",
+                                        SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "mess", "リアクションロール対象メッセージ",
                                                 Arrays.asList(
                                                         SlashCommandOption.create(SlashCommandOptionType.STRING, "messageId", "メッセージID", true),
                                                         SlashCommandOption.create(SlashCommandOptionType.CHANNEL, "textChannel", "対象チャンネル", true)

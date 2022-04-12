@@ -41,7 +41,6 @@ public class DiscordDAO extends DAOBase {
             ResultSet rs = prestmt.executeQuery();
             while (rs.next()) {
                 dataList.setServer(serverId);
-                dataList.setPrefix(rs.getString(ServerPropertyParameters.PREFIX.getParameter()));
                 dataList.setMentionChannel(rs.getString(ServerPropertyParameters.MENTION_CHANNEL_ID.getParameter()));
                 dataList.setFstChannel(rs.getString(ServerPropertyParameters.FIRST_CHANNEL_ID.getParameter()));
                 dataList.setVoiceCategory(rs.getString(ServerPropertyParameters.VOICE_CATEGORY_ID.getParameter()));
@@ -71,8 +70,6 @@ public class DiscordDAO extends DAOBase {
                 sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET " + ServerPropertyParameters.TEXT_CATEGORY_ID.getParameter() + " = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
             else if ("f".equals(idx))
                 sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET " + ServerPropertyParameters.FIRST_CHANNEL_ID.getParameter() + " = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
-            else if ("p".equals(idx))
-                sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET " + ServerPropertyParameters.PREFIX.getParameter() + " = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
             else if ("m".equals(idx))
                 sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET " + ServerPropertyParameters.MENTION_CHANNEL_ID.getParameter() + " = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
             else if ("tmpby".equals(idx))
@@ -119,10 +116,9 @@ public class DiscordDAO extends DAOBase {
         this.open();
         prestmt = null;
         try {
-            String sql = "INSERT INTO " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " (" + ServerPropertyParameters.SERVER_ID.getParameter() + "," + ServerPropertyParameters.PREFIX.getParameter() + ") VALUES(?,?)";
+            String sql = "INSERT INTO " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " (" + ServerPropertyParameters.SERVER_ID.getParameter()+ " ) VALUES(?)";
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, Server);
-            prestmt.setString(2, ServerPropertyParameters.DEFAULT_PREFIX.getParameter());
             prestmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -538,7 +534,6 @@ public class DiscordDAO extends DAOBase {
             prestmt.setString(1, record.getMessageID());
             ResultSet rs2 = prestmt.executeQuery();
             while (rs2.next()) {
-                System.out.println(rs2.getString(ReactRoleParameters.EMOJI.getParameter()));
                 record.getEmoji().add(rs2.getString(ReactRoleParameters.EMOJI.getParameter()));
                 record.getRoleID().add(rs2.getString(ReactRoleParameters.ROLE_ID.getParameter()));
             }
@@ -991,5 +986,36 @@ public class DiscordDAO extends DAOBase {
         } finally {
             this.close(prestmt);
         }
+    }
+
+    public ArrayList<ServerDataList> getNoSlashCommandServer() {
+        this.open();
+        ArrayList<ServerDataList> servers = new ArrayList<>();
+        prestmt = null;
+        try {
+            String sql = "SELECT * FROM " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " WHERE PREFIX = ?";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, ">");
+            ResultSet rs = prestmt.executeQuery();
+            while (rs.next()) {
+                ServerDataList dataList = new ServerDataList();
+                dataList.setServer(rs.getString(ServerPropertyParameters.SERVER_ID.getParameter()));
+                dataList.setMentionChannel(rs.getString(ServerPropertyParameters.MENTION_CHANNEL_ID.getParameter()));
+                dataList.setFstChannel(rs.getString(ServerPropertyParameters.FIRST_CHANNEL_ID.getParameter()));
+                dataList.setVoiceCategory(rs.getString(ServerPropertyParameters.VOICE_CATEGORY_ID.getParameter()));
+                dataList.setTextCategory(rs.getString(ServerPropertyParameters.TEXT_CATEGORY_ID.getParameter()));
+                dataList.setTempBy(rs.getBoolean(ServerPropertyParameters.TEMP_BY.getParameter()));
+                dataList.setTextBy(rs.getBoolean(ServerPropertyParameters.TEXT_BY.getParameter()));
+                dataList.setStereotyped(rs.getString((ServerPropertyParameters.STEREOTYPED.getParameter())));
+                dataList.setDefaultSize(rs.getString(ServerPropertyParameters.DEFAULT_SIZE.getParameter()));
+                dataList.setDefaultName(rs.getString(ServerPropertyParameters.DEFAULT_NAME.getParameter()));
+                servers.add(dataList);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
+        }
+        return servers;
     }
 }

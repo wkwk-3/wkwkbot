@@ -33,7 +33,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class BotMain extends Thread {
@@ -1205,7 +1204,7 @@ public class BotMain extends Thread {
                 api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
             });
             Permissions per = new PermissionsBuilder().setAllowed(PermissionType.ADMINISTRATOR).build();
-            System.out.println("URL : " + api.createBotInvite(per));
+            System.out.println("URL : " + api.createBotInvite(per).replaceFirst("scope=bot","scope=bot+applications.commands"));
             System.out.println();
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             while (true) {

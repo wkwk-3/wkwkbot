@@ -16,6 +16,10 @@ public class WkwkSlashCommand {
     public void createCommand(){
         SlashCommand ping =
                 SlashCommand.with("ping", "BOTの回線速度を計測").createGlobal(api).join();
+        SlashCommand invite =
+                SlashCommand.with("invite", "BOT招待リンクを表示").createGlobal(api).join();
+        SlashCommand guild =
+                SlashCommand.with("guild", "サポートサーバー招待リンクを表示").createGlobal(api).join();
         SlashCommand setup =
                 SlashCommand.with("setup", "一時通話作成に必要な要素を生成").createGlobal(api).join();
         SlashCommand set =

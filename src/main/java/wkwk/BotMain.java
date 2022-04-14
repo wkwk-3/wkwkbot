@@ -635,6 +635,14 @@ public class BotMain extends Thread {
                                 resPonseString = new StringBuilder("個チャに送信");
                                 response = true;
                                 break;
+                            case "invite":
+                                resPonseString = new StringBuilder("https://wkb.page.link/bot");
+                                response = true;
+                                break;
+                            case "guild":
+                                resPonseString = new StringBuilder("https://wkb.page.link/guild");
+                                response = true;
+                                break;
                         }
                         if (cmd.equalsIgnoreCase("name") || cmd.equalsIgnoreCase("size") || cmd.equalsIgnoreCase("men") || cmd.equalsIgnoreCase("n") || cmd.equalsIgnoreCase("s") || cmd.equalsIgnoreCase("m")) {
                             ChannelList list = dao.TempGetChannelList(channel.getIdAsString(), "t");
@@ -683,12 +691,12 @@ public class BotMain extends Thread {
                                             response = true;
                                         }
                                     }
-                                } else {
-                                    resPonseString = new StringBuilder("一時通話リンクしているテキストチャンネルでしか、送信できません");
+                                } else if (api.getServerVoiceChannelById(requestVoiceId).isPresent() && !api.getServerVoiceChannelById(requestVoiceId).get().getEffectivePermissions(sendUser).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
+                                    resPonseString = new StringBuilder("通話管理権限が無いと使用できません");
                                     response = true;
                                 }
-                            } else {
-                                resPonseString = new StringBuilder("一時通話に接続しているかつ、通話管理権限が無いと使用できません");
+                            } else if (!sendUser.getConnectedVoiceChannel(server).isPresent()) {
+                                resPonseString = new StringBuilder("一時通話に接続していないと使用できません");
                                 response = true;
                             }
                         }
@@ -867,6 +875,10 @@ public class BotMain extends Thread {
                                 ServerTextChannel tx = api.getServerTextChannelById(list.getTextID()).get();
                                 tx.createUpdater().removePermissionOverwrite(user).update();
                             }
+                            if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
+                                ServerVoiceChannel vx = api.getServerVoiceChannelById(list.getVoiceID()).get();
+                                vx.createUpdater().removePermissionOverwrite(user).update();
+                            }
                         }
                     }
                 } catch (SystemException | DatabaseException ignored) {
@@ -920,74 +932,79 @@ public class BotMain extends Thread {
                 SelectMenuInteraction menuInteraction = e.getSelectMenuInteraction();
                 String cmd = menuInteraction.getCustomId();
                 String response = null;
+                User user = menuInteraction.getUser();
                 try {
                     if (menuInteraction.getChannel().isPresent()) {
                         ChannelList list = dao.TempGetChannelList(menuInteraction.getChannel().get().getIdAsString(), "t");
+                        boolean isManage = api.getServerTextChannelById(list.getTextID()).get().getOverwrittenUserPermissions().get(menuInteraction.getUser().getId()).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS);
                         String requestVoiceId = list.getVoiceID();
-                        if (cmd.equalsIgnoreCase("transSelect")) {
-                            if (api.getServerVoiceChannelById(requestVoiceId).isPresent()) {
-                                boolean claimSw = false;
-                                long oldAdminId = 0L;
-                                for (Map.Entry<Long, Permissions> entry : api.getServerVoiceChannelById(requestVoiceId).get().getOverwrittenUserPermissions().entrySet()) {
-                                    if (entry.getValue().getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
-                                        for (Long connectId : api.getServerVoiceChannelById(requestVoiceId).get().getConnectedUserIds()) {
-                                            if (Objects.equals(connectId, entry.getKey())) {
-                                                oldAdminId = entry.getKey();
-                                                claimSw = true;
-                                                break;
-                                            }
+                        if (isManage) {
+                            if (cmd.equalsIgnoreCase("transSelect")) {
+                                long oldManege = menuInteraction.getUser().getId();
+                                if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
+                                    User selectUser = api.getUserById(menuInteraction.getChosenOptions().get(0).getValue()).join();
+                                    api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(selectUser, new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS,PermissionType.READ_MESSAGES).build()).removePermissionOverwrite(api.getUserById(oldManege).join()).update();
+                                    if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
+                                        api.getServerTextChannelById(list.getTextID()).get().createUpdater().addPermissionOverwrite(selectUser, new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS,PermissionType.READ_MESSAGES,
+                                                PermissionType.READ_MESSAGE_HISTORY,
+                                                PermissionType.SEND_MESSAGES,
+                                                PermissionType.ADD_REACTIONS,
+                                                PermissionType.ATTACH_FILE,
+                                                PermissionType.USE_APPLICATION_COMMANDS,
+                                                PermissionType.USE_EXTERNAL_STICKERS,
+                                                PermissionType.USE_EXTERNAL_EMOJIS).build()).removePermissionOverwrite(api.getUserById(oldManege).join()).addPermissionOverwrite(api.getUserById(oldManege).join(), new PermissionsBuilder().setAllowed(PermissionType.READ_MESSAGES,
+                                                PermissionType.READ_MESSAGE_HISTORY,
+                                                PermissionType.SEND_MESSAGES,
+                                                PermissionType.ADD_REACTIONS,
+                                                PermissionType.ATTACH_FILE,
+                                                PermissionType.USE_APPLICATION_COMMANDS,
+                                                PermissionType.USE_EXTERNAL_STICKERS,
+                                                PermissionType.USE_EXTERNAL_EMOJIS).build()).update();
+                                    }
+                                    response = selectUser.getName() + "が新しく通話管理者になりました";
+                                }
+                            } else if (cmd.equalsIgnoreCase("name")) {
+                                if (api.getServerVoiceChannelById(requestVoiceId).isPresent()) {
+                                    if (api.getServerTextChannelById(list.getTextID()).isPresent() && api.getServerTextChannelById(list.getTextID()).get().getOverwrittenUserPermissions().get(menuInteraction.getUser().getId()).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
+                                        String name = menuInteraction.getChosenOptions().get(0).getValue();
+                                        if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
+                                            api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setName(name).update();
                                         }
+                                        if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
+                                            api.getServerTextChannelById(list.getTextID()).get().createUpdater().setName(name).update();
+                                        }
+                                        response = "チャンネル名を" + name + "に変更しました";
+                                    }
+                                }
+                            }
+                        }
+                        if (api.getServerById(list.getServerID()).get().getPermissions(user).getAllowedPermission().contains(PermissionType.ADMINISTRATOR)) {
+                            if (cmd.equalsIgnoreCase("removeName")) {
+                                if (api.getServerById(list.getServerID()).isPresent() && api.getServerById(list.getServerID()).get().getPermissions(menuInteraction.getUser()).getAllowedPermission().contains(PermissionType.ADMINISTRATOR) || menuInteraction.getUser().isBotOwner()) {
+                                    String name = menuInteraction.getChosenOptions().get(0).getValue();
+                                    if (menuInteraction.getServer().isPresent()) {
+                                        dao.deleteNamePreset(menuInteraction.getServer().get().getIdAsString(), name);
+                                        response = name + "を削除しました";
+                                    } else {
+                                        response = "削除に失敗しました";
+                                    }
+                                }
+                            } else if (cmd.equalsIgnoreCase("removeLogging")) {
+                                String[] inputs = menuInteraction.getChosenOptions().get(0).getValue().split(" ");
+                                dao.deleteLogging(inputs[0], inputs[1], inputs[2]);
+                                response = "削除しました";
+                            } else if (cmd.equalsIgnoreCase("removeRole")) {
+                                String selectEmoji = menuInteraction.getChosenOptions().get(0).getValue();
+                                ReactionRoleRecord record = dao.getReactAllData(menuInteraction.getServer().get().getIdAsString());
+                                for (String emoji : record.getEmoji()){
+                                    if (selectEmoji.equals(emoji)){
+                                        dao.deleteRoles(emoji,record.getMessageID());
+                                        response = emoji + "を削除しました";
                                         break;
                                     }
                                 }
-                                if (claimSw) {
-                                    User selectUser = api.getUserById(menuInteraction.getChosenOptions().get(0).getValue()).join();
-                                    User oldAdmin = api.getUserById(oldAdminId).join();
-                                    api.getServerVoiceChannelById(requestVoiceId).get().createUpdater().addPermissionOverwrite(selectUser, new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS).build()).addPermissionOverwrite(oldAdmin, new PermissionsBuilder().setUnset(PermissionType.MANAGE_CHANNELS).build()).update();
-                                    response = selectUser.getName() + "が新しく通話管理者になりました";
-                                } else {
-                                    response = "あなたは管理者ではありません";
-                                }
-                            }
 
-                        } else if (cmd.equalsIgnoreCase("name")) {
-                            if (api.getServerVoiceChannelById(requestVoiceId).isPresent()) {
-                                if (api.getServerTextChannelById(list.getTextID()).isPresent() && api.getServerTextChannelById(list.getTextID()).get().getOverwrittenUserPermissions().get(menuInteraction.getUser().getId()).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
-                                    String name = menuInteraction.getChosenOptions().get(0).getValue();
-                                    if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
-                                        api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setName(name).update();
-                                    }
-                                    if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
-                                        api.getServerTextChannelById(list.getTextID()).get().createUpdater().setName(name).update();
-                                    }
-                                    response = "チャンネル名を" + name + "に変更しました";
-                                }
                             }
-                        } else if (cmd.equalsIgnoreCase("removeName")) {
-                            if (api.getServerById(list.getServerID()).isPresent() && api.getServerById(list.getServerID()).get().getPermissions(menuInteraction.getUser()).getAllowedPermission().contains(PermissionType.ADMINISTRATOR) || menuInteraction.getUser().isBotOwner()) {
-                                String name = menuInteraction.getChosenOptions().get(0).getValue();
-                                if (menuInteraction.getServer().isPresent()) {
-                                    dao.deleteNamePreset(menuInteraction.getServer().get().getIdAsString(), name);
-                                    response = name + "を削除しました";
-                                } else {
-                                    response = "削除に失敗しました";
-                                }
-                            }
-                        } else if (cmd.equalsIgnoreCase("removeLogging")) {
-                            String[] inputs = menuInteraction.getChosenOptions().get(0).getValue().split(" ");
-                            dao.deleteLogging(inputs[0], inputs[1], inputs[2]);
-                            response = "削除しました";
-                        } else if (cmd.equalsIgnoreCase("removeRole")) {
-                            String selectEmoji = menuInteraction.getChosenOptions().get(0).getValue();
-                            ReactionRoleRecord record = dao.getReactAllData(menuInteraction.getServer().get().getIdAsString());
-                            for (String emoji : record.getEmoji()){
-                                if (selectEmoji.equals(emoji)){
-                                    dao.deleteRoles(emoji,record.getMessageID());
-                                    response = emoji + "を削除しました";
-                                    break;
-                                }
-                            }
-
                         }
                         if (response != null) {
                             menuInteraction.getMessage().delete();
@@ -1002,7 +1019,7 @@ public class BotMain extends Thread {
             api.addButtonClickListener(e -> {
                 MessageBuilder messageBuilder = null;
                 ButtonInteraction buttonInteraction = e.getButtonInteraction();
-                String response = buttonInteraction.getUser().getMentionTag() + "\n";
+                String response = "";
                 String id = buttonInteraction.getCustomId();
                 if (buttonInteraction.getChannel().isPresent()) {
                     String textChannelId = buttonInteraction.getChannel().get().getIdAsString();
@@ -1131,7 +1148,7 @@ public class BotMain extends Thread {
                                 }
                         } else if (api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().get(buttonInteraction.getUser().getId()) == null ||
                                 !api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().get(buttonInteraction.getUser().getId()).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
-                            response += "あなたは管理者ではありません";
+                            response += "あなたは通話管理者ではありません";
                         }
                         if (buttonInteraction.getUser().getConnectedVoiceChannel(buttonInteraction.getServer().get()).isPresent() &&
                                 requestVoiceId.equalsIgnoreCase(buttonInteraction.getUser().getConnectedVoiceChannel(buttonInteraction.getServer().get()).get().getIdAsString()) &&
@@ -1151,6 +1168,16 @@ public class BotMain extends Thread {
                                 }
                                 if (claimSw) {
                                     api.getServerVoiceChannelById(requestVoiceId).get().createUpdater().addPermissionOverwrite(buttonInteraction.getUser(), new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS).build()).update();
+                                    if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
+                                        api.getServerTextChannelById(list.getTextID()).get().createUpdater().addPermissionOverwrite(buttonInteraction.getUser(), new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS, PermissionType.READ_MESSAGES,
+                                                PermissionType.READ_MESSAGE_HISTORY,
+                                                PermissionType.SEND_MESSAGES,
+                                                PermissionType.ADD_REACTIONS,
+                                                PermissionType.ATTACH_FILE,
+                                                PermissionType.USE_APPLICATION_COMMANDS,
+                                                PermissionType.USE_EXTERNAL_STICKERS,
+                                                PermissionType.USE_EXTERNAL_EMOJIS).build()).update();
+                                    }
                                     response = buttonInteraction.getUser().getName() + "が新しく通話管理者になりました";
                                 } else {
                                     response = "通話管理者が通話にいらっしゃいます";
@@ -1159,7 +1186,8 @@ public class BotMain extends Thread {
                         }
                         if (!response.equalsIgnoreCase(buttonInteraction.getUser().getMentionTag() + "\n")) {
                             e.getInteraction().createImmediateResponder().setFlags(InteractionCallbackDataFlag.EPHEMERAL).setContent(response).respond();
-                        } else if (messageBuilder != null) {
+                        }
+                        if (messageBuilder != null) {
                             messageBuilder.send(buttonInteraction.getChannel().get());
                             buttonInteraction.createImmediateResponder().respond();
                         }
@@ -1203,7 +1231,7 @@ public class BotMain extends Thread {
                 }
                 api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
             });
-            Permissions per = new PermissionsBuilder().setAllowed(PermissionType.ADMINISTRATOR).build();
+            Permissions per = new PermissionsBuilder().setAllowed().build();
             System.out.println("URL : " + api.createBotInvite(per).replaceFirst("scope=bot","scope=bot+applications.commands"));
             System.out.println();
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -1279,7 +1307,7 @@ public class BotMain extends Thread {
                 } else if (cmd.equalsIgnoreCase("updateAnnounce")) {
                     System.out.println("送信開始");
                     for (ServerDataList list : dao.getNoSlashCommandServer()) {
-                        if (api.getServerById(list.getServer()).isPresent()) {
+                        if (api.getServerById(list.getServer()).isPresent() && api.getServerById(list.getServer()).get().getOwner().isPresent()) {
                             new MessageBuilder().setContent("wkwkBOTをお使いいただき誠にありがとうございます。" +
                                     "\n当BOTは4/12 12:00 を持って全機能が\nスラッシュコマンドに移行いたしました" +
                                     "\nそれに伴い、BOTの招待リンクがスラッシュコマンド対応の物に変更されました" +

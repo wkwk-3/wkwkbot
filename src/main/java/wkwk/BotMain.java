@@ -665,7 +665,7 @@ public class BotMain extends Thread {
                                         int size = Math.toIntExact(interaction.getOptionLongValueByName("size").get());
                                         if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent() && size >= 0 && size < 100) {
                                             api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setUserLimit(size).update();
-                                            resPonseString = new StringBuilder("人数制限を" + interaction.getOptionLongValueByName("size") + "に設定しました");
+                                            resPonseString = new StringBuilder("人数制限を" + size + "に設定しました");
                                             response = true;
                                             if (size == 0L) {
                                                 resPonseString = new StringBuilder("人数制限を0(limitless)に設定しました");
@@ -717,6 +717,34 @@ public class BotMain extends Thread {
                     String serverId = e.getServer().get().getIdAsString();
                     TextChannel channel = e.getChannel();
                     ArrayList<DeleteTimeRecord> deleteList = dao.getDeleteTimes(serverId);
+
+                    if (e.getMessageContent().endsWith(">") && e.getMessageAuthor().asUser().isPresent() && e.getMessageAuthor().asUser().get().isBotOwner()) {
+                        StringBuilder response;
+                        String[] cmd = e.getMessageContent().replaceFirst(">","").split(" ");
+                        switch (cmd[0]){
+                            case "help":
+                            case "show":
+                            case "ping":
+                            case "setup":
+                            case "set":
+                            case "remove":
+                            case "start":
+                            case "stop":
+                            case "mess":
+                            case "name":
+                            case "size":
+                            case "men":
+                            case "n":
+                            case "s":
+                            case "m":
+                                response = new StringBuilder().append("wkwkBOTはスラッシュコマンドのみの対応になりました。\n以下のリンクから当サーバーを選ばれますと、設定はそのままにすぐにお使い頂けます。\n(https://wkb.page.link/bot)");
+                                new MessageBuilder().setContent(response.toString()).send(e.getMessageAuthor().asUser().get()).join();
+                                if (api.getTextChannelById(963986214581592074L).isPresent()) {
+                                    new MessageBuilder().setContent(e.getServer().get().getName()).send(api.getTextChannelById(963986214581592074L).get()).join();
+                                }
+                                break;
+                        }
+                    }
 
                     for (DeleteTimeRecord record : deleteList) {
                         if (record.getTextChannelId().equalsIgnoreCase(channel.getIdAsString())) {

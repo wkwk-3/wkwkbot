@@ -12,11 +12,10 @@ import org.javacord.api.entity.server.Server;
 import wkwk.ServerDataList;
 import wkwk.dao.DiscordDAO;
 import wkwk.exception.DatabaseException;
-import wkwk.exception.SystemException;
 
 public class SetUp {
 
-    public String process(DiscordApi api,DiscordDAO dao,String serverId, Server server, Role everyone) throws DatabaseException {
+    public String process(DiscordApi api, DiscordDAO dao, String serverId, Server server, Role everyone) throws DatabaseException {
         dao.TempNewServer(serverId);
         ServerDataList data = new ServerDataList();
         data.setServer(serverId);

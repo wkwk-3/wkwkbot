@@ -118,7 +118,7 @@ public class DiscordDAO extends DAOBase {
         this.open();
         prestmt = null;
         try {
-            String sql = "INSERT INTO " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " (" + ServerPropertyParameters.SERVER_ID.getParameter()+ " ) VALUES(?)";
+            String sql = "INSERT INTO " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " (" + ServerPropertyParameters.SERVER_ID.getParameter() + " ) VALUES(?)";
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, Server);
             prestmt.execute();
@@ -863,7 +863,7 @@ public class DiscordDAO extends DAOBase {
         }
     }
 
-    public void addLogging(ArrayList<LoggingRecord> records){
+    public void addLogging(ArrayList<LoggingRecord> records) {
         this.open();
         try {
             for (LoggingRecord record : records) {
@@ -886,11 +886,11 @@ public class DiscordDAO extends DAOBase {
         }
     }
 
-    public ArrayList<LoggingRecord> getLogging(String select ,String id) {
+    public ArrayList<LoggingRecord> getLogging(String select, String id) {
         this.open();
         prestmt = null;
         ArrayList<LoggingRecord> records = new ArrayList<>();
-        switch (select){
+        switch (select) {
             case "c":
                 String sql = "SELECT EXISTS(SELECT * FROM " + DAOParameters.TABLE_LOGGING.getParameter() + " WHERE " + LoggingParameters.TARGET_CHANNEL_ID.getParameter() + " = ?) AS TARGET_CHECK";
                 try {
@@ -975,6 +975,7 @@ public class DiscordDAO extends DAOBase {
             this.close(prestmt);
         }
     }
+
     public void deleteLogging(String server) {
         this.open();
         prestmt = null;
@@ -1033,7 +1034,7 @@ public class DiscordDAO extends DAOBase {
             ResultSet rs = prestmt.executeQuery();
             while (rs.next()) {
                 if (rs.getInt("NO_CHECK") == 1) {
-                    nos =  true;
+                    nos = true;
                 }
             }
         } catch (SQLException e) {

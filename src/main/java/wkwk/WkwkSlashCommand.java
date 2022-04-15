@@ -1,7 +1,9 @@
 package wkwk;
 
 import org.javacord.api.DiscordApi;
-import org.javacord.api.interaction.*;
+import org.javacord.api.interaction.SlashCommand;
+import org.javacord.api.interaction.SlashCommandOption;
+import org.javacord.api.interaction.SlashCommandOptionType;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,11 +11,12 @@ import java.util.List;
 
 public class WkwkSlashCommand {
     DiscordApi api;
+
     public WkwkSlashCommand(DiscordApi api) {
         this.api = api;
     }
 
-    public void createCommand(){
+    public void createCommand() {
         SlashCommand ping =
                 SlashCommand.with("ping", "BOTの回線速度を計測").createGlobal(api).join();
         SlashCommand invite =
@@ -97,8 +100,8 @@ public class WkwkSlashCommand {
                         Arrays.asList(
                                 SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "delete", "オートデリート開始",
                                         Arrays.asList(
-                                                SlashCommandOption.create(SlashCommandOptionType.LONG, "time","削除までの時間"),
-                                                SlashCommandOption.create(SlashCommandOptionType.STRING, "unit","時間の単位 s m h d ")
+                                                SlashCommandOption.create(SlashCommandOptionType.LONG, "time", "削除までの時間"),
+                                                SlashCommandOption.create(SlashCommandOptionType.STRING, "unit", "時間の単位 s m h d ")
                                         ))
                         )).createGlobal(api).join();
         SlashCommand stop =

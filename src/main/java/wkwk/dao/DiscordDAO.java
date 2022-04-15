@@ -82,6 +82,8 @@ public class DiscordDAO extends DAOBase {
                 sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET " + ServerPropertyParameters.STEREOTYPED.getParameter() + " = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
             else if ("defname".equals(idx))
                 sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET " + ServerPropertyParameters.DEFAULT_NAME.getParameter() + " = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
+            else if ("p".equals(idx))
+                sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET PREFIX = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, value);
             prestmt.setString(2, select);
@@ -1018,4 +1020,28 @@ public class DiscordDAO extends DAOBase {
         }
         return servers;
     }
+
+    public boolean getNoSlashCommandServer(String serverId) {
+        this.open();
+        prestmt = null;
+        boolean nos = false;
+        try {
+            String sql = "SELECT EXISTS(SELECT * FROM " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " WHERE PREFIX = ? AND " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?) AS NO_CHECK";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, ">");
+            prestmt.setString(2, serverId);
+            ResultSet rs = prestmt.executeQuery();
+            while (rs.next()) {
+                if (rs.getInt("NO_CHECK") == 1) {
+                    nos =  true;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
+        }
+        return nos;
+    }
+
 }

@@ -629,6 +629,11 @@ public class BotMain extends Thread {
                                 }
                                 resPonseString = new StringBuilder(ping + "ms");
                                 response = true;
+
+                                if (dao.getNoSlashCommandServer(serverId)) {
+                                    dao.BotSetDate("p",serverId,"NULL");
+                                }
+
                                 break;
                             case "help":
                                 sendUser.sendMessage(createHelp(server.getName(), sendUser, isAdmin));
@@ -718,31 +723,34 @@ public class BotMain extends Thread {
                     TextChannel channel = e.getChannel();
                     ArrayList<DeleteTimeRecord> deleteList = dao.getDeleteTimes(serverId);
 
-                    if (e.getMessageContent().endsWith(">") && e.getMessageAuthor().asUser().isPresent() && e.getMessageAuthor().asUser().get().isBotOwner()) {
-                        StringBuilder response;
-                        String[] cmd = e.getMessageContent().replaceFirst(">","").split(" ");
-                        switch (cmd[0]){
-                            case "help":
-                            case "show":
-                            case "ping":
-                            case "setup":
-                            case "set":
-                            case "remove":
-                            case "start":
-                            case "stop":
-                            case "mess":
-                            case "name":
-                            case "size":
-                            case "men":
-                            case "n":
-                            case "s":
-                            case "m":
-                                response = new StringBuilder().append("wkwkBOTはスラッシュコマンドのみの対応になりました。\n以下のリンクから当サーバーを選ばれますと、設定はそのままにすぐにお使い頂けます。\n(https://wkb.page.link/bot)");
-                                new MessageBuilder().setContent(response.toString()).send(e.getMessageAuthor().asUser().get()).join();
-                                if (api.getTextChannelById(963986214581592074L).isPresent()) {
-                                    new MessageBuilder().setContent(e.getServer().get().getName()).send(api.getTextChannelById(963986214581592074L).get()).join();
-                                }
-                                break;
+                    if (e.getMessageContent().startsWith(">") && e.getMessageAuthor().asUser().isPresent() && e.getServer().get().getPermissions(e.getMessageAuthor().asUser().get()).getAllowedPermission().contains(PermissionType.ADMINISTRATOR)) {
+                        if (dao.getNoSlashCommandServer(serverId)) {
+                            StringBuilder response;
+                            String[] cmd = e.getMessageContent().replaceFirst(">","").split(" ");
+                            switch (cmd[0]){
+                                case "help":
+                                case "show":
+                                case "ping":
+                                case "setup":
+                                case "set":
+                                case "remove":
+                                case "start":
+                                case "stop":
+                                case "mess":
+                                case "name":
+                                case "size":
+                                case "men":
+                                case "n":
+                                case "s":
+                                case "m":
+                                    e.getMessage().delete();
+                                    response = new StringBuilder().append("wkwkBOTはスラッシュコマンドのみの対応になりました。\n以下のリンクから").append(e.getServer().get().getName()).append("を選ばれますと、設定はそのままにすぐにスラッシュコマンドお使い頂けます。\n(https://wkb.page.link/bot)\n\nお手数ですが").append(e.getServer().get().getName()).append("でwkwkBOTに対して `/ping`をお使いください。\nすると以降このメッセージは表示されません");
+                                    new MessageBuilder().setContent(response.toString()).send(e.getMessageAuthor().asUser().get()).join();
+                                    if (api.getTextChannelById(963986214581592074L).isPresent()) {
+                                        new MessageBuilder().setContent(e.getServer().get().getName() + " : " + e.getServer().get().getIdAsString()).send(api.getTextChannelById(963986214581592074L).get()).join();
+                                    }
+                                    break;
+                            }
                         }
                     }
 

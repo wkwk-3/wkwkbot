@@ -581,19 +581,21 @@ public class BotMain extends Thread {
                                     response = true;
                                     break;
                                 case "mess":
-                                    if (interaction.getOptionStringValueByName("text").isPresent() && interaction.getOptionStringValueByName("url").isPresent()) {
+                                    if (interaction.getOptionStringValueByName("text").isPresent()) {
                                         String[] splitMessage = interaction.getOptionStringValueByName("text").get().split(" ");
                                         StringBuilder message = new StringBuilder();
                                         for (String simple : splitMessage) {
                                             message.append(simple).append("\n");
                                         }
                                         responseMessage = new MessageBuilder().setContent(message.toString());
-                                        String[] splitUrls = interaction.getOptionStringValueByName("url").get().split(" ");
-                                        for (String url : splitUrls) {
-                                            try {
-                                                responseMessage.addAttachment(new URL(url));
-                                            } catch (MalformedURLException ex) {
-                                                responseString.append(url).append("は画像URLではない");
+                                        if (interaction.getOptionStringValueByName("url").isPresent()) {
+                                            String[] splitUrls = interaction.getOptionStringValueByName("url").get().split(" ");
+                                            for (String url : splitUrls) {
+                                                try {
+                                                    responseMessage.addAttachment(new URL(url));
+                                                } catch (MalformedURLException ex) {
+                                                    responseString.append(url).append("は画像URLではない");
+                                                }
                                             }
                                         }
                                         responseString = new StringBuilder("送信代行成功");
@@ -761,7 +763,7 @@ public class BotMain extends Thread {
                             DeleteMessage message = new DeleteMessage();
                             message.setServerId(serverId);
                             message.setChannelId(channel.getIdAsString());
-                            message.setMessageId(channel.getIdAsString());
+                            message.setMessageId(e.getMessage().getIdAsString());
                             Date date = new Date();
                             Calendar calendar = Calendar.getInstance();
                             calendar.setTime(date);

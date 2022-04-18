@@ -13,6 +13,9 @@ import java.util.ArrayList;
 
 public class DiscordDAO extends DAOBase {
 
+    public void serverLeaveAllDataDelete(String serverId) {
+
+    }
     public String BotGetToken() throws DatabaseException, SystemException {
         this.open();
         String token = null;
@@ -804,7 +807,7 @@ public class DiscordDAO extends DAOBase {
         }
     }
 
-    public ArrayList<DeleteMessage> getDeleteMessage(String date) { // now
+    public ArrayList<DeleteMessage> getDeleteMessage(String date) {
         ArrayList<DeleteMessage> list = new ArrayList<>();
         this.open();
         prestmt = null;

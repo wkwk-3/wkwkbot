@@ -13,26 +13,23 @@ public class AutoDeleteMessage {
     DiscordDAO dao = null;
 
     public void start(DiscordApi api, DiscordDAO dao) {
+        this.api = api;
+        this.dao = dao;
         task = new TimerTask() {
             public void run() {
-                if (api != null && dao != null) {
-                    Date date = new Date();
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(date);
-                    calendar.set(Calendar.MILLISECOND, 0);
-
-                    ArrayList<DeleteMessage> messages = dao.getDeleteMessage(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
-                    for (DeleteMessage message : messages) {
-                        if (api.getTextChannelById(message.getChannelId()).isPresent()) {
-                            api.getMessageById(message.getMessageId(), api.getTextChannelById(message.getChannelId()).get()).join().delete();
-                        }
-                        dao.deleteMessage("m", message.getMessageId());
+                Date date = new Date();
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(date);
+                ArrayList<DeleteMessage> messages = dao.getDeleteMessage(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
+                System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
+                for (DeleteMessage message : messages) {
+                    if (api.getTextChannelById(message.getChannelId()).isPresent()) {
+                        api.getMessageById(message.getMessageId(), api.getTextChannelById(message.getChannelId()).get()).join().delete();
                     }
+                    dao.deleteMessage("m", message.getMessageId());
                 }
             }
         };
-        this.api = api;
-        this.dao = dao;
         timer = new Timer();
         Date date = new Date();
         Calendar calendar = Calendar.getInstance();

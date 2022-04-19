@@ -813,14 +813,14 @@ public class DiscordDAO extends DAOBase {
         prestmt = null;
 
 
-        String sql = "SELECT EXISTS(SELECT * FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.DELETE_TIME.getParameter() + " = ?) AS MESSAGE_CHECK";
+        String sql = "SELECT EXISTS(SELECT * FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.DELETE_TIME.getParameter() + " < ?) AS MESSAGE_CHECK";
         try {
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, date);
             ResultSet rs = prestmt.executeQuery();
             while (rs.next()) {
                 if (rs.getInt("MESSAGE_CHECK") == 1) {
-                    sql = "SELECT * FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.DELETE_TIME.getParameter() + " = ?";
+                    sql = "SELECT * FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.DELETE_TIME.getParameter() + " < ?";
                     prestmt = con.prepareStatement(sql);
                     try {
                         prestmt.setString(1, date);

@@ -192,6 +192,11 @@ public class BotMain extends Thread {
             });
 
 
+            api.addMessageCreateListener(event -> {
+                if (!event.getChannel().asServerChannel().isPresent()) {
+                    System.out.println("test");
+                }
+            });
             api.addMessageDeleteListener(e -> {
                 if (e.getMessageAuthor().isPresent() && e.getMessageAuthor().get().asUser().isPresent() && !e.getMessageAuthor().get().asUser().get().isBot() && e.getServer().isPresent()) {
                     TextChannel channel = e.getChannel();

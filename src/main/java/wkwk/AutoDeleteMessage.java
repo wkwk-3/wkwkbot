@@ -21,7 +21,7 @@ public class AutoDeleteMessage {
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTime(date);
                 ArrayList<DeleteMessage> messages = dao.getDeleteMessage(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
-                System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
+                System.out.println  (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
                 for (DeleteMessage message : messages) {
                     if (api.getTextChannelById(message.getChannelId()).isPresent()) {
                         api.getMessageById(message.getMessageId(), api.getTextChannelById(message.getChannelId()).get()).join().delete();

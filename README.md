@@ -30,26 +30,16 @@
   - 一時通話初期人数変更
   - PREFIXの変更
 - その他機能
+  - 時間指定のメッセージ削除
   - サーバー情報取得
   - コマンドヘルプ機能
   - BOTによるメッセージ代替送信
 ***
-##### セットアップ方法
-###### ※以下は自分でBOTを動かしたい方向けとなっております
-インストールするべきもの。  
-[MySQL](https://dev.mysql.com/downloads/mysql/) ※インストールしてください  
-[JDK-17](https://www.oracle.com/java/technologies/downloads/) ※パッチを通してください  
-[Maven](https://maven.apache.org/download.cgi) ※パッチを通してください
-1. BotToken,CLIENT ID,CLIENT SECRETを取得 [DEVELOPER PORTAL](https://discord.com/developers/applications)
-2. 1 で取得した情報を追記し [DB.txt](https://github.com/wkwk-3/wkwkbot/blob/main/DB/DB.txt) をSQLで実行
-3. プロジェクト内で`mvn install`を実行
-4. targetフォルダ内で`java -jar <ファイル名>.jar`を実行
-***
 ###### 今後追加する機能(予定)
 - Webサイトからの管理機能
 - 読み上げ機能
-- 各機能の有効化切り替え
 - その他要望の可能な限りの対応
+- 通話人数選択式
 ***
 ###### 以下使用API
 [MySQL Connecter / J](https://github.com/mysql/mysql-connector-j)  

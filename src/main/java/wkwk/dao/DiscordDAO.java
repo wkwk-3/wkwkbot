@@ -692,21 +692,6 @@ public class DiscordDAO extends DAOBase {
         }
     }
 
-    public void deleteNamePreset(String serverId) {
-        this.open();
-        prestmt = null;
-        try {
-            String sql = "DELETE FROM " + DAOParameters.TABLE_NAME_PRESET.getParameter() + " WHERE " + NamePresetParameters.SERVER_ID.getParameter() + " = ?";
-            prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, serverId);
-            prestmt.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            this.close(prestmt);
-        }
-    }
-
     public TweetAPIList getAutoTweetApis() {
         this.open();
         TweetAPIList apis = new TweetAPIList();
@@ -772,21 +757,6 @@ public class DiscordDAO extends DAOBase {
             String sql = "DELETE FROM " + DAOParameters.TABLE_DELETE_TIMES.getParameter() + " WHERE " + DeleteTimesParameters.TEXT_CHANNEL_ID.getParameter() + " = ?";
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, channelId);
-            prestmt.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            this.close(prestmt);
-        }
-    }
-
-    public void deleteDeleteTimes(String serverId) {
-        this.open();
-        prestmt = null;
-        try {
-            String sql = "DELETE FROM " + DAOParameters.TABLE_DELETE_TIMES.getParameter() + " WHERE " + DeleteTimesParameters.SERVER_ID.getParameter() + " = ?";
-            prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, serverId);
             prestmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -870,6 +840,8 @@ public class DiscordDAO extends DAOBase {
                         }
                     } catch (SQLException e) {
                         e.printStackTrace();
+                    } finally {
+                        this.close(prestmt2);
                     }
                 } else {
                     break;
@@ -877,6 +849,8 @@ public class DiscordDAO extends DAOBase {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            this.close(prestmt);
         }
         return list;
     }
@@ -1008,21 +982,6 @@ public class DiscordDAO extends DAOBase {
             prestmt.setString(1, target);
             prestmt.setString(2, channel);
             prestmt.setString(3, type);
-            prestmt.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            this.close(prestmt);
-        }
-    }
-
-    public void deleteLogging(String server) {
-        this.open();
-        prestmt = null;
-        try {
-            String sql = "DELETE FROM " + DAOParameters.TABLE_LOGGING.getParameter() + " WHERE " + LoggingParameters.SERVER_ID.getParameter() + " = ?";
-            prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, server);
             prestmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();

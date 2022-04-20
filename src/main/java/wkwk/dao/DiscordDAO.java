@@ -5,16 +5,55 @@ import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
 import wkwk.parameter.*;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 
 public class DiscordDAO extends DAOBase {
 
     public void serverLeaveAllDataDelete(String serverId) {
-
+        this.open();
+        Statement stmt = null;
+        try {
+            String sql = "DELETE FROM " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = " + serverId;
+            stmt = con.createStatement();
+            stmt.execute(sql);
+            stmt = null;
+            sql = "DELETE FROM " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " WHERE " + TempChannelsParameters.SERVER_ID.getParameter() + " = " + serverId;
+            stmt = con.createStatement();
+            stmt.execute(sql);
+            stmt = null;
+            sql = "DELETE FROM " + DAOParameters.TABLE_REACT_ROLE.getParameter() + " WHERE " + ReactRoleParameters.SERVER_ID.getParameter() + " = " + serverId;
+            stmt = con.createStatement();
+            stmt.execute(sql);
+            stmt = null;
+            sql = "DELETE FROM " + DAOParameters.TABLE_REACT_MESSAGE.getParameter() + " WHERE " + ReactMessageParameters.SERVER_ID.getParameter() + " = " + serverId;
+            stmt = con.createStatement();
+            stmt.execute(sql);
+            stmt = null;
+            sql = "DELETE FROM " + DAOParameters.TABLE_NAME_PRESET.getParameter() + " WHERE " + NamePresetParameters.SERVER_ID.getParameter() + " = " + serverId;
+            stmt = con.createStatement();
+            stmt.execute(sql);
+            stmt = null;
+            sql = "DELETE FROM " + DAOParameters.TABLE_MENTION_MESSAGE.getParameter() + " WHERE " + MentionMessageParameters.SERVER_ID.getParameter() + " = " + serverId;
+            stmt = con.createStatement();
+            stmt.execute(sql);
+            stmt = null;
+            sql = "DELETE FROM " + DAOParameters.TABLE_LOGGING.getParameter() + " WHERE " + LoggingParameters.SERVER_ID.getParameter() + " = " + serverId;
+            stmt = con.createStatement();
+            stmt.execute(sql);
+            stmt = null;
+            sql = "DELETE FROM " + DAOParameters.TABLE_DELETE_TIMES.getParameter() + " WHERE " + DeleteTimesParameters.SERVER_ID.getParameter() + " = " + serverId;
+            stmt = con.createStatement();
+            stmt.execute(sql);
+            stmt = null;
+            sql = "DELETE FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.SERVER_ID.getParameter() + " = " + serverId;
+            stmt = con.createStatement();
+            stmt.execute(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(stmt);
+        }
     }
     public String BotGetToken() throws DatabaseException, SystemException {
         this.open();
@@ -810,9 +849,7 @@ public class DiscordDAO extends DAOBase {
     public ArrayList<DeleteMessage> getDeleteMessage(String date) {
         ArrayList<DeleteMessage> list = new ArrayList<>();
         this.open();
-        prestmt = null;
-
-
+        PreparedStatement prestmt2;
         String sql = "SELECT EXISTS(SELECT * FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.DELETE_TIME.getParameter() + " < ?) AS MESSAGE_CHECK";
         try {
             prestmt = con.prepareStatement(sql);
@@ -821,10 +858,10 @@ public class DiscordDAO extends DAOBase {
             while (rs.next()) {
                 if (rs.getInt("MESSAGE_CHECK") == 1) {
                     sql = "SELECT * FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.DELETE_TIME.getParameter() + " < ?";
-                    prestmt = con.prepareStatement(sql);
+                    prestmt2 = con.prepareStatement(sql);
                     try {
-                        prestmt.setString(1, date);
-                        ResultSet rsx = prestmt.executeQuery();
+                        prestmt2.setString(1, date);
+                        ResultSet rsx = prestmt2.executeQuery();
                         while (rsx.next()) {
                             DeleteMessage message = new DeleteMessage();
                             message.setMessageId(rsx.getString(DeleteMessagesParameters.MESSAGE_ID.getParameter()));
@@ -854,7 +891,7 @@ public class DiscordDAO extends DAOBase {
                 prestmt.setString(1, id);
                 prestmt.execute();
             } else if (select.equalsIgnoreCase("s")) {
-                String sql = "DELETE FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.SERVER.getParameter() + " = ?";
+                String sql = "DELETE FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.SERVER_ID.getParameter() + " = ?";
                 prestmt = con.prepareStatement(sql);
                 prestmt.setString(1, id);
                 prestmt.execute();

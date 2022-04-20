@@ -23,10 +23,7 @@ public class AutoDeleteMessage {
                 ArrayList<DeleteMessage> messages = dao.getDeleteMessage(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
                 System.out.println  (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
                 for (DeleteMessage message : messages) {
-                    if (api.getTextChannelById(message.getChannelId()).isPresent()) {
-                        api.getMessageById(message.getMessageId(), api.getTextChannelById(message.getChannelId()).get()).join().delete();
-                    }
-                    dao.deleteMessage("m", message.getMessageId());
+                    new MessageDelete(api,dao,message);
                 }
             }
         };

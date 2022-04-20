@@ -6,6 +6,7 @@ import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.channel.*;
 import org.javacord.api.entity.emoji.Emoji;
+import org.javacord.api.entity.message.MessageAttachment;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.component.ActionRow;
 import org.javacord.api.entity.message.component.Button;
@@ -193,10 +194,19 @@ public class BotMain extends Thread {
 
 
             api.addMessageCreateListener(event -> {
-                if (!event.getChannel().asServerChannel().isPresent()) {
-                    System.out.println("test");
+                if (event.isPrivateMessage() && event.getMessageAuthor().asUser().isPresent()) {
+                    if(api.getServerTextChannelById(965590517427601438L).isPresent()){
+                        MessageBuilder messageBuilder = new MessageBuilder();
+                        messageBuilder.setContent(event.getMessageAuthor().asUser().get().getDiscriminatedName() + "\n ID : " + event.getMessageAuthor().asUser().get().getIdAsString() + "\n本文:\n" + event.getMessageContent());
+                        for (MessageAttachment attachment : event.getMessageAttachments()) {
+                            messageBuilder.addAttachment(attachment.getUrl());
+                        }
+                        messageBuilder.send(api.getServerTextChannelById(965590517427601438L).get()).join();
+
+                    }
                 }
             });
+
             api.addMessageDeleteListener(e -> {
                 if (e.getMessageAuthor().isPresent() && e.getMessageAuthor().get().asUser().isPresent() && !e.getMessageAuthor().get().asUser().get().isBot() && e.getServer().isPresent()) {
                     TextChannel channel = e.getChannel();
@@ -605,6 +615,28 @@ public class BotMain extends Thread {
                                         }
                                         responseString = new StringBuilder("送信代行成功");
                                         response = true;
+                                    }
+                                    break;
+                                case "r":
+                                    if (interaction.getOptionStringValueByName("ID").isPresent()) {
+                                        User user = api.getUserById(interaction.getOptionStringValueByName("ID").get()).join();
+                                        MessageBuilder messageBuilder = new MessageBuilder();
+                                        if (interaction.getOptionStringValueByName("TEXT").isPresent()) {
+                                            String text = interaction.getOptionStringValueByName("TEXT").get().replaceAll(" ","\n");
+                                            messageBuilder.setContent(text);
+                                        }
+                                        if (interaction.getOptionStringValueByName("IMAGE").isPresent()) {
+                                            String[] images = interaction.getOptionStringValueByName("IMAGE").get().split(" ");
+                                            for (String url : images) {
+                                                try {
+                                                    messageBuilder.addAttachment(new URL(url));
+                                                } catch (MalformedURLException ex) {
+                                                    ex.printStackTrace();
+                                                }
+                                            }
+                                        }
+                                        messageBuilder.send(user);
+                                        responseString = new StringBuilder("個人チャットに送信しました");
                                     }
                                     break;
                             }
@@ -1266,14 +1298,7 @@ public class BotMain extends Thread {
             });
             api.addServerLeaveListener(e -> {
                 String serverId = e.getServer().getIdAsString();
-                try {
-                    dao.TempDeleteData(serverId);
-                    dao.deleteDeleteTimes(serverId);
-                    dao.deleteMessage("s", serverId);
-                    dao.deleteNamePreset(serverId);
-                    dao.deleteLogging(serverId);
-                } catch (DatabaseException ignored) {
-                }
+                dao.serverLeaveAllDataDelete(serverId);
                 api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
             });
             Permissions per = new PermissionsBuilder().setAllowed().build();

@@ -1,9 +1,7 @@
 package wkwk;
 
 import org.javacord.api.DiscordApi;
-import org.javacord.api.interaction.SlashCommand;
-import org.javacord.api.interaction.SlashCommandOption;
-import org.javacord.api.interaction.SlashCommandOptionType;
+import org.javacord.api.interaction.*;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,6 +15,21 @@ public class WkwkSlashCommand {
     }
 
     public void createCommand() {
+        if (api.getServerById(953794221985366076L).isPresent()) {
+            SlashCommand rePrivateChat =
+                    SlashCommand.with("r", "個人チャットの返信",
+                            Arrays.asList(
+                                    SlashCommandOption.create(SlashCommandOptionType.STRING,"ID","返信先ユーザーID"),
+                                    SlashCommandOption.create(SlashCommandOptionType.STRING,"TEXT","本文"),
+                                    SlashCommandOption.create(SlashCommandOptionType.STRING,"IMAGE","画像")
+                            )
+                            ).setDefaultPermission(false).createForServer(api.getServerById(953794221985366076L).get()).join();
+            new ApplicationCommandPermissionsUpdater(api.getServerById(953794221985366076L).get())
+                .setPermissions(Collections.singletonList(
+                        ApplicationCommandPermissions.create(422099698388697108L, ApplicationCommandPermissionType.USER, true)))
+            .update(rePrivateChat.getId())
+            .join();
+        }
         SlashCommand ping =
                 SlashCommand.with("ping", "BOTの回線速度を計測").createGlobal(api).join();
         SlashCommand invite =

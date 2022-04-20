@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public enum DeleteMessagesParameters {
 
-    SERVER(DeleteTimesParameters.SERVER_ID.getParameter()),
+    SERVER_ID(DeleteTimesParameters.SERVER_ID.getParameter()),
     MESSAGE_ID("MESSAGEID"),
     TEXT_CHANNEL_ID("TEXTCHANNELID"),
     DELETE_TIME("DELETETIME");

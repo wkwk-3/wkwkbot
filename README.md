@@ -1,7 +1,8 @@
 # wkwkbot
 ***
-[BOT追加](https://discord.com/oauth2/authorize?client_id=937343064811384924&scope=bot&permissions=8)  
-[サポートDiscordサーバー](https://discord.gg/6Z7jabh983)
+[BOT追加](https://wkb.page.link/bot)  
+[サポートDiscordサーバー](https://wkb.page.link/guild)
+[Twitter](https://wkb.page.link/twtr)
 
 [![Discord Presence](https://lanyard.cnrad.dev/api/422099698388697108?idleMessage=今は何もしてないよ&hideTimestamp=true
 )](https://discord.com/users/422099698388697108)

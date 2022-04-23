@@ -33,6 +33,16 @@ public class WkwkSlashCommand {
                 SlashCommand.with("guild", "サポートサーバー招待リンクを表示").createGlobal(api).join();
         SlashCommand setup =
                 SlashCommand.with("setup", "一時通話作成に必要な要素を生成").createGlobal(api).join();
+        SlashCommand add =
+                SlashCommand.with("add", "追加",
+                        Collections.singletonList(
+                                SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "user", "特定のユーザーだけ見えるようにする"))
+                        ).createGlobal(api).join();
+        SlashCommand delete =
+                SlashCommand.with("delete", "削除",
+                        Collections.singletonList(
+                                SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "user", "特定のユーザーだけに見えないように"))
+                ).createGlobal(api).join();
         SlashCommand set =
                 SlashCommand.with("set", "サーバー設定変更",
                                 Arrays.asList(

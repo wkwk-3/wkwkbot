@@ -18,12 +18,16 @@ public class AutoDeleteMessage {
         task = new TimerTask() {
             public void run() {
                 Date date = new Date();
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(date);
-                ArrayList<DeleteMessage> messages = dao.getDeleteMessage(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
-                System.out.println  (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
+                String dates = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+                ArrayList<DeleteMessage> messages = dao.getDeleteMessage(dates);
                 for (DeleteMessage message : messages) {
-                    new MessageDelete(api,dao,message);
+                    try {
+                        if (api.getTextChannelById(message.getChannelId()).isPresent()) {
+                            api.getMessageById(message.getMessageId(), api.getTextChannelById(message.getChannelId()).get()).join().delete();
+                        }
+                        dao.deleteMessage("m", message.getMessageId());
+                    } catch (Exception ignored) {
+                    }
                 }
             }
         };

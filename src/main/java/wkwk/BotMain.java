@@ -6,8 +6,10 @@ import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.channel.*;
 import org.javacord.api.entity.emoji.Emoji;
+import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAttachment;
 import org.javacord.api.entity.message.MessageBuilder;
+import org.javacord.api.entity.message.MessageUpdater;
 import org.javacord.api.entity.message.component.ActionRow;
 import org.javacord.api.entity.message.component.Button;
 import org.javacord.api.entity.message.component.SelectMenuBuilder;
@@ -35,6 +37,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -176,7 +179,6 @@ public class BotMain extends Thread {
                     }
                 }
             });
-
             api.addServerMemberLeaveListener(e -> {
                 ArrayList<LoggingRecord> logRecord = dao.getLogging("s", e.getServer().getIdAsString());
                 for (LoggingRecord record : logRecord) {
@@ -191,23 +193,29 @@ public class BotMain extends Thread {
                     }
                 }
             });
-
-
             api.addMessageCreateListener(event -> {
                 if (event.isPrivateMessage() && event.getMessageAuthor().asUser().isPresent()) {
-                    if(api.getServerTextChannelById(965590517427601438L).isPresent()){
+                    if (api.getServerTextChannelById(966824808622993462L).isPresent()) {
                         MessageBuilder messageBuilder = new MessageBuilder();
-                        messageBuilder.setContent(event.getMessageAuthor().asUser().get().getDiscriminatedName() + "\n ID : " + event.getMessageAuthor().asUser().get().getIdAsString() + "\n本文:\n" + event.getMessageContent());
+                        User privateUser = null;
+                        if (event.getMessageAuthor().asUser().get().getId() == wkwk.getId() && event.getPrivateChannel().isPresent() && event.getPrivateChannel().get().getRecipient().isPresent()) {
+                            privateUser = event.getPrivateChannel().get().getRecipient().get();
+                        }
+                        StringBuilder builder = new StringBuilder();
+                        if (privateUser != null) {
+                            builder.append(privateUser.getDiscriminatedName()).append("のDM\n");
+                        }
+                        builder.append(event.getMessageAuthor().asUser().get().getDiscriminatedName()).append("\n ID : ").append(event.getMessageAuthor().asUser().get().getIdAsString()).append("\n本文:\n").append(event.getMessageContent());
+                        messageBuilder.setContent(builder.toString());
                         for (MessageAttachment attachment : event.getMessageAttachments()) {
                             messageBuilder.addAttachment(attachment.getUrl());
                         }
-                        messageBuilder.send(api.getServerTextChannelById(965590517427601438L).get()).join();
-
+                        messageBuilder.send(api.getServerTextChannelById(966824808622993462L).get()).join();
                     }
                 }
             });
-
             api.addMessageDeleteListener(e -> {
+                dao.deleteMessage("m", e.getMessageId());
                 if (e.getMessageAuthor().isPresent() && e.getMessageAuthor().get().asUser().isPresent() && !e.getMessageAuthor().get().asUser().get().isBot() && e.getServer().isPresent()) {
                     TextChannel channel = e.getChannel();
                     User user = e.getMessageAuthor().get().asUser().get();
@@ -225,7 +233,6 @@ public class BotMain extends Thread {
                     }
                 }
             });
-
             api.addSlashCommandCreateListener(e -> {
                 try {
                     SlashCommandInteraction interaction = e.getSlashCommandInteraction();
@@ -622,7 +629,7 @@ public class BotMain extends Thread {
                                         User user = api.getUserById(interaction.getOptionStringValueByName("ID").get()).join();
                                         MessageBuilder messageBuilder = new MessageBuilder();
                                         if (interaction.getOptionStringValueByName("TEXT").isPresent()) {
-                                            String text = interaction.getOptionStringValueByName("TEXT").get().replaceAll(" ","\n");
+                                            String text = interaction.getOptionStringValueByName("TEXT").get().replaceAll(" ", "\n");
                                             messageBuilder.setContent(text);
                                         }
                                         if (interaction.getOptionStringValueByName("IMAGE").isPresent()) {
@@ -757,14 +764,12 @@ public class BotMain extends Thread {
                     ex.printStackTrace();
                 }
             });
-
             api.addMessageCreateListener(e -> {
                 if (e.getMessageAuthor().asUser().isPresent() && !e.getMessageAuthor().asUser().get().isBot() && e.getServer().isPresent()) {
                     String serverId = e.getServer().get().getIdAsString();
                     TextChannel channel = e.getChannel();
                     ArrayList<DeleteTimeRecord> deleteList = dao.getDeleteTimes(serverId);
-
-                    if (e.getMessageContent().startsWith(">") && e.getMessageAuthor().asUser().isPresent() && e.getServer().get().getPermissions(e.getMessageAuthor().asUser().get()).getAllowedPermission().contains(PermissionType.ADMINISTRATOR)) {
+                    if (e.getServer().get().getOwner().isPresent() && e.getMessageContent().startsWith(">") && e.getMessageAuthor().asUser().isPresent() && e.getServer().get().getPermissions(e.getMessageAuthor().asUser().get()).getAllowedPermission().contains(PermissionType.ADMINISTRATOR) || e.getServer().get().getOwner().get().getId() == e.getMessageAuthor().asUser().get().getId()) {
                         if (dao.getNoSlashCommandServer(serverId)) {
                             StringBuilder response;
                             String[] cmd = e.getMessageContent().replaceFirst(">", "").split(" ");
@@ -787,23 +792,21 @@ public class BotMain extends Thread {
                                     e.getMessage().delete();
                                     response = new StringBuilder().append("wkwkBOTはスラッシュコマンドのみの対応になりました。\n以下のリンクから").append(e.getServer().get().getName()).append("を選ばれますと、設定はそのままにすぐにスラッシュコマンドお使い頂けます。\n(https://wkb.page.link/bot)\n\nお手数ですが").append(e.getServer().get().getName()).append("でwkwkBOTに対して `/ping`をお使いください。\nすると以降このメッセージは表示されません");
                                     new MessageBuilder().setContent(response.toString()).send(e.getMessageAuthor().asUser().get()).join();
-                                    if (api.getTextChannelById(963986214581592074L).isPresent()) {
-                                        new MessageBuilder().setContent(e.getServer().get().getName() + " : " + e.getServer().get().getIdAsString()).send(api.getTextChannelById(963986214581592074L).get()).join();
+                                    if (api.getTextChannelById(966824808622993461L).isPresent()) {
+                                        new MessageBuilder().setContent(e.getServer().get().getName() + " : " + e.getServer().get().getIdAsString()).send(api.getTextChannelById(966824808622993461L).get()).join();
                                     }
                                     break;
                             }
                         }
                     }
-
                     for (DeleteTimeRecord record : deleteList) {
                         if (record.getTextChannelId().equalsIgnoreCase(channel.getIdAsString())) {
                             DeleteMessage message = new DeleteMessage();
                             message.setServerId(serverId);
                             message.setChannelId(channel.getIdAsString());
                             message.setMessageId(e.getMessage().getIdAsString());
-                            Date date = new Date();
                             Calendar calendar = Calendar.getInstance();
-                            calendar.setTime(date);
+                            calendar.setTime(Date.from(e.getMessage().getCreationTimestamp()));
                             switch (record.getTimeUnit()) {
                                 case "s":
                                 case "S":
@@ -829,7 +832,6 @@ public class BotMain extends Thread {
                     }
                 }
             });
-
             api.addServerVoiceChannelMemberJoinListener(e -> {
                 if (!e.getUser().isBot()) {
                     User joinUser = e.getUser();
@@ -859,12 +861,12 @@ public class BotMain extends Thread {
                                 if (data.getTextBy()) {
                                     ServerTextChannel text = new ServerTextChannelBuilder(server).setName(defaultName).setCategory(tcat).addPermissionOverwrite(server.getEveryoneRole(), new PermissionsBuilder().setAllDenied().build()).create().get();
                                     list.setTextID(text.getIdAsString());
-                                    new MessageBuilder().setContent("通話名前変更、通話最大人数変更、募集メッセージ送信はスラッシュコマンドになりました\n").addComponents(
-                                            ActionRow.of(Button.success("claim", "管理権限獲得"),
-                                                    Button.success("transfer", "通話権限移譲"),
-                                                    Button.success("hide", "非表示切替"),
-                                                    Button.success("lock", "参加許可切替"),
-                                                    Button.success("name", "通話名前変更"))).send(text);
+                                    new MessageBuilder().setContent("通話名前変更、通話最大人数変更、募集メッセージ送信は\nスラッシュコマンドになりました").addComponents(
+                                            ActionRow.of(Button.success("name", "通話名前変更"),
+                                                    Button.success("size", "通話人数変更"),
+                                                    Button.success("send-recruiting", "募集送信"),
+                                                    Button.success("remove-recruiting", "募集分削除"),
+                                                    Button.danger("next", "次の項目"))).send(text);
                                 } else {
                                     list.setTextID("NULL");
                                 }
@@ -962,7 +964,6 @@ public class BotMain extends Thread {
                 }
                 api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
             });
-
             api.addReactionAddListener(e -> {
                 if (!e.requestUser().join().isBot()) {
                     Emoji emoji = e.getEmoji();
@@ -983,7 +984,6 @@ public class BotMain extends Thread {
                     }
                 }
             });
-
             api.addReactionRemoveListener(e -> {
                 if (!e.requestUser().join().isBot()) {
                     Emoji emoji = e.getEmoji();
@@ -1004,7 +1004,6 @@ public class BotMain extends Thread {
                     }
                 }
             });
-
             api.addSelectMenuChooseListener(e -> {
                 SelectMenuInteraction menuInteraction = e.getSelectMenuInteraction();
                 String cmd = menuInteraction.getCustomId();
@@ -1053,6 +1052,12 @@ public class BotMain extends Thread {
                                         response = "チャンネル名を" + name + "に変更しました";
                                     }
                                 }
+                            } else if (cmd.equalsIgnoreCase("size")) {
+                                int size = Integer.parseInt(menuInteraction.getChosenOptions().get(0).getValue());
+                                if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
+                                    api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setUserLimit(size).update();
+                                    response = "通話人数を" + size + "に変更しました";
+                                }
                             }
                         }
                         if (api.getServerById(list.getServerID()).get().getPermissions(user).getAllowedPermission().contains(PermissionType.ADMINISTRATOR)) {
@@ -1092,7 +1097,6 @@ public class BotMain extends Thread {
                     ex.printStackTrace();
                 }
             });
-
             api.addButtonClickListener(e -> {
                 MessageBuilder messageBuilder = null;
                 ButtonInteraction buttonInteraction = e.getButtonInteraction();
@@ -1125,7 +1129,6 @@ public class BotMain extends Thread {
                                         if (lockIs) permissions.setDenied(PermissionType.CONNECT);
                                         else permissions.setUnset(PermissionType.CONNECT);
                                         ArrayList<Role> targetRole = new ArrayList<>();
-
                                         for (Map.Entry<Long, Permissions> permissionMap : api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenRolePermissions().entrySet()) {
                                             if (hideIs) {
                                                 for (PermissionType allowType : permissionMap.getValue().getAllowedPermission()) {
@@ -1168,7 +1171,6 @@ public class BotMain extends Thread {
                                         if (hideIs) permissions.setDenied(PermissionType.READ_MESSAGES);
                                         else permissions.setUnset(PermissionType.READ_MESSAGES);
                                         ArrayList<Role> targetRole = new ArrayList<>();
-
                                         for (Map.Entry<Long, Permissions> permissionMap : api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenRolePermissions().entrySet()) {
                                             if (lockIs) {
                                                 for (PermissionType allowType : permissionMap.getValue().getAllowedPermission()) {
@@ -1186,7 +1188,6 @@ public class BotMain extends Thread {
                                                 }
                                             }
                                         }
-
                                         ServerVoiceChannelUpdater updater = api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater();
                                         targetRole.add(buttonInteraction.getServer().get().getEveryoneRole());
                                         for (Role target : targetRole) {
@@ -1221,6 +1222,50 @@ public class BotMain extends Thread {
                                                 .addComponents(ActionRow.of(selectMenuBuilder.build()));
                                     } else {
                                         response = "名前の選択肢がありません";
+                                    }
+                                } else if (id.equalsIgnoreCase("next")) {
+                                    buttonInteraction.getMessage().createUpdater().removeAllComponents().addComponents(
+                                            ActionRow.of(Button.danger("back", "前の項目"),
+                                                    Button.success("transfer", "通話権限移譲"),
+                                                    Button.success("claim", "通話権限獲得"),
+                                                    Button.success("hide", "非表示切替"),
+                                                    Button.success("lock", "参加許可切替"))).applyChanges();
+                                } else if (id.equalsIgnoreCase("back")) {
+                                    buttonInteraction.getMessage().createUpdater().removeAllComponents().addComponents(
+                                            ActionRow.of(Button.success("name", "通話名前変更"),
+                                                    Button.success("size", "通話人数変更"),
+                                                    Button.success("send-recruiting", "募集送信"),
+                                                    Button.success("remove-recruiting", "募集分削除"),
+                                                    Button.danger("next", "次の項目"))).applyChanges();
+                                } else if (id.equalsIgnoreCase("size")){
+                                    SelectMenuBuilder selectMenuBuilder = new SelectMenuBuilder().setCustomId("size").setPlaceholder("変更したい人数を選択してください").setMaximumValues(1).setMinimumValues(1);
+                                    for (int n = 2 ; n < 7 ; n++) {
+                                        selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(Integer.toString(n)).setValue(Integer.toString(n)).build());
+                                    }
+                                    messageBuilder = new MessageBuilder()
+                                            .setContent("通話人数変更")
+                                            .addComponents(ActionRow.of(selectMenuBuilder.build()));
+                                } else if (id.equalsIgnoreCase("send-recruiting")){
+                                    String serverId = buttonInteraction.getServer().get().getIdAsString();
+                                    User sendUser = buttonInteraction.getUser();
+                                    ServerDataList serverList = dao.TempGetData(serverId);
+                                    if (api.getServerTextChannelById(serverList.getMentionChannel()).isPresent()) {
+                                        ServerTextChannel mention = api.getServerTextChannelById(serverList.getMentionChannel()).get();
+                                        String mentionMessage = serverList.getStereotyped();
+                                        mentionMessage = mentionMessage.replaceAll("&user&", sendUser.getMentionTag())
+                                                .replaceAll("&text&", "")
+                                                .replaceAll("/n", "\n")
+                                                .replaceAll("&channel&", "<#" + list.getVoiceID() + "> ")
+                                                .replaceAll("&everyone&", "@everyone ")
+                                                .replaceAll("&here&", "@here ");
+                                        dao.addMentionMessage(list.getTextID(), new MessageBuilder().setContent(mentionMessage).send(mention).join().getIdAsString(), serverId);
+                                    }
+                                } else if (id.equalsIgnoreCase("remove-recruiting")){
+                                    if (api.getTextChannelById(dao.getMentionChannel(list.getServerID())).isPresent()) {
+                                        for (String message : dao.getMentionMessage(list.getTextID()).getMessages()) {
+                                            api.getMessageById(message, api.getTextChannelById(dao.getMentionChannel(list.getServerID())).get()).join().delete();
+                                        }
+                                        dao.deleteMentions(list.getTextID());
                                     }
                                 }
                         } else if (api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().get(buttonInteraction.getUser().getId()) == null ||
@@ -1268,11 +1313,10 @@ public class BotMain extends Thread {
                             messageBuilder.send(buttonInteraction.getChannel().get());
                             buttonInteraction.createImmediateResponder().respond();
                         }
-                    } catch (DatabaseException ignored) {
+                    } catch (DatabaseException | SystemException ignored) {
                     }
                 }
             });
-
             api.addServerJoinListener(e -> {
                 Server server = e.getServer();
                 try {
@@ -1301,7 +1345,7 @@ public class BotMain extends Thread {
                 dao.serverLeaveAllDataDelete(serverId);
                 api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
             });
-            Permissions per = new PermissionsBuilder().setAllowed().build();
+            Permissions per = new PermissionsBuilder().setAllowed(PermissionType.ADMINISTRATOR).build();
             System.out.println("URL : " + api.createBotInvite(per).replaceAll("scope=bot", "scope=bot+applications.commands"));
             System.out.println();
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));

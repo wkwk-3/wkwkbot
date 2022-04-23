@@ -55,6 +55,7 @@ public class DiscordDAO extends DAOBase {
             this.close(stmt);
         }
     }
+
     public String BotGetToken() throws DatabaseException, SystemException {
         this.open();
         String token = null;
@@ -819,17 +820,18 @@ public class DiscordDAO extends DAOBase {
     public ArrayList<DeleteMessage> getDeleteMessage(String date) {
         ArrayList<DeleteMessage> list = new ArrayList<>();
         this.open();
-        PreparedStatement prestmt2;
+        PreparedStatement prestmt1 = null;
+        PreparedStatement prestmt2 = null;
         String sql = "SELECT EXISTS(SELECT * FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.DELETE_TIME.getParameter() + " < ?) AS MESSAGE_CHECK";
+        String sql2 = "SELECT * FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.DELETE_TIME.getParameter() + " < ?";
         try {
-            prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, date);
-            ResultSet rs = prestmt.executeQuery();
+            prestmt1 = con.prepareStatement(sql);
+            prestmt1.setString(1, date);
+            ResultSet rs = prestmt1.executeQuery();
             while (rs.next()) {
                 if (rs.getInt("MESSAGE_CHECK") == 1) {
-                    sql = "SELECT * FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.DELETE_TIME.getParameter() + " < ?";
-                    prestmt2 = con.prepareStatement(sql);
                     try {
+                        prestmt2 = con.prepareStatement(sql2);
                         prestmt2.setString(1, date);
                         ResultSet rsx = prestmt2.executeQuery();
                         while (rsx.next()) {
@@ -840,41 +842,41 @@ public class DiscordDAO extends DAOBase {
                         }
                     } catch (SQLException e) {
                         e.printStackTrace();
-                    } finally {
-                        this.close(prestmt2);
                     }
-                } else {
-                    break;
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            this.close(prestmt);
+            this.close(prestmt1);
+            this.close(prestmt2);
         }
         return list;
     }
 
     public void deleteMessage(String select, String id) {
         this.open();
-        prestmt = null;
+        PreparedStatement prestmt3 = null;
         try {
             if (select.equalsIgnoreCase("m")) {
                 String sql = "DELETE FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.MESSAGE_ID.getParameter() + " = ?";
-                prestmt = con.prepareStatement(sql);
-                prestmt.setString(1, id);
-                prestmt.execute();
+                prestmt3 = con.prepareStatement(sql);
+                prestmt3.setString(1, id);
+                prestmt3.execute();
             } else if (select.equalsIgnoreCase("s")) {
                 String sql = "DELETE FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.SERVER_ID.getParameter() + " = ?";
-                prestmt = con.prepareStatement(sql);
-                prestmt.setString(1, id);
-                prestmt.execute();
+                prestmt3 = con.prepareStatement(sql);
+                prestmt3.setString(1, id);
+                prestmt3.execute();
             }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            this.close(prestmt);
+            this.close(prestmt3);
         }
+    }
+    public void deleteMessage(String select, Long id) {
+        deleteMessage(select,Long.toString(id));
     }
 
     public void addLogging(ArrayList<LoggingRecord> records) {

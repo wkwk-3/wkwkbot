@@ -1046,4 +1046,83 @@ public class DiscordDAO extends DAOBase {
         return nos;
     }
 
+    public void addBotSendMessage(BotSendMessageRecord record) {
+        this.open();
+        try {
+            prestmt = null;
+            String sql = "INSERT INTO " + DAOParameters.TABLE_BOT_SEND_MESSAGES.getParameter() + " VALUES (?,?,?,?)";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, record.getSERVERID());
+            prestmt.setString(2, record.getMESSAGEID());
+            prestmt.setString(3, record.getCHANNELID());
+            prestmt.setString(4, record.getUSERID());
+            prestmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
+        }
+    }
+    public BotSendMessageRecord getBotSendMessage(String MessageID) {
+        BotSendMessageRecord record = new BotSendMessageRecord();
+        record.setMESSAGEID("NULL");
+        this.open();
+        prestmt = null;
+        try {
+            String sql = "SELECT EXISTS(SELECT * FROM " + DAOParameters.TABLE_BOT_SEND_MESSAGES.getParameter() + " WHERE " + BotSendMessageParameters.MESSAGE_ID.getParameter() + " = ?) AS MESSAGE_CHECK";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, MessageID);
+            ResultSet rs = prestmt.executeQuery();
+            while (rs.next()) {
+                if (rs.getInt("MESSAGE_CHECK") == 1) {
+                    sql = "SELECT * FROM " + DAOParameters.TABLE_BOT_SEND_MESSAGES.getParameter() + " WHERE " + BotSendMessageParameters.MESSAGE_ID.getParameter() + " = ?";
+                    prestmt = con.prepareStatement(sql);
+                    prestmt.setString(1, MessageID);
+                    ResultSet resultSet = prestmt.executeQuery();
+                    while (resultSet.next()) {
+                        record.setSERVERID(resultSet.getString(BotSendMessageParameters.SERVER_ID.getParameter()));
+                        record.setCHANNELID(resultSet.getString(BotSendMessageParameters.CHANNEL_ID.getParameter()));
+                        record.setMESSAGEID(resultSet.getString(BotSendMessageParameters.MESSAGE_ID.getParameter()));
+                        record.setUSERID(resultSet.getString(BotSendMessageParameters.USER_ID.getParameter()));
+
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
+        }
+        return record;
+    }
+
+    public void deleteBotSendMessage(String MessageId) {
+        this.open();
+        prestmt = null;
+        try {
+            String sql = "DELETE FROM " + DAOParameters.TABLE_BOT_SEND_MESSAGES.getParameter() + " WHERE " + BotSendMessageParameters.MESSAGE_ID.getParameter() + " = ?";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, MessageId);
+            prestmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
+        }
+    }
+
+    public void deleteMentionMessage(String MessageId) {
+        this.open();
+        prestmt = null;
+        try {
+            String sql = "DELETE FROM " + DAOParameters.TABLE_MENTION_MESSAGE.getParameter() + " WHERE " + BotSendMessageParameters.MESSAGE_ID.getParameter() + " = ?";
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, MessageId);
+            prestmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.close(prestmt);
+        }
+    }
 }

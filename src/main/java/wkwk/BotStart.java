@@ -4,6 +4,8 @@ package wkwk;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.message.MessageBuilder;
+import wkwk.botSystem.SlashCommandSystem;
+import wkwk.botSystem.TempChannelSystem;
 import wkwk.dao.DiscordDAO;
 import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
@@ -17,11 +19,17 @@ public class BotStart {
         try {
             DiscordDAO dao = new DiscordDAO();
             DiscordApi api = new DiscordApiBuilder().setAllIntents().setToken(dao.BotGetToken()).login().join();
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             WkwkSlashCommand wkwkSlashCommand = new WkwkSlashCommand(api);
             AutoTweet autoTweet = new AutoTweet(dao.getAutoTweetApis());
+
+
             new AutoDeleteMessage().start(api, dao);
+            new SlashCommandSystem(api).run();
+            new TempChannelSystem(api).run();
+
             new BotMain(api, dao);
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             while (true) {
                 String cmd = br.readLine();
                 if ("stop".equals(cmd)) {

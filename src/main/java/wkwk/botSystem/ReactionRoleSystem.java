@@ -16,40 +16,40 @@ public class ReactionRoleSystem {
 
     public void run() {
         DiscordDAO dao = new DiscordDAO();
-        api.addReactionAddListener(e -> {
-            if (!e.requestUser().join().isBot()) {
-                Emoji emoji = e.getEmoji();
-                if (emoji.asUnicodeEmoji().isPresent() && e.getServer().isPresent()) {
-                    String serverId = e.getServer().get().getIdAsString();
-                    String textChannel = e.getChannel().getIdAsString();
-                    String messageId = e.requestMessage().join().getIdAsString();
+        api.addReactionAddListener(event -> {
+            if (!event.requestUser().join().isBot()) {
+                Emoji emoji = event.getEmoji();
+                if (emoji.asUnicodeEmoji().isPresent() && event.getServer().isPresent()) {
+                    String serverId = event.getServer().get().getIdAsString();
+                    String textChannel = event.getChannel().getIdAsString();
+                    String messageId = event.requestMessage().join().getIdAsString();
                     ReactionRoleRecord record = dao.getReactAllData(serverId);
                     if (record.getTextChannelID() != null && record.getMessageID() != null && record.getTextChannelID().equals(textChannel) && record.getMessageID().equals(messageId)) {
                         ArrayList<String> emojis = record.getEmoji();
                         ArrayList<String> roles = record.getRoleID();
                         for (int i = 0; i < record.getEmoji().size(); i++) {
                             if (emoji.asUnicodeEmoji().get().equals(emojis.get(i)) && api.getRoleById(roles.get(i)).isPresent()) {
-                                e.requestUser().join().addRole(api.getRoleById(roles.get(i)).get()).join();
+                                event.requestUser().join().addRole(api.getRoleById(roles.get(i)).get()).join();
                             }
                         }
                     }
                 }
             }
         });
-        api.addReactionRemoveListener(e -> {
-            if (!e.requestUser().join().isBot()) {
-                Emoji emoji = e.getEmoji();
-                if (emoji.asUnicodeEmoji().isPresent() && e.getServer().isPresent()) {
-                    String serverId = e.getServer().get().getIdAsString();
-                    String textChannel = e.getChannel().getIdAsString();
-                    String messageId = e.requestMessage().join().getIdAsString();
+        api.addReactionRemoveListener(event -> {
+            if (!event.requestUser().join().isBot()) {
+                Emoji emoji = event.getEmoji();
+                if (emoji.asUnicodeEmoji().isPresent() && event.getServer().isPresent()) {
+                    String serverId = event.getServer().get().getIdAsString();
+                    String textChannel = event.getChannel().getIdAsString();
+                    String messageId = event.requestMessage().join().getIdAsString();
                     ReactionRoleRecord record = dao.getReactAllData(serverId);
                     if (record.getTextChannelID() != null && record.getMessageID() != null && record.getTextChannelID().equals(textChannel) && record.getMessageID().equals(messageId)) {
                         ArrayList<String> emojis = record.getEmoji();
                         ArrayList<String> roles = record.getRoleID();
                         for (int i = 0; i < record.getEmoji().size(); i++) {
                             if (emoji.asUnicodeEmoji().get().equals(emojis.get(i)) && api.getRoleById(roles.get(i)).isPresent()) {
-                                e.requestUser().join().removeRole(api.getRoleById(roles.get(i)).get()).join();
+                                event.requestUser().join().removeRole(api.getRoleById(roles.get(i)).get()).join();
                             }
                         }
                     }

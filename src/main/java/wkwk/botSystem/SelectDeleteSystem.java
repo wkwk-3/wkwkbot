@@ -14,20 +14,20 @@ public class SelectDeleteSystem {
 
     public void run() {
         DiscordDAO dao = new DiscordDAO();
-        api.addReactionAddListener(e -> {
-            if (!e.requestUser().join().isBot()) {
-                Emoji emoji = e.getEmoji();
-                if (emoji.asUnicodeEmoji().isPresent() && e.getServer().isPresent()) {
-                    String messageId = e.requestMessage().join().getIdAsString();
+        api.addReactionAddListener(event -> {
+            if (!event.requestUser().join().isBot()) {
+                Emoji emoji = event.getEmoji();
+                if (emoji.asUnicodeEmoji().isPresent() && event.getServer().isPresent()) {
+                    String messageId = event.requestMessage().join().getIdAsString();
                     if (emoji.asUnicodeEmoji().isPresent() && emoji.asUnicodeEmoji().get().equals("❌")) {
                         BotSendMessageRecord messageRecord = dao.getBotSendMessage(messageId);
-                        if (!messageRecord.getMESSAGEID().equalsIgnoreCase("NULL") && messageRecord.getMESSAGEID().equalsIgnoreCase(messageId) && messageRecord.getUSERID().equalsIgnoreCase(e.getUser().get().getIdAsString())) {
-                            e.getMessage().get().delete();
+                        if (!messageRecord.getMESSAGEID().equalsIgnoreCase("NULL") && messageRecord.getMESSAGEID().equalsIgnoreCase(messageId) && messageRecord.getUSERID().equalsIgnoreCase(event.getUser().get().getIdAsString())) {
+                            event.getMessage().get().delete();
                             dao.deleteBotSendMessage(messageId);
                             dao.deleteMentionMessage(messageId);
                             dao.deleteMessage("m", messageId);
-                        } else if (!messageRecord.getMESSAGEID().equalsIgnoreCase("NULL") && messageRecord.getMESSAGEID().equalsIgnoreCase(messageId) && !messageRecord.getUSERID().equalsIgnoreCase(e.getUser().get().getIdAsString())) {
-                            e.removeReaction();
+                        } else if (!messageRecord.getMESSAGEID().equalsIgnoreCase("NULL") && messageRecord.getMESSAGEID().equalsIgnoreCase(messageId) && !messageRecord.getUSERID().equalsIgnoreCase(event.getUser().get().getIdAsString())) {
+                            event.removeReaction();
                         }
                     }
                 }

@@ -19,8 +19,8 @@ public class PresetSystem {
 
     public void run() {
         DiscordDAO dao = new DiscordDAO();
-        api.addSelectMenuChooseListener(e -> {
-            SelectMenuInteraction menuInteraction = e.getSelectMenuInteraction();
+        api.addSelectMenuChooseListener(event -> {
+            SelectMenuInteraction menuInteraction = event.getSelectMenuInteraction();
             String cmd = menuInteraction.getCustomId();
             String response = null;
             User user = menuInteraction.getUser();

@@ -40,14 +40,14 @@ public class TempChannelSystem {
         DiscordDAO dao = new DiscordDAO();
         Processing processing = new Processing();
 
-        api.addServerVoiceChannelMemberJoinListener(e -> {
-            User joinUser = e.getUser();
+        api.addServerVoiceChannelMemberJoinListener(event -> {
+            User joinUser = event.getUser();
             if (!joinUser.isBot()) {
                 ChannelCategory joinChannelCategory = null;
-                Server server = e.getServer();
+                Server server = event.getServer();
                 String serverId = server.getIdAsString();
-                String joinVoiceId = e.getChannel().getIdAsString();
-                if (e.getChannel().getCategory().isPresent()) joinChannelCategory = e.getChannel().getCategory().get();
+                String joinVoiceId = event.getChannel().getIdAsString();
+                if (event.getChannel().getCategory().isPresent()) joinChannelCategory = event.getChannel().getCategory().get();
                 try {
                     ServerDataRecord data = dao.TempGetData(serverId);
                     String firstChannel = data.getFstChannel();
@@ -106,12 +106,12 @@ public class TempChannelSystem {
             }
             api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
         });
-        api.addServerVoiceChannelMemberLeaveListener(e -> {
+        api.addServerVoiceChannelMemberLeaveListener(event -> {
             ServerDataRecord data;
-            User user = e.getUser();
+            User user = event.getUser();
             ChannelCategory leaveChannelCategory = null;
-            String serverId = e.getServer().getIdAsString();
-            if (e.getChannel().getCategory().isPresent()) leaveChannelCategory = e.getChannel().getCategory().get();
+            String serverId = event.getServer().getIdAsString();
+            if (event.getChannel().getCategory().isPresent()) leaveChannelCategory = event.getChannel().getCategory().get();
             try {
                 data = dao.TempGetData(serverId);
                 String voiceCategory = data.getVoiceCategory();
@@ -139,9 +139,9 @@ public class TempChannelSystem {
                         }
                     }
                 if (leaveChannelCategory != null && leaveChannelCategory.getIdAsString().equals(voiceCategory)) {
-                    String leaveVoiceChannel = e.getChannel().getIdAsString();
+                    String leaveVoiceChannel = event.getChannel().getIdAsString();
                     ChannelRecord list = dao.TempGetChannelList(leaveVoiceChannel, "v");
-                    if (e.getChannel().getConnectedUserIds().size() > 0) {
+                    if (event.getChannel().getConnectedUserIds().size() > 0) {
                         if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
                             ServerTextChannel tx = api.getServerTextChannelById(list.getTextID()).get();
                             tx.createUpdater().removePermissionOverwrite(user).update();
@@ -156,9 +156,9 @@ public class TempChannelSystem {
             }
             api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
         });
-        api.addButtonClickListener(e -> {
+        api.addButtonClickListener(event -> {
             MessageBuilder messageBuilder = null;
-            ButtonInteraction buttonInteraction = e.getButtonInteraction();
+            ButtonInteraction buttonInteraction = event.getButtonInteraction();
             String response = "";
             String id = buttonInteraction.getCustomId();
             if (buttonInteraction.getChannel().isPresent()) {
@@ -356,7 +356,7 @@ public class TempChannelSystem {
                             } else response = "通話管理者が通話にいらっしゃいます";
                         }
                     }
-                    e.getInteraction().createImmediateResponder().setFlags(InteractionCallbackDataFlag.EPHEMERAL).setContent(response).respond();
+                    event.getInteraction().createImmediateResponder().setFlags(InteractionCallbackDataFlag.EPHEMERAL).setContent(response).respond();
                     if (messageBuilder != null) {
                         Message message = messageBuilder.send(buttonInteraction.getChannel().get()).join();
                         message.addReaction("❌");
@@ -372,8 +372,8 @@ public class TempChannelSystem {
                 }
             }
         });
-        api.addSelectMenuChooseListener(e -> {
-            SelectMenuInteraction menuInteraction = e.getSelectMenuInteraction();
+        api.addSelectMenuChooseListener(event -> {
+            SelectMenuInteraction menuInteraction = event.getSelectMenuInteraction();
             String cmd = menuInteraction.getCustomId();
             String response = null;
             try {

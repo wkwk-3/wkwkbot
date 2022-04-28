@@ -21,19 +21,19 @@ public class AutoDeleteRegisterSystem {
     public void run() {
         DiscordDAO dao = new DiscordDAO();
         SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        api.addMessageCreateListener(e -> {
-            if (e.getMessageAuthor().asUser().isPresent() && !e.getMessageAuthor().asUser().get().isBot() && e.getServer().isPresent()) {
-                String serverId = e.getServer().get().getIdAsString();
-                TextChannel channel = e.getChannel();
+        api.addMessageCreateListener(event -> {
+            if (event.getMessageAuthor().asUser().isPresent() && !event.getMessageAuthor().asUser().get().isBot() && event.getServer().isPresent()) {
+                String serverId = event.getServer().get().getIdAsString();
+                TextChannel channel = event.getChannel();
                 ArrayList<DeleteTimeRecord> deleteList = dao.getDeleteTimes(serverId);
                 for (DeleteTimeRecord record : deleteList) {
                     if (record.getTextChannelId().equals(channel.getIdAsString())) {
                         DeleteMessageRecord message = new DeleteMessageRecord();
                         message.setServerId(serverId);
                         message.setChannelId(channel.getIdAsString());
-                        message.setMessageId(e.getMessage().getIdAsString());
+                        message.setMessageId(event.getMessage().getIdAsString());
                         Calendar calendar = Calendar.getInstance();
-                        calendar.setTime(Date.from(e.getMessage().getCreationTimestamp()));
+                        calendar.setTime(Date.from(event.getMessage().getCreationTimestamp()));
                         if ("s".equals(record.getTimeUnit()) || "S".equals(record.getTimeUnit())) {
                             calendar.add(Calendar.SECOND, record.getDeleteTime());
                         } else if ("m".equals(record.getTimeUnit()) || "M".equals(record.getTimeUnit())) {

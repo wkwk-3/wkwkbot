@@ -3,17 +3,17 @@ package wkwk.Command;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.user.User;
-import wkwk.ReactionRoleRecord;
-import wkwk.ServerDataList;
 import wkwk.dao.DiscordDAO;
 import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
+import wkwk.record.ReactionRoleRecord;
+import wkwk.record.ServerDataRecord;
 
 import java.awt.*;
 
 public class Show {
     public EmbedBuilder create(String serverName, String serverId, User sendUser, DiscordDAO dao, DiscordApi api) {
-        ServerDataList tempData = null;
+        ServerDataRecord tempData = null;
         String bys = null;
         StringBuilder reacts = null;
 

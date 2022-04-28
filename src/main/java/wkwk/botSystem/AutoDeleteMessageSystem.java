@@ -1,26 +1,29 @@
-package wkwk;
+package wkwk.botSystem;
 
 import org.javacord.api.DiscordApi;
 import wkwk.dao.DiscordDAO;
+import wkwk.record.DeleteMessageRecord;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class AutoDeleteMessage {
+public class AutoDeleteMessageSystem {
     TimerTask task;
     Timer timer;
-    DiscordApi api = null;
-    DiscordDAO dao = null;
+    DiscordApi api;
+    DiscordDAO dao = new DiscordDAO();
 
-    public void start(DiscordApi api, DiscordDAO dao) {
+    public AutoDeleteMessageSystem(DiscordApi api) {
         this.api = api;
-        this.dao = dao;
+    }
+
+    public void run() {
         task = new TimerTask() {
             public void run() {
                 Date date = new Date();
                 String dates = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
-                ArrayList<DeleteMessage> messages = dao.getDeleteMessage(dates);
-                for (DeleteMessage message : messages) {
+                ArrayList<DeleteMessageRecord> messages = dao.getDeleteMessage(dates);
+                for (DeleteMessageRecord message : messages) {
                     try {
                         if (api.getTextChannelById(message.getChannelId()).isPresent()) {
                             api.getMessageById(message.getMessageId(), api.getTextChannelById(message.getChannelId()).get()).join().delete();

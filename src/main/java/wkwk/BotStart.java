@@ -3,12 +3,18 @@ package wkwk;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
+import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.message.MessageBuilder;
-import wkwk.botSystem.SlashCommandSystem;
-import wkwk.botSystem.TempChannelSystem;
+import org.javacord.api.entity.permission.PermissionType;
+import org.javacord.api.entity.permission.PermissionsBuilder;
+import wkwk.Command.WkwkSlashCommand;
+import wkwk.botSystem.*;
 import wkwk.dao.DiscordDAO;
 import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
+import wkwk.record.ChannelRecord;
+import wkwk.record.ServerDataRecord;
+import wkwk.twitterSystem.AutoTweet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,13 +27,21 @@ public class BotStart {
             DiscordApi api = new DiscordApiBuilder().setAllIntents().setToken(dao.BotGetToken()).login().join();
             WkwkSlashCommand wkwkSlashCommand = new WkwkSlashCommand(api);
             AutoTweet autoTweet = new AutoTweet(dao.getAutoTweetApis());
+            autoTweet.start();
 
-
-            new AutoDeleteMessage().start(api, dao);
+            new AutoDeleteMessageSystem(api).run();
+            new AutoDeleteRegisterSystem(api).run();
+            new GuideSystem(api).run();
+            new LoggingSystem(api).run();
+            new PresetSystem(api).run();
+            new ReactionRoleSystem(api).run();
+            new SelectDeleteSystem(api).run();
             new SlashCommandSystem(api).run();
             new TempChannelSystem(api).run();
+            new WatchingSystem(api).run();
 
-            new BotMain(api, dao);
+            System.out.println("URL : " + api.createBotInvite(new PermissionsBuilder().setAllowed(PermissionType.ADMINISTRATOR).build()).replaceAll("scope=bot", "scope=bot+applications.commands"));
+            api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
 
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             while (true) {
@@ -54,7 +68,7 @@ public class BotStart {
                             dao.deleteMentions(text);
                             System.out.println("右のメンションデータを削除しました -> " + text);
                         } else {
-                            ChannelList list = dao.TempGetChannelList(api.getServerTextChannelById(text).get().getIdAsString(), "t");
+                            ChannelRecord list = dao.TempGetChannelList(api.getServerTextChannelById(text).get().getIdAsString(), "t");
                             if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent() && api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUserIds().size() < 1) {
                                 k++;
                                 api.getServerVoiceChannelById(list.getVoiceID()).get().delete();
@@ -82,6 +96,7 @@ public class BotStart {
                     if (k > 0) outMention = "メンションデータ削除完了";
                     if (j > 0) outTemp = "一時データ削除完了";
                     System.out.println(outServer + "\n" + outMention + "\n" + outTemp);
+                    api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
                 } else if ("ts".equals(cmd)) {
                     autoTweet.start();
                 } else if ("tp".equals(cmd)) {
@@ -101,7 +116,7 @@ public class BotStart {
                     wkwkSlashCommand.commandShow();
                 } else if ("updateAnnounce".equals(cmd)) {
                     System.out.println("送信開始");
-                    for (ServerDataList list : dao.getNoSlashCommandServer()) {
+                    for (ServerDataRecord list : dao.getNoSlashCommandServer()) {
                         if (api.getServerById(list.getServer()).isPresent() && api.getServerById(list.getServer()).get().getOwner().isPresent()) {
                             new MessageBuilder().setContent("wkwkBOTをお使いいただき誠にありがとうございます。" +
                                     "\n当BOTは4/12 12:00 を持って全機能が\nスラッシュコマンドに移行いたしました" +

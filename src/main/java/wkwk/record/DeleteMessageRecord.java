@@ -1,9 +1,9 @@
-package wkwk;
+package wkwk.record;
 
 import lombok.Data;
 
 @Data
-public class DeleteMessage {
+public class DeleteMessageRecord {
 
     private String serverId;
     private String messageId;

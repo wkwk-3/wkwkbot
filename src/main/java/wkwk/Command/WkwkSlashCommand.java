@@ -1,7 +1,9 @@
-package wkwk;
+package wkwk.Command;
 
 import org.javacord.api.DiscordApi;
-import org.javacord.api.interaction.*;
+import org.javacord.api.interaction.SlashCommand;
+import org.javacord.api.interaction.SlashCommandOption;
+import org.javacord.api.interaction.SlashCommandOptionType;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,7 +39,7 @@ public class WkwkSlashCommand {
                 SlashCommand.with("add", "追加",
                         Collections.singletonList(
                                 SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "user", "特定のユーザーだけ見えるようにする"))
-                        ).createGlobal(api).join();
+                ).createGlobal(api).join();
         SlashCommand delete =
                 SlashCommand.with("delete", "削除",
                         Collections.singletonList(

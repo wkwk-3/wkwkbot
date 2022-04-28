@@ -1,7 +1,8 @@
-package wkwk;
+package wkwk.twitterSystem;
 
 import io.github.redouane59.twitter.TwitterClient;
 import io.github.redouane59.twitter.signature.TwitterCredentials;
+import wkwk.record.TweetAPIRecord;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -24,7 +25,7 @@ public class AutoTweet {
     TimerTask task;
     Timer timer;
 
-    public AutoTweet(TweetAPIList list) {
+    public AutoTweet(TweetAPIRecord list) {
         twitterClient = new TwitterClient(TwitterCredentials.builder()
                 .accessToken(list.getToken())
                 .accessTokenSecret(list.getTokenSecret())

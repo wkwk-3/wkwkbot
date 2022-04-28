@@ -15,13 +15,13 @@ import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.SlashCommandInteraction;
 import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
-import wkwk.*;
 import wkwk.Command.Help;
 import wkwk.Command.Processing;
 import wkwk.Command.Show;
 import wkwk.dao.DiscordDAO;
 import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
+import wkwk.record.*;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -32,10 +32,12 @@ import java.util.Collection;
 
 public class SlashCommandSystem {
     DiscordApi api;
+
     public SlashCommandSystem(DiscordApi api) {
         this.api = api;
     }
-    public void run () {
+
+    public void run() {
         User wkwk = api.getYourself();
 
         Processing processing = new Processing();
@@ -64,11 +66,11 @@ public class SlashCommandSystem {
                     if (isAdmin) {
                         switch (cmd) {
                             case "setup":
-                                ServerDataList old;
+                                ServerDataRecord old;
                                 old = dao.TempGetData(serverId);
                                 ServerTextChannel mentionChannel = new ServerTextChannelBuilder(server).setName("Mention").setRawPosition(1).create().join();
                                 mentionChannel.createUpdater().addPermissionOverwrite(wkwk, new PermissionsBuilder().setAllowed(PermissionType.MENTION_EVERYONE).build()).update().join();
-                                ServerDataList data = new ServerDataList();
+                                ServerDataRecord data = new ServerDataRecord();
                                 data.setServer(serverId);
                                 data.setFstChannel(new ServerVoiceChannelBuilder(server).setName("NewTEMP").setRawPosition(0).setBitrate(64000).addPermissionOverwrite(everyone, new PermissionsBuilder().setDenied(PermissionType.SEND_MESSAGES).build()).addPermissionOverwrite(wkwk, new PermissionsBuilder().setAllowed(PermissionType.MOVE_MEMBERS).build()).create().join().getIdAsString());
                                 data.setMentionChannel(mentionChannel.getIdAsString());
@@ -132,7 +134,8 @@ public class SlashCommandSystem {
                                                     if (api.getServerTextChannelById(textChannel).get().getServer().getIdAsString().equals(serverId)) {
                                                         dao.BotSetDate("m", serverId, textChannel);
                                                         responseString = new StringBuilder("メンション送信チャンネル更新完了");
-                                                    } else responseString = new StringBuilder("このサーバーのテキストチャンネルを入力してください");
+                                                    } else
+                                                        responseString = new StringBuilder("このサーバーのテキストチャンネルを入力してください");
                                                 } else responseString = new StringBuilder("テキストチャンネルを入力してください");
                                             }
                                             break;
@@ -186,8 +189,10 @@ public class SlashCommandSystem {
                                                     dao.setReactRoleData(serverId, record.getMessageID(), roleId, emoji);
                                                     api.getMessageById(record.getMessageID(), api.getServerTextChannelById(record.getTextChannelID()).get()).join().addReaction(emoji).join();
                                                     str.append("リアクションロール設定完了");
-                                                } else if (record.getServerID() == null) str.append("リアクションロールの対象メッセージを設定してください\n");
-                                                if (!EmojiManager.isEmoji(emoji)) str.append(emoji).append("は絵文字ではない\n");
+                                                } else if (record.getServerID() == null)
+                                                    str.append("リアクションロールの対象メッセージを設定してください\n");
+                                                if (!EmojiManager.isEmoji(emoji))
+                                                    str.append(emoji).append("は絵文字ではない\n");
                                                 responseString = new StringBuilder(str.toString());
 
                                             }
@@ -444,7 +449,7 @@ public class SlashCommandSystem {
                             break;
                     }
                     if (cmd.equals("name") || cmd.equals("size") || cmd.equals("men") || cmd.equals("n") || cmd.equals("s") || cmd.equals("m") || cmd.equals("add") || cmd.equals("delete")) {
-                        ChannelList list = dao.TempGetChannelList(channel.getIdAsString(), "t");
+                        ChannelRecord list = dao.TempGetChannelList(channel.getIdAsString(), "t");
                         if (sendUser.getConnectedVoiceChannel(server).isPresent() && list.getVoiceID() != null) {
                             String requestVoiceId = dao.TempGetChannelList(channel.getIdAsString(), "t").getVoiceID();
                             if (requestVoiceId.equals(sendUser.getConnectedVoiceChannel(server).get().getIdAsString()) && api.getServerVoiceChannelById(requestVoiceId).isPresent() && api.getServerVoiceChannelById(requestVoiceId).get().getEffectivePermissions(sendUser).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
@@ -474,7 +479,7 @@ public class SlashCommandSystem {
                                     if (interaction.getOptionStringValueByName("text").isPresent()) {
                                         mentionText.append(interaction.getOptionStringValueByName("text").get());
                                     }
-                                    ServerDataList serverList = dao.TempGetData(serverId);
+                                    ServerDataRecord serverList = dao.TempGetData(serverId);
                                     if (api.getServerTextChannelById(serverList.getMentionChannel()).isPresent()) {
                                         ServerTextChannel mention = api.getServerTextChannelById(serverList.getMentionChannel()).get();
                                         String mentionMessage = serverList.getStereotyped();

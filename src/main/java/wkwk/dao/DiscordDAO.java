@@ -1,9 +1,9 @@
 package wkwk.dao;
 
-import wkwk.*;
 import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
 import wkwk.parameter.*;
+import wkwk.record.*;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -73,10 +73,10 @@ public class DiscordDAO extends DAOBase {
         return token;
     }
 
-    public ServerDataList TempGetData(String serverId) throws SystemException, DatabaseException {
+    public ServerDataRecord TempGetData(String serverId) throws SystemException, DatabaseException {
         this.open();
         prestmt = null;
-        ServerDataList dataList = new ServerDataList();
+        ServerDataRecord dataList = new ServerDataRecord();
         try {
             String sql = "SELECT * FROM " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
             prestmt = con.prepareStatement(sql);
@@ -138,7 +138,7 @@ public class DiscordDAO extends DAOBase {
         }
     }
 
-    public void TempDataUpData(ServerDataList data) throws DatabaseException {
+    public void TempDataUpData(ServerDataRecord data) throws DatabaseException {
         this.open();
         prestmt = null;
         try {
@@ -211,7 +211,7 @@ public class DiscordDAO extends DAOBase {
         }
     }
 
-    public void TempSetChannelList(ChannelList list) throws DatabaseException {
+    public void TempSetChannelList(ChannelRecord list) throws DatabaseException {
         this.open();
         prestmt = null;
         try {
@@ -228,10 +228,10 @@ public class DiscordDAO extends DAOBase {
         }
     }
 
-    public ChannelList TempGetChannelList(String channelId, String select) throws DatabaseException {
+    public ChannelRecord TempGetChannelList(String channelId, String select) throws DatabaseException {
         this.open();
         prestmt = null;
-        ChannelList list = null;
+        ChannelRecord list = null;
         try {
             String sql = null;
             if ("v".equals(select))
@@ -241,7 +241,7 @@ public class DiscordDAO extends DAOBase {
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, channelId);
             ResultSet rs = prestmt.executeQuery();
-            list = new ChannelList();
+            list = new ChannelRecord();
             while (rs.next()) {
                 list.setServerID(rs.getString(TempChannelsParameters.SERVER_ID.getParameter()));
                 list.setVoiceID(rs.getString(TempChannelsParameters.VOICE_CHANNEL_ID.getParameter()));
@@ -378,9 +378,9 @@ public class DiscordDAO extends DAOBase {
         }
     }
 
-    public MentionList getMentionMessage(String textId) {
+    public MentionRecord getMentionMessage(String textId) {
         this.open();
-        MentionList list = new MentionList();
+        MentionRecord list = new MentionRecord();
         prestmt = null;
         try {
             String sql = "SELECT " + MentionMessageParameters.MESSAGE_ID.getParameter() + " FROM " + DAOParameters.TABLE_MENTION_MESSAGE.getParameter() + " WHERE " + MentionMessageParameters.TEXT_CHANNEL_ID.getParameter() + " = ?";
@@ -396,9 +396,9 @@ public class DiscordDAO extends DAOBase {
         return list;
     }
 
-    public MentionList getAllMentionText() {
+    public MentionRecord getAllMentionText() {
         this.open();
-        MentionList list = new MentionList();
+        MentionRecord list = new MentionRecord();
         Statement stmt = null;
         try {
             stmt = con.createStatement();
@@ -693,9 +693,9 @@ public class DiscordDAO extends DAOBase {
         }
     }
 
-    public TweetAPIList getAutoTweetApis() {
+    public TweetAPIRecord getAutoTweetApis() {
         this.open();
-        TweetAPIList apis = new TweetAPIList();
+        TweetAPIRecord apis = new TweetAPIRecord();
         Statement stmt = null;
         try {
             stmt = con.createStatement();
@@ -799,7 +799,7 @@ public class DiscordDAO extends DAOBase {
         return list;
     }
 
-    public void addDeleteMessage(DeleteMessage message) {
+    public void addDeleteMessage(DeleteMessageRecord message) {
         this.open();
         prestmt = null;
         try {
@@ -817,8 +817,8 @@ public class DiscordDAO extends DAOBase {
         }
     }
 
-    public ArrayList<DeleteMessage> getDeleteMessage(String date) {
-        ArrayList<DeleteMessage> list = new ArrayList<>();
+    public ArrayList<DeleteMessageRecord> getDeleteMessage(String date) {
+        ArrayList<DeleteMessageRecord> list = new ArrayList<>();
         this.open();
         PreparedStatement prestmt1 = null;
         PreparedStatement prestmt2 = null;
@@ -835,7 +835,7 @@ public class DiscordDAO extends DAOBase {
                         prestmt2.setString(1, date);
                         ResultSet rsx = prestmt2.executeQuery();
                         while (rsx.next()) {
-                            DeleteMessage message = new DeleteMessage();
+                            DeleteMessageRecord message = new DeleteMessageRecord();
                             message.setMessageId(rsx.getString(DeleteMessagesParameters.MESSAGE_ID.getParameter()));
                             message.setChannelId(rsx.getString(DeleteMessagesParameters.TEXT_CHANNEL_ID.getParameter()));
                             list.add(message);
@@ -875,8 +875,9 @@ public class DiscordDAO extends DAOBase {
             this.close(prestmt3);
         }
     }
+
     public void deleteMessage(String select, Long id) {
-        deleteMessage(select,Long.toString(id));
+        deleteMessage(select, Long.toString(id));
     }
 
     public void addLogging(ArrayList<LoggingRecord> records) {
@@ -992,9 +993,9 @@ public class DiscordDAO extends DAOBase {
         }
     }
 
-    public ArrayList<ServerDataList> getNoSlashCommandServer() {
+    public ArrayList<ServerDataRecord> getNoSlashCommandServer() {
         this.open();
-        ArrayList<ServerDataList> servers = new ArrayList<>();
+        ArrayList<ServerDataRecord> servers = new ArrayList<>();
         prestmt = null;
         try {
             String sql = "SELECT * FROM " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " WHERE PREFIX = ?";
@@ -1002,7 +1003,7 @@ public class DiscordDAO extends DAOBase {
             prestmt.setString(1, ">");
             ResultSet rs = prestmt.executeQuery();
             while (rs.next()) {
-                ServerDataList dataList = new ServerDataList();
+                ServerDataRecord dataList = new ServerDataRecord();
                 dataList.setServer(rs.getString(ServerPropertyParameters.SERVER_ID.getParameter()));
                 dataList.setMentionChannel(rs.getString(ServerPropertyParameters.MENTION_CHANNEL_ID.getParameter()));
                 dataList.setFstChannel(rs.getString(ServerPropertyParameters.FIRST_CHANNEL_ID.getParameter()));
@@ -1063,6 +1064,7 @@ public class DiscordDAO extends DAOBase {
             this.close(prestmt);
         }
     }
+
     public BotSendMessageRecord getBotSendMessage(String MessageID) {
         BotSendMessageRecord record = new BotSendMessageRecord();
         record.setMESSAGEID("NULL");

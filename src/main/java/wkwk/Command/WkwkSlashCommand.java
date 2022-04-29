@@ -17,34 +17,31 @@ public class WkwkSlashCommand {
     }
 
     public void createCommand() {
-        if (api.getServerById(966824807951925258L).isPresent()) {
-            SlashCommand rePrivateChat =
-                    SlashCommand.with("r", "個人チャットの返信",
-                            Arrays.asList(
-                                    SlashCommandOption.create(SlashCommandOptionType.STRING, "ID", "返信先ユーザーID"),
-                                    SlashCommandOption.create(SlashCommandOptionType.STRING, "TEXT", "本文"),
-                                    SlashCommandOption.create(SlashCommandOptionType.STRING, "IMAGE", "画像")
-                            )
-                    ).setDefaultPermission(true).createForServer(api.getServerById(966824807951925258L).get()).join();
-        }
+        System.out.println("ping");
         SlashCommand ping =
                 SlashCommand.with("ping", "BOTの回線速度を計測").createGlobal(api).join();
+        System.out.println("invite");
         SlashCommand invite =
                 SlashCommand.with("invite", "BOT招待リンクを表示").createGlobal(api).join();
+        System.out.println("guild");
         SlashCommand guild =
                 SlashCommand.with("guild", "サポートサーバー招待リンクを表示").createGlobal(api).join();
+        System.out.println("setup");
         SlashCommand setup =
                 SlashCommand.with("setup", "一時通話作成に必要な要素を生成").createGlobal(api).join();
+        System.out.println("add");
         SlashCommand add =
                 SlashCommand.with("add", "追加",
                         Collections.singletonList(
                                 SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "user", "特定のユーザーだけ見えるようにする"))
                 ).createGlobal(api).join();
+        System.out.println("delete");
         SlashCommand delete =
                 SlashCommand.with("delete", "削除",
                         Collections.singletonList(
                                 SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "user", "特定のユーザーだけに見えないように"))
                 ).createGlobal(api).join();
+        System.out.println("set");
         SlashCommand set =
                 SlashCommand.with("set", "サーバー設定変更",
                                 Arrays.asList(
@@ -108,6 +105,7 @@ public class WkwkSlashCommand {
                                 ))
                         .createGlobal(api)
                         .join();
+        System.out.println("remove");
         SlashCommand remove =
                 SlashCommand.with("remove", "設定削除",
                         Arrays.asList(
@@ -115,6 +113,7 @@ public class WkwkSlashCommand {
                                 SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "namepreset", "名前候補削除表示"),
                                 SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "logging", "ログ表示削除表示")
                         )).createGlobal(api).join();
+        System.out.println("start");
         SlashCommand start =
                 SlashCommand.with("start", "処理開始",
                         Arrays.asList(
@@ -124,15 +123,19 @@ public class WkwkSlashCommand {
                                                 SlashCommandOption.create(SlashCommandOptionType.STRING, "unit", "時間の単位 s m h d ")
                                         ))
                         )).createGlobal(api).join();
+        System.out.println("stop");
         SlashCommand stop =
                 SlashCommand.with("stop", "処理終了",
                         Arrays.asList(
                                 SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "delete", "オートデリート終了")
                         )).createGlobal(api).join();
+        System.out.println("help");
         SlashCommand help =
                 SlashCommand.with("help", "ヘルプ").createGlobal(api).join();
+        System.out.println("show");
         SlashCommand show =
                 SlashCommand.with("show", "サーバー情報表示").createGlobal(api).join();
+        System.out.println("mess");
         SlashCommand mess =
                 SlashCommand.with("mess", "メッセージ送信",
                         Arrays.asList(
@@ -140,36 +143,42 @@ public class WkwkSlashCommand {
                                 SlashCommandOption.create(SlashCommandOptionType.STRING, "url", "添付画像リンク")
                         )
                 ).createGlobal(api).join();
+        System.out.println("name");
         SlashCommand name =
                 SlashCommand.with("name", "チャンネル名前変更",
                         Collections.singletonList(
                                 SlashCommandOption.create(SlashCommandOptionType.STRING, "name", "チャンネル名")
                         )
                 ).createGlobal(api).join();
+        System.out.println("size");
         SlashCommand size =
                 SlashCommand.with("size", "チャンネル人数変更",
                         Collections.singletonList(
                                 SlashCommandOption.create(SlashCommandOptionType.LONG, "size", "チャンネル最大人数")
                         )
                 ).createGlobal(api).join();
+        System.out.println("men");
         SlashCommand men =
                 SlashCommand.with("men", "チャンネル募集送信",
                         Collections.singletonList(
                                 SlashCommandOption.create(SlashCommandOptionType.STRING, "text", "募集内容")
                         )
                 ).createGlobal(api).join();
+        System.out.println("nameS");
         SlashCommand nameS =
                 SlashCommand.with("n", "チャンネル名前変更",
                         Collections.singletonList(
                                 SlashCommandOption.create(SlashCommandOptionType.STRING, "name", "チャンネル名")
                         )
                 ).createGlobal(api).join();
+        System.out.println("sizeS");
         SlashCommand sizeS =
                 SlashCommand.with("s", "チャンネル人数変更",
                         Collections.singletonList(
                                 SlashCommandOption.create(SlashCommandOptionType.LONG, "size", "チャンネル最大人数")
                         )
                 ).createGlobal(api).join();
+        System.out.println("menS");
         SlashCommand menS =
                 SlashCommand.with("m", "チャンネル募集送信",
                         Collections.singletonList(

@@ -40,11 +40,11 @@ public class GuideSystem {
             Server server = e.getServer();
             try {
                 if (server.getSystemChannel().isPresent()) {
-                    server.getSystemChannel().get().sendMessage("/setup を打つと\nチャンネルとカテゴリを作成されます");
-                    server.getSystemChannel().get().sendMessage("困ったことがありましたら、下記リンクからサポートサーバーに入り、お聞きください。\nhttps://discord.gg/6Z7jabh983");
+                    server.getSystemChannel().get().sendMessage("/setup を打つと\nチャンネルとカテゴリを作成されます。\n" +
+                            "困ったことがありましたら、下記リンクからサポートサーバーに入り、お聞きください。\nhttp://wkwk.tech/guild");
                 } else {
-                    server.getOwner().get().sendMessage("/setup を打つと\nチャンネルとカテゴリを作成されます");
-                    server.getOwner().get().sendMessage("困ったことがありましたら、下記リンクからサポートサーバーに入り、お聞きください。\nhttps://discord.gg/6Z7jabh983").join();
+                    server.getOwner().get().sendMessage("/setup を打つと\nチャンネルとカテゴリを作成されます。\n" +
+                            "困ったことがありましたら、下記リンクからサポートサーバーに入り、お聞きください。\nhttp://wkwk.tech/guild");
                 }
                 dao.TempNewServer(server.getIdAsString());
             } catch (DatabaseException ignored) {

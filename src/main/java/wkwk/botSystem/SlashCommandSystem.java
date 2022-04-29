@@ -227,6 +227,7 @@ public class SlashCommandSystem {
 
                                             }
                                             break;
+
                                         case "logging":
                                             if (interaction.getOptionByIndex(0).isPresent() && interaction.getOptionByIndex(0).get().getOptionByIndex(0).isPresent()) {
                                                 String subCommand = interaction.getOptionByIndex(0).get().getOptionByIndex(0).get().getName();
@@ -236,13 +237,13 @@ public class SlashCommandSystem {
                                                 logging.setChannelId(channel.getIdAsString());
                                                 logging.setLogType(subCommand);
                                                 ArrayList<String> targets;
-                                                if (subCommand.equals("USER")) {
+                                                if (subCommand.equals("user")) {
                                                     logging.setTargetChannelId(channel.getIdAsString());
                                                     records.add(logging);
                                                     dao.addLogging(records);
                                                     responseString = new StringBuilder("ユーザー加入・脱退履歴を設定");
 
-                                                } else if (subCommand.equals("CHAT") && interaction.getOptionByIndex(0).get().getOptionByIndex(0).get().getOptionChannelValueByName("textChannel").isPresent()) {
+                                                } else if (subCommand.equals("chat") && interaction.getOptionByIndex(0).get().getOptionByIndex(0).get().getOptionChannelValueByName("textChannel").isPresent()) {
                                                     targets = new ArrayList<>();
                                                     targets.add(interaction.getOptionByIndex(0).get().getOptionByIndex(0).get().getOptionChannelValueByName("textChannel").get().getIdAsString());
                                                     targets.forEach(id -> {
@@ -301,9 +302,9 @@ public class SlashCommandSystem {
                                             if (logRecord.size() > 0) {
                                                 SelectMenuBuilder selectMenuBuilder = new SelectMenuBuilder().setCustomId("removeLogging").setPlaceholder("削除したいlog設定を選んでください").setMaximumValues(1).setMinimumValues(1);
                                                 for (LoggingRecord log : logRecord) {
-                                                    if (api.getServerTextChannelById(log.getTargetChannelId()).isPresent() && log.getLogType().equals("CHAT")) {
+                                                    if (api.getServerTextChannelById(log.getTargetChannelId()).isPresent() && log.getLogType().equals("chat")) {
                                                         selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(log.getLogType() + ":" + api.getServerTextChannelById(log.getTargetChannelId()).get().getName()).setValue(log.getTargetChannelId() + " " + log.getLogType() + " " + log.getChannelId()).build());
-                                                    } else if (api.getServerTextChannelById(log.getTargetChannelId()).isPresent() && log.getLogType().equals("USER")) {
+                                                    } else if (api.getServerTextChannelById(log.getTargetChannelId()).isPresent() && log.getLogType().equals("user")) {
                                                         selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(log.getLogType() + ":" + api.getServerTextChannelById(log.getTargetChannelId()).get().getName()).setValue(log.getTargetChannelId() + " " + log.getLogType() + " " + log.getChannelId()).build());
                                                     } else if (!api.getServerTextChannelById(log.getTargetChannelId()).isPresent()) {
                                                         selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(log.getLogType() + ":" + log.getTargetChannelId()).setValue(log.getChannelId() + " " + log.getLogType() + " " + log.getChannelId()).build());
@@ -313,7 +314,9 @@ public class SlashCommandSystem {
                                                         .setContent("履歴チャンネル削除")
                                                         .addComponents(ActionRow.of(selectMenuBuilder.build()));
                                                 responseString = new StringBuilder("選択形式を送信");
-                                            } else responseString = new StringBuilder("候補がありません");
+                                            } else {
+                                                responseString = new StringBuilder("候補がありません");
+                                            }
                                             break;
                                     }
                                 }
@@ -545,7 +548,7 @@ public class SlashCommandSystem {
                         BotSendMessageRecord record = new BotSendMessageRecord();
                         record.setMESSAGEID(message.getIdAsString());
                         record.setCHANNELID(channel.getIdAsString());
-                        record.setUSERID(sendUser.getIdAsString());
+                        record.setUSERID(interaction.getUser().getIdAsString());
                         record.setSERVERID(serverId);
                         dao.addBotSendMessage(record);
                     }

@@ -379,83 +379,85 @@ public class TempChannelSystem {
             try {
                 if (menuInteraction.getChannel().isPresent()) {
                     ChannelRecord list = dao.TempGetChannelList(menuInteraction.getChannel().get().getIdAsString(), "t");
-                    boolean isManage = api.getServerTextChannelById(list.getTextID()).get().getOverwrittenUserPermissions().get(menuInteraction.getUser().getId()).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS);
-                    String requestVoiceId = list.getVoiceID();
-                    if (isManage) {
-                        switch (cmd) {
-                            case "transSelect":
-                                long oldManege = menuInteraction.getUser().getId();
-                                if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
-                                    User selectUser = api.getUserById(menuInteraction.getChosenOptions().get(0).getValue()).join();
-                                    api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(selectUser, new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS, PermissionType.READ_MESSAGES).build()).removePermissionOverwrite(api.getUserById(oldManege).join()).update();
-                                    if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
-                                        api.getServerTextChannelById(list.getTextID()).get().createUpdater().addPermissionOverwrite(selectUser, new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS, PermissionType.READ_MESSAGES,
-                                                PermissionType.READ_MESSAGE_HISTORY,
-                                                PermissionType.SEND_MESSAGES,
-                                                PermissionType.ADD_REACTIONS,
-                                                PermissionType.ATTACH_FILE,
-                                                PermissionType.USE_APPLICATION_COMMANDS,
-                                                PermissionType.USE_EXTERNAL_STICKERS,
-                                                PermissionType.USE_EXTERNAL_EMOJIS).build()).removePermissionOverwrite(api.getUserById(oldManege).join()).addPermissionOverwrite(api.getUserById(oldManege).join(), new PermissionsBuilder().setAllowed(PermissionType.READ_MESSAGES,
-                                                PermissionType.READ_MESSAGE_HISTORY,
-                                                PermissionType.SEND_MESSAGES,
-                                                PermissionType.ADD_REACTIONS,
-                                                PermissionType.ATTACH_FILE,
-                                                PermissionType.USE_APPLICATION_COMMANDS,
-                                                PermissionType.USE_EXTERNAL_STICKERS,
-                                                PermissionType.USE_EXTERNAL_EMOJIS).build()).update();
-                                    }
-                                    response = selectUser.getName() + "が新しく通話管理者になりました";
-                                }
-                                break;
-                            case "name":
-                                if (api.getServerVoiceChannelById(requestVoiceId).isPresent()) {
-                                    if (api.getServerTextChannelById(list.getTextID()).isPresent() && api.getServerTextChannelById(list.getTextID()).get().getOverwrittenUserPermissions().get(menuInteraction.getUser().getId()).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
-                                        String name = menuInteraction.getChosenOptions().get(0).getValue();
-                                        if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
-                                            api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setName(name).update();
-                                        }
+                    if (list.getServerID() != null) {
+                        boolean isManage = api.getServerTextChannelById(list.getTextID()).get().getOverwrittenUserPermissions().get(menuInteraction.getUser().getId()).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS);
+                        String requestVoiceId = list.getVoiceID();
+                        if (isManage) {
+                            switch (cmd) {
+                                case "transSelect":
+                                    long oldManege = menuInteraction.getUser().getId();
+                                    if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
+                                        User selectUser = api.getUserById(menuInteraction.getChosenOptions().get(0).getValue()).join();
+                                        api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(selectUser, new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS, PermissionType.READ_MESSAGES).build()).removePermissionOverwrite(api.getUserById(oldManege).join()).update();
                                         if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
-                                            api.getServerTextChannelById(list.getTextID()).get().createUpdater().setName(name).update();
+                                            api.getServerTextChannelById(list.getTextID()).get().createUpdater().addPermissionOverwrite(selectUser, new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS, PermissionType.READ_MESSAGES,
+                                                    PermissionType.READ_MESSAGE_HISTORY,
+                                                    PermissionType.SEND_MESSAGES,
+                                                    PermissionType.ADD_REACTIONS,
+                                                    PermissionType.ATTACH_FILE,
+                                                    PermissionType.USE_APPLICATION_COMMANDS,
+                                                    PermissionType.USE_EXTERNAL_STICKERS,
+                                                    PermissionType.USE_EXTERNAL_EMOJIS).build()).removePermissionOverwrite(api.getUserById(oldManege).join()).addPermissionOverwrite(api.getUserById(oldManege).join(), new PermissionsBuilder().setAllowed(PermissionType.READ_MESSAGES,
+                                                    PermissionType.READ_MESSAGE_HISTORY,
+                                                    PermissionType.SEND_MESSAGES,
+                                                    PermissionType.ADD_REACTIONS,
+                                                    PermissionType.ATTACH_FILE,
+                                                    PermissionType.USE_APPLICATION_COMMANDS,
+                                                    PermissionType.USE_EXTERNAL_STICKERS,
+                                                    PermissionType.USE_EXTERNAL_EMOJIS).build()).update();
                                         }
-                                        response = "チャンネル名を" + name + "に変更しました";
+                                        response = selectUser.getName() + "が新しく通話管理者になりました";
                                     }
-                                }
-                                break;
-                            case "size":
-                                int size = Integer.parseInt(menuInteraction.getChosenOptions().get(0).getValue());
-                                if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
-                                    api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setUserLimit(size).update();
-                                    response = "通話人数を" + size + "に変更しました";
-                                }
-                                break;
-                            case "addUser":
-                                if (api.getServerVoiceChannelById(requestVoiceId).isPresent()) {
-                                    ServerVoiceChannel voiceChannel = api.getServerVoiceChannelById(requestVoiceId).get();
-                                    ServerVoiceChannelUpdater updater = voiceChannel.createUpdater();
-                                    for (SelectMenuOption option : menuInteraction.getChosenOptions()) {
-                                        updater.addPermissionOverwrite(api.getUserById(option.getValue()).join(), new PermissionsBuilder().setAllowed(PermissionType.CONNECT, PermissionType.READ_MESSAGES).build());
+                                    break;
+                                case "name":
+                                    if (api.getServerVoiceChannelById(requestVoiceId).isPresent()) {
+                                        if (api.getServerTextChannelById(list.getTextID()).isPresent() && api.getServerTextChannelById(list.getTextID()).get().getOverwrittenUserPermissions().get(menuInteraction.getUser().getId()).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
+                                            String name = menuInteraction.getChosenOptions().get(0).getValue();
+                                            if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
+                                                api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setName(name).update();
+                                            }
+                                            if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
+                                                api.getServerTextChannelById(list.getTextID()).get().createUpdater().setName(name).update();
+                                            }
+                                            response = "チャンネル名を" + name + "に変更しました";
+                                        }
                                     }
-                                    updater.update();
-                                    response = menuInteraction.getChosenOptions().size() + "人を追加しました。";
-                                }
-                                break;
-                            case "deleteUser":
-                                if (api.getServerVoiceChannelById(requestVoiceId).isPresent()) {
-                                    ServerVoiceChannel voiceChannel = api.getServerVoiceChannelById(requestVoiceId).get();
-                                    ServerVoiceChannelUpdater updater = voiceChannel.createUpdater();
-                                    for (SelectMenuOption option : menuInteraction.getChosenOptions()) {
-                                        updater.addPermissionOverwrite(api.getUserById(option.getValue()).join(), new PermissionsBuilder().setDenied(PermissionType.CONNECT, PermissionType.READ_MESSAGES).build());
+                                    break;
+                                case "size":
+                                    int size = Integer.parseInt(menuInteraction.getChosenOptions().get(0).getValue());
+                                    if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
+                                        api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setUserLimit(size).update();
+                                        response = "通話人数を" + size + "に変更しました";
                                     }
-                                    updater.update();
-                                    response = menuInteraction.getChosenOptions().size() + "人を排除しました。";
-                                }
-                                break;
+                                    break;
+                                case "addUser":
+                                    if (api.getServerVoiceChannelById(requestVoiceId).isPresent()) {
+                                        ServerVoiceChannel voiceChannel = api.getServerVoiceChannelById(requestVoiceId).get();
+                                        ServerVoiceChannelUpdater updater = voiceChannel.createUpdater();
+                                        for (SelectMenuOption option : menuInteraction.getChosenOptions()) {
+                                            updater.addPermissionOverwrite(api.getUserById(option.getValue()).join(), new PermissionsBuilder().setAllowed(PermissionType.CONNECT, PermissionType.READ_MESSAGES).build());
+                                        }
+                                        updater.update();
+                                        response = menuInteraction.getChosenOptions().size() + "人を追加しました。";
+                                    }
+                                    break;
+                                case "deleteUser":
+                                    if (api.getServerVoiceChannelById(requestVoiceId).isPresent()) {
+                                        ServerVoiceChannel voiceChannel = api.getServerVoiceChannelById(requestVoiceId).get();
+                                        ServerVoiceChannelUpdater updater = voiceChannel.createUpdater();
+                                        for (SelectMenuOption option : menuInteraction.getChosenOptions()) {
+                                            updater.addPermissionOverwrite(api.getUserById(option.getValue()).join(), new PermissionsBuilder().setDenied(PermissionType.CONNECT, PermissionType.READ_MESSAGES).build());
+                                        }
+                                        updater.update();
+                                        response = menuInteraction.getChosenOptions().size() + "人を排除しました。";
+                                    }
+                                    break;
+                            }
                         }
-                    }
-                    if (response != null) {
-                        menuInteraction.getMessage().delete();
-                        menuInteraction.createImmediateResponder().setFlags(InteractionCallbackDataFlag.EPHEMERAL).setContent(response).respond();
+                        if (response != null) {
+                            menuInteraction.getMessage().delete();
+                            menuInteraction.createImmediateResponder().setFlags(InteractionCallbackDataFlag.EPHEMERAL).setContent(response).respond();
+                        }
                     }
                 }
             } catch (DatabaseException ex) {

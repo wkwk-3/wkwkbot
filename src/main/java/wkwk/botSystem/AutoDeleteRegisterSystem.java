@@ -20,7 +20,7 @@ public class AutoDeleteRegisterSystem {
 
     public void run() {
         DiscordDAO dao = new DiscordDAO();
-        SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         api.addMessageCreateListener(event -> {
             if (event.getMessageAuthor().asUser().isPresent() && !event.getMessageAuthor().asUser().get().isBot() && event.getServer().isPresent()) {
                 String serverId = event.getServer().get().getIdAsString();

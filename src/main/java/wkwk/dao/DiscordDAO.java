@@ -234,10 +234,14 @@ public class DiscordDAO extends DAOBase {
         ChannelRecord list = null;
         try {
             String sql = null;
-            if ("v".equals(select))
-                sql = "SELECT * FROM " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " WHERE " + TempChannelsParameters.VOICE_CHANNEL_ID.getParameter() + " = ?";
-            else if ("t".equals(select))
-                sql = "SELECT * FROM " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " WHERE " + TempChannelsParameters.TEXT_CHANNEL_ID.getParameter() + " = ?";
+            switch (select) {
+                case "v":
+                    sql = "SELECT * FROM " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " WHERE " + TempChannelsParameters.VOICE_CHANNEL_ID.getParameter() + " = ?";
+                    break;
+                case "t":
+                    sql = "SELECT * FROM " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " WHERE " + TempChannelsParameters.TEXT_CHANNEL_ID.getParameter() + " = ?";
+                    break;
+            }
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, channelId);
             ResultSet rs = prestmt.executeQuery();

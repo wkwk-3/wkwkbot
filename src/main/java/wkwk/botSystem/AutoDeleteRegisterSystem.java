@@ -3,8 +3,8 @@ package wkwk.botSystem;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.TextChannel;
 import wkwk.dao.DiscordDAO;
-import wkwk.record.DeleteMessageRecord;
-import wkwk.record.DeleteTimeRecord;
+import wkwk.parameter.record.DeleteMessageRecord;
+import wkwk.parameter.record.DeleteTimeRecord;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

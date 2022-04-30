@@ -2,7 +2,7 @@ package wkwk.botSystem;
 
 import org.javacord.api.DiscordApi;
 import wkwk.dao.DiscordDAO;
-import wkwk.record.DeleteMessageRecord;
+import wkwk.parameter.record.DeleteMessageRecord;
 
 import java.text.SimpleDateFormat;
 import java.util.*;

@@ -3,7 +3,7 @@ package wkwk.dao;
 import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
 import wkwk.parameter.*;
-import wkwk.record.*;
+import wkwk.parameter.record.*;
 
 import java.sql.*;
 import java.util.ArrayList;

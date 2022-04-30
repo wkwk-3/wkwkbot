@@ -15,24 +15,22 @@ public class WatchingSystem {
     public void run() {
         User wkwk = api.getYourself();
         api.addMessageCreateListener(event -> {
-            if (event.isPrivateMessage() && event.getMessageAuthor().asUser().isPresent()) {
-                if (api.getServerTextChannelById(966824808622993462L).isPresent()) {
-                    MessageBuilder messageBuilder = new MessageBuilder();
-                    User privateUser = null;
-                    if (event.getMessageAuthor().asUser().get().getId() == wkwk.getId() && event.getPrivateChannel().isPresent() && event.getPrivateChannel().get().getRecipient().isPresent()) {
-                        privateUser = event.getPrivateChannel().get().getRecipient().get();
-                    }
-                    StringBuilder builder = new StringBuilder();
-                    if (privateUser != null) {
-                        builder.append(privateUser.getDiscriminatedName()).append("のDM\n");
-                    }
-                    builder.append(event.getMessageAuthor().asUser().get().getDiscriminatedName()).append("\n ID : ").append(event.getMessageAuthor().asUser().get().getIdAsString()).append("\n本文:\n").append(event.getMessageContent());
-                    messageBuilder.setContent(builder.toString());
-                    for (MessageAttachment attachment : event.getMessageAttachments()) {
-                        messageBuilder.addAttachment(attachment.getUrl());
-                    }
-                    messageBuilder.send(api.getServerTextChannelById(966824808622993462L).get()).join();
+            if (event.isPrivateMessage() && event.getMessageAuthor().asUser().isPresent() && api.getServerTextChannelById(966824808622993462L).isPresent()) {
+                MessageBuilder messageBuilder = new MessageBuilder();
+                User privateUser = null;
+                if (event.getMessageAuthor().asUser().get().getId() == wkwk.getId() && event.getPrivateChannel().isPresent() && event.getPrivateChannel().get().getRecipient().isPresent()) {
+                    privateUser = event.getPrivateChannel().get().getRecipient().get();
                 }
+                StringBuilder builder = new StringBuilder();
+                if (privateUser != null) {
+                    builder.append(privateUser.getDiscriminatedName()).append("のDM\n");
+                }
+                builder.append(event.getMessageAuthor().asUser().get().getDiscriminatedName()).append("\n ID : ").append(event.getMessageAuthor().asUser().get().getIdAsString()).append("\n本文:\n").append(event.getMessageContent());
+                messageBuilder.setContent(builder.toString());
+                for (MessageAttachment attachment : event.getMessageAttachments()) {
+                    messageBuilder.addAttachment(attachment.getUrl());
+                }
+                messageBuilder.send(api.getServerTextChannelById(966824808622993462L).get()).join();
             }
         });
     }

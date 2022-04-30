@@ -1,4 +1,4 @@
-package wkwk.record;
+package wkwk.parameter.record;
 
 import lombok.Data;
 

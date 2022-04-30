@@ -3,7 +3,7 @@ package wkwk.botSystem;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.emoji.Emoji;
 import wkwk.dao.DiscordDAO;
-import wkwk.record.BotSendMessageRecord;
+import wkwk.parameter.record.BotSendMessageRecord;
 
 public class SelectDeleteSystem {
     DiscordApi api;

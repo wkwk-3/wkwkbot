@@ -21,7 +21,7 @@ import wkwk.Command.Show;
 import wkwk.dao.DiscordDAO;
 import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
-import wkwk.record.*;
+import wkwk.parameter.record.*;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -194,7 +194,6 @@ public class SlashCommandSystem {
                                                 if (!EmojiManager.isEmoji(emoji))
                                                     str.append(emoji).append("は絵文字ではない\n");
                                                 responseString = new StringBuilder(str.toString());
-
                                             }
                                             break;
                                         case "mess":
@@ -213,7 +212,6 @@ public class SlashCommandSystem {
 
                                                 } else if (!api.getMessageById(messageId, api.getServerTextChannelById(target.getId()).get()).join().getServer().isPresent()) {
                                                     responseString = new StringBuilder("このサーバーのメッセージIDを入力してください");
-
                                                 }
                                             }
                                             break;
@@ -224,7 +222,6 @@ public class SlashCommandSystem {
                                                     dao.addNamePreset(serverId, name);
                                                     responseString = new StringBuilder("名前変更候補を追加しました");
                                                 } else responseString = new StringBuilder("100文字以内にしてください。");
-
                                             }
                                             break;
 
@@ -252,7 +249,6 @@ public class SlashCommandSystem {
                                                     });
                                                     dao.addLogging(records);
                                                     responseString = new StringBuilder("チャット履歴を設定");
-
                                                 }
                                             }
                                             break;

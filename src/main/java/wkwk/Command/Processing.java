@@ -1,7 +1,7 @@
 package wkwk.Command;
 
 import org.javacord.api.entity.user.User;
-import wkwk.record.ChannelRecord;
+import wkwk.parameter.record.ChannelRecord;
 
 public class Processing {
     public String RecruitingTextRePress(String raw, User sendUser, ChannelRecord list, String text) {

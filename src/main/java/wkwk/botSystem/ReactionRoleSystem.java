@@ -3,7 +3,7 @@ package wkwk.botSystem;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.emoji.Emoji;
 import wkwk.dao.DiscordDAO;
-import wkwk.record.ReactionRoleRecord;
+import wkwk.parameter.record.ReactionRoleRecord;
 
 import java.util.ArrayList;
 

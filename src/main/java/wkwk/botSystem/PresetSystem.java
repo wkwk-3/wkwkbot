@@ -6,7 +6,7 @@ import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.SelectMenuInteraction;
 import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import wkwk.dao.DiscordDAO;
-import wkwk.record.ReactionRoleRecord;
+import wkwk.parameter.record.ReactionRoleRecord;
 
 public class PresetSystem {
     DiscordApi api;
@@ -50,7 +50,6 @@ public class PresetSystem {
                                     break;
                                 }
                             }
-
                             break;
                     }
                 }

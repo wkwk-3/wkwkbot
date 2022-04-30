@@ -6,8 +6,8 @@ import org.javacord.api.entity.user.User;
 import wkwk.dao.DiscordDAO;
 import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
-import wkwk.record.ReactionRoleRecord;
-import wkwk.record.ServerDataRecord;
+import wkwk.parameter.record.ReactionRoleRecord;
+import wkwk.parameter.record.ServerDataRecord;
 
 import java.awt.*;
 

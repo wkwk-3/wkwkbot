@@ -19,9 +19,9 @@ import wkwk.Command.Processing;
 import wkwk.dao.DiscordDAO;
 import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
-import wkwk.record.BotSendMessageRecord;
-import wkwk.record.ChannelRecord;
-import wkwk.record.ServerDataRecord;
+import wkwk.parameter.record.BotSendMessageRecord;
+import wkwk.parameter.record.ChannelRecord;
+import wkwk.parameter.record.ServerDataRecord;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -47,7 +47,8 @@ public class TempChannelSystem {
                 Server server = event.getServer();
                 String serverId = server.getIdAsString();
                 String joinVoiceId = event.getChannel().getIdAsString();
-                if (event.getChannel().getCategory().isPresent()) joinChannelCategory = event.getChannel().getCategory().get();
+                if (event.getChannel().getCategory().isPresent())
+                    joinChannelCategory = event.getChannel().getCategory().get();
                 try {
                     ServerDataRecord data = dao.TempGetData(serverId);
                     String firstChannel = data.getFstChannel();
@@ -111,7 +112,8 @@ public class TempChannelSystem {
             User user = event.getUser();
             ChannelCategory leaveChannelCategory = null;
             String serverId = event.getServer().getIdAsString();
-            if (event.getChannel().getCategory().isPresent()) leaveChannelCategory = event.getChannel().getCategory().get();
+            if (event.getChannel().getCategory().isPresent())
+                leaveChannelCategory = event.getChannel().getCategory().get();
             try {
                 data = dao.TempGetData(serverId);
                 String voiceCategory = data.getVoiceCategory();

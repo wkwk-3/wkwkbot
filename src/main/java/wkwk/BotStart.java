@@ -39,6 +39,7 @@ public class BotStart {
             new SlashCommandSystem(api).run();
             new TempChannelSystem(api).run();
             new WatchingSystem(api).run();
+            new HelpSystem(api).run();
 
             System.out.println("URL : " + api.createBotInvite(new PermissionsBuilder().setAllowed(PermissionType.ADMINISTRATOR).build()).replaceAll("scope=bot", "scope=bot+applications.commands"));
             api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");

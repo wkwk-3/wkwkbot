@@ -436,10 +436,6 @@ public class SlashCommandSystem {
                             }
                             responseString = new StringBuilder(ping + "ms");
                             break;
-                        case "help":
-                            sendUser.sendMessage(help.Create(server.getName(), sendUser, isAdmin));
-                            responseString = new StringBuilder("個チャに送信");
-                            break;
                         case "invite":
                             responseString = new StringBuilder("https://wkb.page.link/bot");
                             break;
@@ -503,8 +499,9 @@ public class SlashCommandSystem {
                                             users.removeAll(api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUsers());
                                             users.removeIf(User::isBot);
                                         }
-                                        if (users.isEmpty()) responseString = new StringBuilder("対象ユーザーが0人です");
-                                        else {
+                                        if (users.isEmpty()) {
+                                            responseString = new StringBuilder("対象ユーザーが0人です");
+                                        } else {
                                             SelectMenuBuilder selectMenuBuilder = new SelectMenuBuilder().setCustomId("addUser").setPlaceholder("ユーザー追加").setMinimumValues(1);
                                             selectMenuBuilder.setMaximumValues(Math.min(users.size(), 24));
                                             users.forEach(user -> selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(user.getName()).setValue(String.valueOf(user.getIdAsString())).build()));

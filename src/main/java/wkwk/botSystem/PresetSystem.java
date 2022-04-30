@@ -22,7 +22,7 @@ public class PresetSystem {
             String cmd = menuInteraction.getCustomId();
             String response = null;
             User user = menuInteraction.getUser();
-            if (menuInteraction.getChannel().isPresent()) {
+            if (menuInteraction.getChannel().isPresent() && menuInteraction.getServer().isPresent()) {
                 String serverId = menuInteraction.getServer().get().getIdAsString();
                 if (api.getServerById(serverId).get().getPermissions(user).getAllowedPermission().contains(PermissionType.ADMINISTRATOR)) {
                     switch (cmd) {

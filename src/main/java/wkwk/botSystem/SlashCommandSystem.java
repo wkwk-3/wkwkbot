@@ -15,7 +15,6 @@ import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.SlashCommandInteraction;
 import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
-import wkwk.Command.Help;
 import wkwk.Command.Processing;
 import wkwk.Command.Show;
 import wkwk.dao.DiscordDAO;
@@ -42,7 +41,6 @@ public class SlashCommandSystem {
 
         Processing processing = new Processing();
         DiscordDAO dao = new DiscordDAO();
-        Help help = new Help();
         Show show = new Show();
 
         api.addSlashCommandCreateListener(event -> {
@@ -441,6 +439,10 @@ public class SlashCommandSystem {
                             break;
                         case "guild":
                             responseString = new StringBuilder("https://wkb.page.link/guild");
+                            break;
+                        case "help":
+                            new HelpSystem(api).sendHelp(event);
+                            responseString = new StringBuilder("個人チャットに送信しました");
                             break;
                     }
                     if (cmd.equals("name") || cmd.equals("size") || cmd.equals("men") || cmd.equals("n") || cmd.equals("s") || cmd.equals("m") || cmd.equals("add") || cmd.equals("delete")) {

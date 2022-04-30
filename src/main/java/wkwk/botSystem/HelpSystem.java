@@ -10,6 +10,7 @@ import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
+import org.javacord.api.event.interaction.SlashCommandCreateEvent;
 import org.javacord.api.interaction.SelectMenuInteraction;
 import org.javacord.api.interaction.SlashCommandInteraction;
 
@@ -101,7 +102,13 @@ public class HelpSystem {
                     "・`/set enable temp <true or false>` -> 一時通話チャンネル作成切替",
                     "・`/set enable text <true or false>` -> 一時テキストチャンネル作成切替"
             ));
-
+    final Map<String, String> enableGuide = new HashMap<String, String>() {
+        {
+            for (int i = 0; i < subCommandsEnable.size(); i++) {
+                put(subCommandsEnable.get(i), subCommandsEnableGuide.get(i));
+            }
+        }
+    };
     ArrayList<String> subCommandsLogging = new ArrayList<>(
             Arrays.asList(
                     "chat", "user"
@@ -111,77 +118,40 @@ public class HelpSystem {
                     "・`/set logging chat {ログを保存したいチャンネル}`↓\n 入力したチャンネルに対象のチャンネルで消された\n メッセージのログを出力します\n",
                     "・`/set logging user` -> 入力したチャンネルにサーバーの\n ユーザー入退室ログを出力します\n"
             ));
-
-    Map<String,String> allGuide = new HashMap<String, String>(){
+    Map<String, String> allGuide = new HashMap<String, String>() {
         {
-            for (int i = 0 ; i < subCommandsAdmin.size() ; i++) {
-                put(subCommandsAdmin.get(i),subCommandsAdminGuide.get(i));
+            for (int i = 0; i < subCommandsAdmin.size(); i++) {
+                put(subCommandsAdmin.get(i), subCommandsAdminGuide.get(i));
+            }
+        }
+    };
+    Map<String, String> setGuide = new HashMap<String, String>() {
+        {
+            for (int i = 0; i < subCommandsSet.size(); i++) {
+                put(subCommandsSet.get(i), subCommandsSetGuide.get(i));
+            }
+        }
+    };
+    Map<String, String> removeGuide = new HashMap<String, String>() {
+        {
+            for (int i = 0; i < subCommandsRemove.size(); i++) {
+                put(subCommandsRemove.get(i), subCommandsRemoveGuide.get(i));
+            }
+        }
+    };
+    Map<String, String> loggingGuide = new HashMap<String, String>() {
+        {
+            for (int i = 0; i < subCommandsLogging.size(); i++) {
+                put(subCommandsLogging.get(i), subCommandsLoggingGuide.get(i));
             }
         }
     };
 
-    Map<String,String> setGuide = new HashMap<String, String>(){
-        {
-            for (int i = 0 ; i < subCommandsSet.size() ; i++) {
-                put(subCommandsSet.get(i),subCommandsSetGuide.get(i));
-            }
-        }
-    };
-
-    Map<String,String> removeGuide = new HashMap<String, String>(){
-        {
-            for (int i = 0 ; i < subCommandsRemove.size() ; i++) {
-                put(subCommandsRemove.get(i),subCommandsRemoveGuide.get(i));
-            }
-        }
-    };
-
-    final Map<String, String> enableGuide = new HashMap<String, String>() {
-        {
-            for (int i = 0; i < subCommandsEnable.size(); i++) {
-                put(subCommandsEnable.get(i), subCommandsEnableGuide.get(i));
-            }
-        }
-    };
-
-    Map<String,String> loggingGuide = new HashMap<String, String>(){
-        {
-            for (int i = 0 ; i < subCommandsLogging.size() ; i++) {
-                put(subCommandsLogging.get(i),subCommandsLoggingGuide.get(i));
-            }
-        }
-    };
     public HelpSystem(DiscordApi api) {
         this.api = api;
     }
-    public void run(){
-        api.addSlashCommandCreateListener(event -> {
-            SlashCommandInteraction interaction = event.getSlashCommandInteraction();
-            String cmd = interaction.getCommandName();
-            if (interaction.getServer().isPresent() && interaction.getChannel().isPresent()) {
-                Server server = interaction.getServer().get();
-                User sendUser = interaction.getUser();
-                boolean isAdmin = server.getAllowedPermissions(sendUser).contains(PermissionType.ADMINISTRATOR);
-                if (cmd.equals("help")) {
-                    SelectMenuBuilder helpMenuBuilder;
-                    if (isAdmin) {
-                        helpMenuBuilder = new SelectMenuBuilder().setCustomId("selectHelp").setPlaceholder("どのヘルプが欲しいですか？").setMaximumValues(subCommandsAdmin.size()).setMinimumValues(1);
-                        for (String subs : subCommandsAdmin) {
-                            helpMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(subs).setValue(subs).build());
-                        }
-                    } else {
-                        helpMenuBuilder = new SelectMenuBuilder().setCustomId("selectHelp").setPlaceholder("どのヘルプが欲しいですか？").setMaximumValues(subCommandsUser.size()).setMinimumValues(1);
-                        for (String subs : subCommandsUser) {
-                            helpMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(subs).setValue(subs).build());
-                        }
-                    }
-                    new MessageBuilder()
-                            .setContent("ヘルプ選択")
-                            .addComponents(ActionRow.of(helpMenuBuilder.build())).send(sendUser);
-                }
-            }
-        });
 
+    public void run() {
         api.addSelectMenuChooseListener(event -> {
             SelectMenuInteraction menuInteraction = event.getSelectMenuInteraction();
             String cmd = menuInteraction.getCustomId();
@@ -229,7 +199,6 @@ public class HelpSystem {
                     menuInteraction.getMessage().delete();
                     break;
                 case "selectSet": {
-                    MessageBuilder messageBuilder = new MessageBuilder();
                     StringBuilder stringBuilder = new StringBuilder();
                     boolean enable = false;
                     boolean logging = false;
@@ -270,7 +239,6 @@ public class HelpSystem {
                     break;
                 }
                 case "selectRemove": {
-                    MessageBuilder messageBuilder = new MessageBuilder();
                     StringBuilder stringBuilder = new StringBuilder();
                     for (SelectMenuOption option : menuInteraction.getChosenOptions()) {
                         stringBuilder.append(removeGuide.get(option.getValue())).append("\n");
@@ -303,10 +271,10 @@ public class HelpSystem {
                     for (SelectMenuOption option : menuInteraction.getChosenOptions()) {
                         stringBuilder.append(loggingGuide.get(option.getValue())).append("\n");
                     }
-                    if (!stringBuilder.toString().equals("")) {;
+                    if (!stringBuilder.toString().equals("")) {
                         sendUser.sendMessage(
                                 new EmbedBuilder().setTitle("Loggingヘルプ")
-                                .setDescription(stringBuilder.toString())
+                                        .setDescription(stringBuilder.toString())
                         );
                     }
                     menuInteraction.getMessage().delete();
@@ -314,5 +282,32 @@ public class HelpSystem {
                 }
             }
         });
+    }
+
+    public void sendHelp(SlashCommandCreateEvent event) {
+        SlashCommandInteraction interaction = event.getSlashCommandInteraction();
+        String cmd = interaction.getCommandName();
+        if (interaction.getServer().isPresent() && interaction.getChannel().isPresent()) {
+            Server server = interaction.getServer().get();
+            User sendUser = interaction.getUser();
+            boolean isAdmin = server.getAllowedPermissions(sendUser).contains(PermissionType.ADMINISTRATOR);
+            if (cmd.equals("help")) {
+                SelectMenuBuilder helpMenuBuilder;
+                if (isAdmin) {
+                    helpMenuBuilder = new SelectMenuBuilder().setCustomId("selectHelp").setPlaceholder("どのヘルプが欲しいですか？").setMaximumValues(subCommandsAdmin.size()).setMinimumValues(1);
+                    for (String subs : subCommandsAdmin) {
+                        helpMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(subs).setValue(subs).build());
+                    }
+                } else {
+                    helpMenuBuilder = new SelectMenuBuilder().setCustomId("selectHelp").setPlaceholder("どのヘルプが欲しいですか？").setMaximumValues(subCommandsUser.size()).setMinimumValues(1);
+                    for (String subs : subCommandsUser) {
+                        helpMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(subs).setValue(subs).build());
+                    }
+                }
+                new MessageBuilder()
+                        .setContent("ヘルプ選択")
+                        .addComponents(ActionRow.of(helpMenuBuilder.build())).send(sendUser);
+            }
+        }
     }
 }

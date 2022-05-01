@@ -367,7 +367,7 @@ public class SlashCommandSystem {
                                 }
                                 break;
                             case "show":
-                                sendUser.sendMessage(show.create(server.getName(), serverId, sendUser, dao, api));
+                                sendUser.sendMessage(show.create(server.getName(), serverId, sendUser, api));
                                 responseString = new StringBuilder("個チャに送信");
                                 break;
                             case "mess":

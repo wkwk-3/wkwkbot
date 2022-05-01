@@ -6,17 +6,19 @@ import org.javacord.api.entity.user.User;
 import wkwk.dao.DiscordDAO;
 import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
+import wkwk.parameter.record.DeleteTimeRecord;
+import wkwk.parameter.record.LoggingRecord;
 import wkwk.parameter.record.ReactionRoleRecord;
 import wkwk.parameter.record.ServerDataRecord;
 
 import java.awt.*;
 
 public class Show {
-    public EmbedBuilder create(String serverName, String serverId, User sendUser, DiscordDAO dao, DiscordApi api) {
+    DiscordDAO dao = new DiscordDAO();
+    public EmbedBuilder create(String serverName, String serverId, User sendUser, DiscordApi api) {
         ServerDataRecord tempData = null;
         String bys = null;
-        StringBuilder reacts = null;
-
+        StringBuilder reacts = new StringBuilder("・リアクションロール設定\n");
         try {
             tempData = dao.TempGetData(serverId);
             ReactionRoleRecord react = dao.getReactAllData(tempData.getServer());
@@ -39,18 +41,39 @@ public class Show {
             } else {
                 bys += "・一時通話初期人数 : " + size + "人\n";
             }
-            reacts = new StringBuilder();
             if (api.getServerTextChannelById(react.getTextChannelID()).isPresent()) {
-                reacts.append("・リアクションロールメッセージ : ").append(api.getMessageById(react.getMessageID(), api.getServerTextChannelById(react.getTextChannelID()).get()).join().getLink()).append("\n");
+                reacts.append("　・リアクションロールメッセージ : ").append(api.getMessageById(react.getMessageID(), api.getServerTextChannelById(react.getTextChannelID()).get()).join().getLink()).append("\n");
             }
             for (int i = 0; i < emojis.length; i++) {
                 if (api.getRoleById(roles[i]).isPresent()) {
-                    reacts.append("・リアクションロール : ").append("@").append(api.getRoleById(roles[i]).get().getName()).append(" >>>> ").append(emojis[i]).append("\n");
+                    reacts.append("　・リアクションロール : ").append("@").append(api.getRoleById(roles[i]).get().getName()).append(" >>>> ").append(emojis[i]).append("\n");
                 }
             }
         } catch (SystemException | DatabaseException e) {
             e.printStackTrace();
         }
+        StringBuilder namePreset = new StringBuilder("・チャンネル名変更候補設定\n");
+        for (String name : dao.GetNamePreset(serverId)) {
+            namePreset.append("　・ : ").append(name).append("\n");
+        }
+        StringBuilder channelLog = new StringBuilder("・メッセージログ設定\n");
+        StringBuilder userLog = new StringBuilder("・ユーザーログ設定\n");
+        for (LoggingRecord log : dao.getLogging("s",serverId)) {
+            if (log.getLogType().equals("chat")) {
+                channelLog.append("　・対象チャンネル : <#").append(log.getTargetChannelId()).append("> -> 出力チャンネル : <#").append(log.getChannelId()).append(">\n");
+            } else if (log.getLogType().equals("user")) {
+                userLog.append("　・出力チャンネル : <#").append(log.getChannelId()).append(">\n");
+            }
+        }
+        StringBuilder autoDelete = new StringBuilder("・自動削除設定\n");
+        for (DeleteTimeRecord delete : dao.getDeleteTimes(serverId)) {
+            autoDelete.append("　・<#").append(delete.getTextChannelId()).append("> -> ").append(delete.getDeleteTime()).append(delete.getTimeUnit().replaceFirst("s","秒後").replaceFirst("S","秒後").replaceFirst("m","分後").replaceFirst("M","分後").replaceFirst("h","時間後").replaceFirst("H","時間後").replaceFirst("d","日後").replaceFirst("D","日後")).append("\n");
+        }
+        if (reacts.toString().equals("・リアクションロール設定\n")) reacts = new StringBuilder("・リアクションロール設定 : 無し\n");
+        if (channelLog.toString().equals("・メッセージログ設定\n")) channelLog = new StringBuilder("・メッセージログ設定 : 無し\n");
+        if (userLog.toString().equals("・ユーザーログ設定\n")) userLog = new StringBuilder("・ユーザーログ設定 : 無し\n");
+        if (autoDelete.toString().equals("・自動削除設定\n")) autoDelete = new StringBuilder("・自動削除設定 : 無し\n");
+        if (namePreset.toString().equals("・チャンネル名変更候補設定\n")) namePreset = new StringBuilder("・チャンネル名変更候補設定 : 無し\n");
         if (tempData != null) {
             return new EmbedBuilder()
                     .setTitle("一覧情報表示 With " + serverName)
@@ -59,8 +82,9 @@ public class Show {
                             "・一時作成チャネル : <#" + tempData.getFstChannel() + ">\n" +
                             "・通話カテゴリ : <#" + tempData.getVoiceCategory() + ">\n" +
                             "・テキストカテゴリ : <#" + tempData.getTextCategory() + ">\n" +
-                            "・カスタム募集 : " + tempData.getStereotyped() + "\n" + bys +
-                            reacts)
+                            "・カスタム募集 : " + tempData.getStereotyped() + "\n" +
+                            "・通話初期ネーム : " + tempData.getDefaultName() + "\n" +
+                            bys + reacts + channelLog + userLog + namePreset + autoDelete)
                     .setColor(Color.cyan)
                     .setThumbnail("https://i.imgur.com/KHpjoiu.png");
         } else {

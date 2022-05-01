@@ -36,8 +36,8 @@ public class HelpSystem {
                     "・`/setup` -> 必要なチャンネルとカテゴリを自動作成",
                     "・`/add user` -> 非表示状態の一時通話を特定のユーザーに表示させる",
                     "・`/delete user` -> 表示状態の一時通話を特定のユーザーに非表示させる",
-                    "set NONE",
-                    "remove NONE",
+                    "NONE",
+                    "NONE",
                     "・`/start delete {time} {unit}` -> ",
                     "・`/stop delete` -> ",
                     "・`/help` -> コマンド情報を表示",
@@ -59,7 +59,7 @@ public class HelpSystem {
     ArrayList<String> subCommandsSet = new ArrayList<>(
             Arrays.asList(
                     "vcat", "tcat", "first", "mention",
-                    "enable", "size", "role", // enable選択肢あり
+                    "enable", "size", "role",
                     "mess", "namepreset", "logging", "stereo"
             ));
     ArrayList<String> subCommandsSetGuide = new ArrayList<>(
@@ -68,7 +68,7 @@ public class HelpSystem {
                     "・`/set tcat {カテゴリ}` -> 一時チャットの作成先を変更",
                     "・`/set first {チャンネル}` -> 通話作成用チャンネルを変更",
                     "・`/set mention {チャンネル}` -> 募集送信チャンネル変更",
-                    "enable NONE",
+                    "NONE",
                     "・`/set size {0~99の数字}` -> 一時通話初期人数変更",
                     "・`/set role {ロール} {絵文字}` -> リアクションロールの付与ロールと絵文字を変更",
                     "・`/set mess {メッセージID} {チャンネル}` -> リアクションロールの対象メッセージを変更",
@@ -99,8 +99,8 @@ public class HelpSystem {
             ));
     ArrayList<String> subCommandsEnableGuide = new ArrayList<>(
             Arrays.asList(
-                    "・`/set enable temp <true or false>` -> 一時通話チャンネル作成切替",
-                    "・`/set enable text <true or false>` -> 一時テキストチャンネル作成切替"
+                    "・`/set enable temp {true or false}` -> 一時通話チャンネル作成切替",
+                    "・`/set enable text {true or false}` -> 一時テキストチャンネル作成切替"
             ));
     final Map<String, String> enableGuide = new HashMap<String, String>() {
         {

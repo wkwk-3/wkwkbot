@@ -10,35 +10,16 @@ import java.util.ArrayList;
 
 public class DiscordDAO extends DAOBase {
 
+
     public void serverLeaveAllDataDelete(String serverId) {
         this.open();
         Statement stmt = null;
         try {
-            String sql = "DELETE FROM " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = " + serverId;
+            String sql = "DELETE FROM " + DAOParameters.TABLE_BOT_SEND_MESSAGES.getParameter() + " WHERE " + BotSendMessageParameters.SERVER_ID.getParameter() + " = " + serverId;
             stmt = con.createStatement();
             stmt.execute(sql);
             stmt = null;
-            sql = "DELETE FROM " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " WHERE " + TempChannelsParameters.SERVER_ID.getParameter() + " = " + serverId;
-            stmt = con.createStatement();
-            stmt.execute(sql);
-            stmt = null;
-            sql = "DELETE FROM " + DAOParameters.TABLE_REACT_ROLE.getParameter() + " WHERE " + ReactRoleParameters.SERVER_ID.getParameter() + " = " + serverId;
-            stmt = con.createStatement();
-            stmt.execute(sql);
-            stmt = null;
-            sql = "DELETE FROM " + DAOParameters.TABLE_REACT_MESSAGE.getParameter() + " WHERE " + ReactMessageParameters.SERVER_ID.getParameter() + " = " + serverId;
-            stmt = con.createStatement();
-            stmt.execute(sql);
-            stmt = null;
-            sql = "DELETE FROM " + DAOParameters.TABLE_NAME_PRESET.getParameter() + " WHERE " + NamePresetParameters.SERVER_ID.getParameter() + " = " + serverId;
-            stmt = con.createStatement();
-            stmt.execute(sql);
-            stmt = null;
-            sql = "DELETE FROM " + DAOParameters.TABLE_MENTION_MESSAGE.getParameter() + " WHERE " + MentionMessageParameters.SERVER_ID.getParameter() + " = " + serverId;
-            stmt = con.createStatement();
-            stmt.execute(sql);
-            stmt = null;
-            sql = "DELETE FROM " + DAOParameters.TABLE_LOGGING.getParameter() + " WHERE " + LoggingParameters.SERVER_ID.getParameter() + " = " + serverId;
+            sql = "DELETE FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.SERVER_ID.getParameter() + " = " + serverId;
             stmt = con.createStatement();
             stmt.execute(sql);
             stmt = null;
@@ -46,7 +27,31 @@ public class DiscordDAO extends DAOBase {
             stmt = con.createStatement();
             stmt.execute(sql);
             stmt = null;
-            sql = "DELETE FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.SERVER_ID.getParameter() + " = " + serverId;
+            sql = "DELETE FROM " + DAOParameters.TABLE_LOGGING.getParameter() + " WHERE " + LoggingParameters.SERVER_ID.getParameter() + " = " + serverId;
+            stmt = con.createStatement();
+            stmt.execute(sql);
+            stmt = null;
+            sql = "DELETE FROM " + DAOParameters.TABLE_MENTION_MESSAGE.getParameter() + " WHERE " + MentionMessageParameters.SERVER_ID.getParameter() + " = " + serverId;
+            stmt = con.createStatement();
+            stmt.execute(sql);
+            stmt = null;
+            sql = "DELETE FROM " + DAOParameters.TABLE_NAME_PRESET.getParameter() + " WHERE " + NamePresetParameters.SERVER_ID.getParameter() + " = " + serverId;
+            stmt = con.createStatement();
+            stmt.execute(sql);
+            stmt = null;
+            sql = "DELETE FROM " + DAOParameters.TABLE_REACT_MESSAGE.getParameter() + " WHERE " + ReactMessageParameters.SERVER_ID.getParameter() + " = " + serverId;
+            stmt = con.createStatement();
+            stmt.execute(sql);
+            stmt = null;
+            sql = "DELETE FROM " + DAOParameters.TABLE_REACT_ROLE.getParameter() + " WHERE " + ReactRoleParameters.SERVER_ID.getParameter() + " = " + serverId;
+            stmt = con.createStatement();
+            stmt.execute(sql);
+            stmt = null;
+            sql = "DELETE FROM " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = " + serverId;
+            stmt = con.createStatement();
+            stmt.execute(sql);
+            stmt = null;
+            sql = "DELETE FROM " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " WHERE " + TempChannelsParameters.SERVER_ID.getParameter() + " = " + serverId;
             stmt = con.createStatement();
             stmt.execute(sql);
         } catch (SQLException e) {
@@ -382,9 +387,9 @@ public class DiscordDAO extends DAOBase {
         }
     }
 
-    public MentionRecord getMentionMessage(String textId) {
+    public MentionMessageRecord getMentionMessage(String textId) {
         this.open();
-        MentionRecord list = new MentionRecord();
+        MentionMessageRecord list = new MentionMessageRecord();
         prestmt = null;
         try {
             String sql = "SELECT " + MentionMessageParameters.MESSAGE_ID.getParameter() + " FROM " + DAOParameters.TABLE_MENTION_MESSAGE.getParameter() + " WHERE " + MentionMessageParameters.TEXT_CHANNEL_ID.getParameter() + " = ?";
@@ -400,9 +405,9 @@ public class DiscordDAO extends DAOBase {
         return list;
     }
 
-    public MentionRecord getAllMentionText() {
+    public MentionMessageRecord getAllMentionText() {
         this.open();
-        MentionRecord list = new MentionRecord();
+        MentionMessageRecord list = new MentionMessageRecord();
         Statement stmt = null;
         try {
             stmt = con.createStatement();

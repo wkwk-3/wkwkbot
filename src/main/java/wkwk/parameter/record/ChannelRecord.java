@@ -9,4 +9,6 @@ public class ChannelRecord {
     private String textID;
     private String serverID;
 
+    private boolean hideBy;
+    private boolean lockBy;
 }

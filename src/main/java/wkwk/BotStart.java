@@ -51,6 +51,14 @@ public class BotStart {
                     System.out.println("システムを終了します");
                     System.exit(0);
                 } else if ("reload".equals(cmd)) {
+
+                    new ReloadSystem(api).run();
+
+
+
+
+
+                    /*
                     int i = 0;
                     int j = 0;
                     int k = 0;
@@ -97,6 +105,7 @@ public class BotStart {
                     if (j > 0) outMention = "メンションデータ削除完了";
                     if (k > 0) outTemp = "一時データ削除完了";
                     System.out.println(outServer + "\n" + outMention + "\n" + outTemp);
+                     */
                     api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
                 } else if ("ts".equals(cmd)) {
                     autoTweet.start();
@@ -121,7 +130,7 @@ public class BotStart {
                     for (ServerDataRecord list : dao.getNoSlashCommandServer()) {
                         if (api.getServerById(list.getServer()).isPresent() && api.getServerById(list.getServer()).get().getOwner().isPresent()) {
                             new MessageBuilder().setContent("wkwkBOTをお使いいただき誠にありがとうございます。" +
-                                    "\n当BOTは4/12 12:00 を持って全機能が\nスラッシュコマンドに移行いたしました" +
+                                    "\n当BOTは4/12 をもしまして全機能が\nスラッシュコマンドに移行いたしました" +
                                     "\nそれに伴い、BOTの招待リンクがスラッシュコマンド対応の物に変更されました" +
                                     "\n※新招待リンク(https://wkb.page.link/bot)" +
                                     "\nお手数ですが、機能を使うにはBOTを再導入して頂く必要があります。" +

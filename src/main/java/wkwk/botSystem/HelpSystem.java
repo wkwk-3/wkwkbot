@@ -287,27 +287,42 @@ public class HelpSystem {
     public void sendHelp(SlashCommandCreateEvent event) {
         SlashCommandInteraction interaction = event.getSlashCommandInteraction();
         String cmd = interaction.getCommandName();
-        if (interaction.getServer().isPresent() && interaction.getChannel().isPresent()) {
-            Server server = interaction.getServer().get();
-            User sendUser = interaction.getUser();
-            boolean isAdmin = server.getAllowedPermissions(sendUser).contains(PermissionType.ADMINISTRATOR);
-            if (cmd.equals("help")) {
-                SelectMenuBuilder helpMenuBuilder;
-                if (isAdmin) {
-                    helpMenuBuilder = new SelectMenuBuilder().setCustomId("selectHelp").setPlaceholder("どのヘルプが欲しいですか？").setMaximumValues(subCommandsAdmin.size()).setMinimumValues(1);
-                    for (String subs : subCommandsAdmin) {
-                        helpMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(subs).setValue(subs).build());
+        Server server = null;
+        if (interaction.getServer().isPresent()) {
+            server = interaction.getServer().get();
+        }
+        if (server != null) {
+            if (interaction.getChannel().isPresent()) {
+                User sendUser = interaction.getUser();
+                boolean isAdmin = server.getAllowedPermissions(sendUser).contains(PermissionType.ADMINISTRATOR);
+                if (cmd.equals("help")) {
+                    SelectMenuBuilder helpMenuBuilder;
+                    if (isAdmin) {
+                        helpMenuBuilder = new SelectMenuBuilder().setCustomId("selectHelp").setPlaceholder("どのヘルプが欲しいですか？").setMaximumValues(subCommandsAdmin.size()).setMinimumValues(1);
+                        for (String subs : subCommandsAdmin) {
+                            helpMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(subs).setValue(subs).build());
+                        }
+                    } else {
+                        helpMenuBuilder = new SelectMenuBuilder().setCustomId("selectHelp").setPlaceholder("どのヘルプが欲しいですか？").setMaximumValues(subCommandsUser.size()).setMinimumValues(1);
+                        for (String subs : subCommandsUser) {
+                            helpMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(subs).setValue(subs).build());
+                        }
                     }
-                } else {
-                    helpMenuBuilder = new SelectMenuBuilder().setCustomId("selectHelp").setPlaceholder("どのヘルプが欲しいですか？").setMaximumValues(subCommandsUser.size()).setMinimumValues(1);
-                    for (String subs : subCommandsUser) {
-                        helpMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(subs).setValue(subs).build());
-                    }
+                    new MessageBuilder()
+                            .setContent("ヘルプ選択")
+                            .addComponents(ActionRow.of(helpMenuBuilder.build())).send(sendUser);
                 }
-                new MessageBuilder()
-                        .setContent("ヘルプ選択")
-                        .addComponents(ActionRow.of(helpMenuBuilder.build())).send(sendUser);
             }
+        } else {
+            User sendUser = interaction.getUser();
+            SelectMenuBuilder helpMenuBuilder;
+            helpMenuBuilder = new SelectMenuBuilder().setCustomId("selectHelp").setPlaceholder("どのヘルプが欲しいですか？").setMaximumValues(subCommandsAdmin.size()).setMinimumValues(1);
+            for (String subs : subCommandsAdmin) {
+                helpMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(subs).setValue(subs).build());
+            }
+            new MessageBuilder()
+                    .setContent("ヘルプ選択")
+                    .addComponents(ActionRow.of(helpMenuBuilder.build())).send(sendUser);
         }
     }
 }

@@ -177,45 +177,6 @@ public class DiscordDAO extends DAOBase {
         }
     }
 
-    public void TempDeleteData(String Server) throws DatabaseException {
-        this.open();
-        prestmt = null;
-        try {
-            String sql = "DELETE FROM " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
-            prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, Server);
-            prestmt.execute();
-            sql = "DELETE FROM " + DAOParameters.TABLE_MENTION_MESSAGE.getParameter() + " WHERE " + MentionMessageParameters.SERVER_ID.getParameter() + " = ?";
-            prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, Server);
-            prestmt.execute();
-            sql = "DELETE FROM " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " WHERE " + TempChannelsParameters.SERVER_ID.getParameter() + " = ?";
-            prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, Server);
-            prestmt.execute();
-            String messageId = null;
-            sql = "SELECT " + ReactMessageParameters.MESSAGE_ID.getParameter() + " FROM " + DAOParameters.TABLE_REACT_MESSAGE.getParameter() + " WHERE " + ReactMessageParameters.SERVER_ID.getParameter() + " = ?";
-            prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, Server);
-            ResultSet r = prestmt.executeQuery();
-            while (r.next()) {
-                messageId = r.getString(ReactMessageParameters.MESSAGE_ID.getParameter());
-            }
-            sql = "DELETE FROM " + DAOParameters.TABLE_REACT_MESSAGE.getParameter() + " WHERE " + ReactMessageParameters.SERVER_ID.getParameter() + " = ?";
-            prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, Server);
-            prestmt.execute();
-            sql = "DELETE FROM " + DAOParameters.TABLE_REACT_ROLE.getParameter() + " WHERE " + ReactRoleParameters.MESSAGE_ID.getParameter() + " = ?";
-            prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, messageId);
-            prestmt.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            this.close(prestmt);
-        }
-    }
-
     public void TempSetChannelList(ChannelRecord list) throws DatabaseException {
         this.open();
         prestmt = null;
@@ -260,23 +221,6 @@ public class DiscordDAO extends DAOBase {
             e.printStackTrace();
         } finally {
             this.close(prestmt);
-        }
-        return list;
-    }
-
-    public ArrayList<String> TempVoiceIds() {
-        this.open();
-        Statement stmt = null;
-        ArrayList<String> list = new ArrayList<>();
-        try {
-            stmt = con.createStatement();
-            String sql = "SELECT DISTINCT " + TempChannelsParameters.VOICE_CHANNEL_ID.getParameter() + " FROM " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter();
-            ResultSet rs = stmt.executeQuery(sql);
-            while (rs.next()) list.add(rs.getString(TempChannelsParameters.VOICE_CHANNEL_ID.getParameter()));
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            this.close(stmt);
         }
         return list;
     }
@@ -405,23 +349,6 @@ public class DiscordDAO extends DAOBase {
         return list;
     }
 
-    public MentionMessageRecord getAllMentionText() {
-        this.open();
-        MentionMessageRecord list = new MentionMessageRecord();
-        Statement stmt = null;
-        try {
-            stmt = con.createStatement();
-            String sql = "SELECT DISTINCT " + TempChannelsParameters.TEXT_CHANNEL_ID.getParameter() + " FROM " + DAOParameters.TABLE_MENTION_MESSAGE.getParameter();
-            ResultSet rs = stmt.executeQuery(sql);
-            while (rs.next()) list.getTextID().add(rs.getString(TempChannelsParameters.TEXT_CHANNEL_ID.getParameter()));
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            this.close(stmt);
-        }
-        return list;
-    }
-
     public void deleteMentions(String textId) {
         this.open();
         prestmt = null;
@@ -453,23 +380,6 @@ public class DiscordDAO extends DAOBase {
             this.close(prestmt);
         }
         return mentionId;
-    }
-
-    public ArrayList<String> getServerList() {
-        Statement stmt = null;
-        ArrayList<String> serverIdList = new ArrayList<>();
-        this.open();
-        try {
-            String sql = "SELECT " + ServerPropertyParameters.SERVER_ID.getParameter() + " FROM " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter();
-            stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-            while (rs.next()) serverIdList.add(rs.getString(ServerPropertyParameters.SERVER_ID.getParameter()));
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            this.close(stmt);
-        }
-        return serverIdList;
     }
 
     public void setReactMessageData(String serverId, String textId, String messageId) {

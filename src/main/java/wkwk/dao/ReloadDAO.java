@@ -85,7 +85,7 @@ public class ReloadDAO extends DAOBase{
             String sql = "DELETE FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE "
                     + DeleteMessagesParameters.SERVER_ID.getParameter() + " = ? AND "
                     + DeleteMessagesParameters.MESSAGE_ID.getParameter() + " = ? AND "
-                    + DeleteMessagesParameters.TEXT_CHANNEL_ID + " = ? AND "
+                    + DeleteMessagesParameters.TEXT_CHANNEL_ID.getParameter() + " = ? AND "
                     + DeleteMessagesParameters.DELETE_TIME.getParameter() + " = ?";
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, record.getServerId());
@@ -131,7 +131,7 @@ public class ReloadDAO extends DAOBase{
             String sql = "DELETE FROM " + DAOParameters.TABLE_DELETE_TIMES.getParameter() + " WHERE "
                     + DeleteTimesParameters.SERVER_ID.getParameter() + " = ? AND "
                     + DeleteTimesParameters.TEXT_CHANNEL_ID.getParameter() + " = ? AND "
-                    + DeleteTimesParameters.DELETE_TIME + " = ? AND "
+                    + DeleteTimesParameters.DELETE_TIME.getParameter() + " = ? AND "
                     + DeleteTimesParameters.TIME_UNIT.getParameter() + " = ?";
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, record.getServerId());
@@ -177,7 +177,7 @@ public class ReloadDAO extends DAOBase{
             String sql = "DELETE FROM " + DAOParameters.TABLE_LOGGING.getParameter() + " WHERE "
                     + LoggingParameters.SERVER_ID.getParameter() + " = ? AND "
                     + LoggingParameters.CHANNEL_ID.getParameter() + " = ? AND "
-                    + LoggingParameters.TARGET_CHANNEL_ID + " = ? AND "
+                    + LoggingParameters.TARGET_CHANNEL_ID.getParameter() + " = ? AND "
                     + LoggingParameters.LOG_TYPE.getParameter() + " = ?";
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, record.getServerId());

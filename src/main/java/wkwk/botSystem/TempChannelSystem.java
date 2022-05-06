@@ -91,7 +91,8 @@ public class TempChannelSystem {
                                             PermissionType.ATTACH_FILE,
                                             PermissionType.USE_APPLICATION_COMMANDS,
                                             PermissionType.USE_EXTERNAL_STICKERS,
-                                            PermissionType.USE_EXTERNAL_EMOJIS);
+                                            PermissionType.USE_EXTERNAL_EMOJIS,
+                                            PermissionType.MANAGE_ROLES);
                             tx.createUpdater().addPermissionOverwrite(joinUser, per.build()).update();
                             if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent())
                                 if (api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUserIds().size() == 1) {
@@ -298,6 +299,7 @@ public class TempChannelSystem {
                                                 Button.danger("next", "次の項目"))).applyChanges();
                             } else if (id.equals("size")) {
                                 SelectMenuBuilder selectMenuBuilder = new SelectMenuBuilder().setCustomId("size").setPlaceholder("変更したい人数を選択してください").setMaximumValues(1).setMinimumValues(1);
+                                selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(Integer.toString(0)).setValue(Integer.toString(0)).build());
                                 for (int n = 2; n < 7; n++) {
                                     selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(Integer.toString(n)).setValue(Integer.toString(n)).build());
                                 }
@@ -352,7 +354,8 @@ public class TempChannelSystem {
                                                     PermissionType.ATTACH_FILE,
                                                     PermissionType.USE_APPLICATION_COMMANDS,
                                                     PermissionType.USE_EXTERNAL_STICKERS,
-                                                    PermissionType.USE_EXTERNAL_EMOJIS).build()).update();
+                                                    PermissionType.USE_EXTERNAL_EMOJIS,
+                                                    PermissionType.MANAGE_ROLES).build()).update();
                                 }
                                 response = buttonInteraction.getUser().getName() + "が新しく通話管理者になりました";
                             } else response = "通話管理者が通話にいらっしゃいます";
@@ -399,7 +402,8 @@ public class TempChannelSystem {
                                                     PermissionType.ATTACH_FILE,
                                                     PermissionType.USE_APPLICATION_COMMANDS,
                                                     PermissionType.USE_EXTERNAL_STICKERS,
-                                                    PermissionType.USE_EXTERNAL_EMOJIS).build()).removePermissionOverwrite(api.getUserById(oldManege).join()).addPermissionOverwrite(api.getUserById(oldManege).join(), new PermissionsBuilder().setAllowed(PermissionType.READ_MESSAGES,
+                                                    PermissionType.USE_EXTERNAL_EMOJIS,
+                                                    PermissionType.MANAGE_ROLES).build()).removePermissionOverwrite(api.getUserById(oldManege).join()).addPermissionOverwrite(api.getUserById(oldManege).join(), new PermissionsBuilder().setAllowed(PermissionType.READ_MESSAGES,
                                                     PermissionType.READ_MESSAGE_HISTORY,
                                                     PermissionType.SEND_MESSAGES,
                                                     PermissionType.ADD_REACTIONS,
@@ -430,28 +434,6 @@ public class TempChannelSystem {
                                     if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
                                         api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setUserLimit(size).update();
                                         response = "通話人数を" + size + "に変更しました";
-                                    }
-                                    break;
-                                case "addUser":
-                                    if (api.getServerVoiceChannelById(requestVoiceId).isPresent()) {
-                                        ServerVoiceChannel voiceChannel = api.getServerVoiceChannelById(requestVoiceId).get();
-                                        ServerVoiceChannelUpdater updater = voiceChannel.createUpdater();
-                                        for (SelectMenuOption option : menuInteraction.getChosenOptions()) {
-                                            updater.addPermissionOverwrite(api.getUserById(option.getValue()).join(), new PermissionsBuilder().setAllowed(PermissionType.CONNECT, PermissionType.READ_MESSAGES).build());
-                                        }
-                                        updater.update();
-                                        response = menuInteraction.getChosenOptions().size() + "人を追加しました。";
-                                    }
-                                    break;
-                                case "deleteUser":
-                                    if (api.getServerVoiceChannelById(requestVoiceId).isPresent()) {
-                                        ServerVoiceChannel voiceChannel = api.getServerVoiceChannelById(requestVoiceId).get();
-                                        ServerVoiceChannelUpdater updater = voiceChannel.createUpdater();
-                                        for (SelectMenuOption option : menuInteraction.getChosenOptions()) {
-                                            updater.addPermissionOverwrite(api.getUserById(option.getValue()).join(), new PermissionsBuilder().setDenied(PermissionType.CONNECT, PermissionType.READ_MESSAGES).build());
-                                        }
-                                        updater.update();
-                                        response = menuInteraction.getChosenOptions().size() + "人を排除しました。";
                                     }
                                     break;
                             }

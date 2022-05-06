@@ -27,7 +27,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Objects;
 
 public class SlashCommandSystem {
     DiscordApi api;
@@ -46,7 +46,7 @@ public class SlashCommandSystem {
         api.addSlashCommandCreateListener(event -> {
             try {
                 SlashCommandInteraction interaction = event.getSlashCommandInteraction();
-                StringBuilder responseString = new StringBuilder();
+                StringBuilder responseString = new StringBuilder("インタラクションに失敗");
                 MessageBuilder responseMessage = null;
                 TextChannel channel;
                 String cmd;
@@ -57,6 +57,7 @@ public class SlashCommandSystem {
                     boolean isAdmin = server.getAllowedPermissions(sendUser).contains(PermissionType.ADMINISTRATOR);
                     Role everyone = server.getEveryoneRole();
                     channel = interaction.getChannel().get();
+                    ChannelRecord list = dao.TempGetChannelList(channel.getIdAsString(), "t");
                     cmd = interaction.getCommandName();
                     if (dao.getNoSlashCommandServer(serverId)) {
                         dao.BotSetDate("p", serverId, "NULL");
@@ -445,96 +446,105 @@ public class SlashCommandSystem {
                             responseString = new StringBuilder("個人チャットに送信しました");
                             break;
                     }
-                    if (cmd.equals("name") || cmd.equals("size") || cmd.equals("men") || cmd.equals("n") || cmd.equals("s") || cmd.equals("m") || cmd.equals("add") || cmd.equals("delete")) {
-                        ChannelRecord list = dao.TempGetChannelList(channel.getIdAsString(), "t");
-                        if (sendUser.getConnectedVoiceChannel(server).isPresent() && list.getVoiceID() != null) {
-                            String requestVoiceId = dao.TempGetChannelList(channel.getIdAsString(), "t").getVoiceID();
-                            if (requestVoiceId.equals(sendUser.getConnectedVoiceChannel(server).get().getIdAsString()) && api.getServerVoiceChannelById(requestVoiceId).isPresent() && api.getServerVoiceChannelById(requestVoiceId).get().getEffectivePermissions(sendUser).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
-                                if (cmd.equals("n") || cmd.equals("name") && interaction.getOptionStringValueByName("name").isPresent()) {
-                                    String name = interaction.getOptionStringValueByName("name").get();
-                                    if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
-                                        api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setName(name).update();
-                                        responseString = new StringBuilder("NAME更新完了");
+                    if (list.getVoiceID() != null) {
+                        boolean isManage = sendUser.getConnectedVoiceChannel(server).get().getOverwrittenPermissions(sendUser).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS);
+                        if (isManage) {
+                            if (cmd.equals("n") || cmd.equals("name") && interaction.getOptionStringValueByName("name").isPresent()) {
+                                String name = interaction.getOptionStringValueByName("name").get();
+                                if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
+                                    api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setName(name).update();
+                                    responseString = new StringBuilder("NAME更新完了");
 
-                                    }
-                                    if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
-                                        api.getServerTextChannelById(list.getTextID()).get().createUpdater().setName(name).update();
-                                        responseString = new StringBuilder("NAME更新完了");
+                                }
+                                if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
+                                    api.getServerTextChannelById(list.getTextID()).get().createUpdater().setName(name).update();
+                                    responseString = new StringBuilder("NAME更新完了");
 
+                                }
+                            } else if (cmd.equals("s") || cmd.equals("size") && interaction.getOptionLongValueByName("size").isPresent()) {
+                                int size = Math.toIntExact(interaction.getOptionLongValueByName("size").get());
+                                if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent() && size >= 0 && size < 100) {
+                                    api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setUserLimit(size).update();
+                                    responseString = new StringBuilder("人数制限を" + size + "に設定しました");
+                                    if (size == 0L) {
+                                        responseString = new StringBuilder("人数制限を0(limitless)に設定しました");
                                     }
-                                } else if (cmd.equals("s") || cmd.equals("size") && interaction.getOptionLongValueByName("size").isPresent()) {
-                                    int size = Math.toIntExact(interaction.getOptionLongValueByName("size").get());
-                                    if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent() && size >= 0 && size < 100) {
-                                        api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setUserLimit(size).update();
-                                        responseString = new StringBuilder("人数制限を" + size + "に設定しました");
-                                        if (size == 0L) {
-                                            responseString = new StringBuilder("人数制限を0(limitless)に設定しました");
-                                        }
-                                    } else if (size > 99) responseString = new StringBuilder("99 以内で入力してください");
-                                } else if (cmd.equals("m") || cmd.equals("men")) {
-                                    StringBuilder mentionText = new StringBuilder();
-                                    if (interaction.getOptionStringValueByName("text").isPresent()) {
-                                        mentionText.append(interaction.getOptionStringValueByName("text").get());
-                                    }
-                                    ServerDataRecord serverList = dao.TempGetData(serverId);
-                                    if (api.getServerTextChannelById(serverList.getMentionChannel()).isPresent()) {
-                                        ServerTextChannel mention = api.getServerTextChannelById(serverList.getMentionChannel()).get();
-                                        String mentionMessage = serverList.getStereotyped();
-                                        mentionMessage = processing.RecruitingTextRePress(mentionMessage, sendUser, list, mentionText.toString());
-                                        Message message = new MessageBuilder().setContent(mentionMessage).send(mention).join();
-                                        message.addReaction("❌");
-                                        dao.addMentionMessage(list.getTextID(), message.getIdAsString(), serverId);
-                                        BotSendMessageRecord record = new BotSendMessageRecord();
-                                        record.setMESSAGEID(message.getIdAsString());
-                                        record.setCHANNELID(mention.getIdAsString());
-                                        record.setUSERID(sendUser.getIdAsString());
-                                        record.setSERVERID(serverId);
-                                        dao.addBotSendMessage(record);
-                                        responseString = new StringBuilder("募集メッセを送信しました");
-                                    }
-                                } else if (cmd.equals("add")) {
-                                    String subCommand = interaction.getOptionByIndex(0).get().getName();
-                                    if ("user".equals(subCommand)) {
-                                        Collection<User> users = new ArrayList<>();
+                                } else if (size > 99) responseString = new StringBuilder("99 以内で入力してください");
+                            } else if (cmd.equals("m") || cmd.equals("men")) {
+                                StringBuilder mentionText = new StringBuilder();
+                                if (interaction.getOptionStringValueByName("text").isPresent()) {
+                                    mentionText.append(interaction.getOptionStringValueByName("text").get());
+                                }
+                                ServerDataRecord serverList = dao.TempGetData(list.getServerID());
+                                if (api.getServerTextChannelById(serverList.getMentionChannel()).isPresent()) {
+                                    ServerTextChannel mention = api.getServerTextChannelById(serverList.getMentionChannel()).get();
+                                    String mentionMessage = serverList.getStereotyped();
+                                    mentionMessage = processing.RecruitingTextRePress(mentionMessage, sendUser, list, mentionText.toString());
+                                    Message message = new MessageBuilder().setContent(mentionMessage).send(mention).join();
+                                    message.addReaction("❌");
+                                    dao.addMentionMessage(list.getTextID(), message.getIdAsString(), list.getServerID());
+                                    BotSendMessageRecord record = new BotSendMessageRecord();
+                                    record.setMESSAGEID(message.getIdAsString());
+                                    record.setCHANNELID(mention.getIdAsString());
+                                    record.setUSERID(sendUser.getIdAsString());
+                                    record.setSERVERID(list.getServerID());
+                                    dao.addBotSendMessage(record);
+                                    responseString = new StringBuilder("募集メッセを送信しました");
+                                }
+                            } else if (cmd.equals("add")) {
+                                String subCommand = interaction.getOptionByIndex(0).get().getName();
+                                if ("user".equals(subCommand)) {
+                                    if (interaction.getOptionByIndex(0).get().getOptionUserValueByName("selectUser").isPresent()) {
+                                        User user = interaction.getOptionByIndex(0).get().getOptionUserValueByName("selectUser").get();
                                         if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
-                                            users = server.getMembers();
-                                            users.removeAll(api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUsers());
-                                            users.removeIf(User::isBot);
+                                            ServerVoiceChannel voiceChannel = api.getServerVoiceChannelById(list.getVoiceID()).get();
+                                            ServerVoiceChannelUpdater updater = voiceChannel.createUpdater();
+                                            updater.addPermissionOverwrite(user, new PermissionsBuilder().setAllowed(PermissionType.CONNECT, PermissionType.READ_MESSAGES).build());
+                                            updater.update();
+                                            responseString = new StringBuilder(user.getName() + "を追加しました。");
                                         }
-                                        if (users.isEmpty()) {
-                                            responseString = new StringBuilder("対象ユーザーが0人です");
-                                        } else {
-                                            SelectMenuBuilder selectMenuBuilder = new SelectMenuBuilder().setCustomId("addUser").setPlaceholder("ユーザー追加").setMinimumValues(1);
-                                            selectMenuBuilder.setMaximumValues(Math.min(users.size(), 24));
-                                            users.forEach(user -> selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(user.getName()).setValue(String.valueOf(user.getIdAsString())).build()));
-                                            responseMessage = new MessageBuilder()
-                                                    .setContent("特定ユーザー追加")
-                                                    .addComponents(ActionRow.of(selectMenuBuilder.build()));
-                                            responseString = new StringBuilder("送信しました");
-                                        }
-                                    }
-                                } else if (cmd.equals("delete")) {
-                                    String subCommand = interaction.getOptionByIndex(0).get().getName();
-                                    if ("user".equals(subCommand)) {
-                                        Collection<User> users = server.getMembers();
-                                        users.removeIf(User::isBot);
-                                        if (users.isEmpty()) responseString = new StringBuilder("対象ユーザーが0人です");
-                                        else {
-                                            SelectMenuBuilder selectMenuBuilder = new SelectMenuBuilder().setCustomId("deleteUser").setPlaceholder("ユーザー排除").setMinimumValues(1);
-                                            selectMenuBuilder.setMaximumValues(Math.min(users.size(), 24));
-                                            users.forEach(user -> selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(user.getName()).setValue(String.valueOf(user.getIdAsString())).build()));
-                                            responseMessage = new MessageBuilder()
-                                                    .setContent("特定ユーザー排除")
-                                                    .addComponents(ActionRow.of(selectMenuBuilder.build()));
-                                            responseString = new StringBuilder("送信しました");
-                                        }
+                                    } else {
+                                        responseString = new StringBuilder("ユーザーを選択してください");
                                     }
                                 }
-                            } else if (api.getServerVoiceChannelById(requestVoiceId).isPresent() && !api.getServerVoiceChannelById(requestVoiceId).get().getEffectivePermissions(sendUser).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
-                                responseString = new StringBuilder("通話管理権限が無いと使用できません");
+                            } else if (cmd.equals("delete")) {
+                                String subCommand = interaction.getOptionByIndex(0).get().getName();
+                                if ("user".equals(subCommand)) {
+                                    if (interaction.getOptionByIndex(0).get().getOptionUserValueByName("selectUser").isPresent()) {
+                                        User user = interaction.getOptionByIndex(0).get().getOptionUserValueByName("selectUser").get();
+                                        if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
+                                            ServerVoiceChannel voiceChannel = api.getServerVoiceChannelById(list.getVoiceID()).get();
+                                            ServerVoiceChannelUpdater updater = voiceChannel.createUpdater();
+                                            updater.addPermissionOverwrite(user, new PermissionsBuilder().setDenied(PermissionType.CONNECT, PermissionType.READ_MESSAGES).build());
+                                            updater.update();
+                                            responseString = new StringBuilder(user.getName() + "を削除しました。");
+                                        }
+                                    } else {
+                                        responseString = new StringBuilder("ユーザーを選択してください");
+                                    }
+                                }
                             }
-                        } else if (!sendUser.getConnectedVoiceChannel(server).isPresent()) {
-                            responseString = new StringBuilder("一時通話に接続していないと使用できません");
+                        } else {
+                            if (cmd.equals("claim")) {
+                                boolean claimSw = api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().entrySet().stream().filter(entry -> entry.getValue().getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)).findFirst().map(entry -> api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUserIds().stream().noneMatch(connectId -> Objects.equals(connectId, entry.getKey()))).orElse(true);
+                                if (claimSw) {
+                                    PermissionsBuilder per = new PermissionsBuilder()
+                                            .setAllowed(PermissionType.READ_MESSAGES,
+                                                    PermissionType.READ_MESSAGE_HISTORY,
+                                                    PermissionType.SEND_MESSAGES,
+                                                    PermissionType.ADD_REACTIONS,
+                                                    PermissionType.ATTACH_FILE,
+                                                    PermissionType.USE_APPLICATION_COMMANDS,
+                                                    PermissionType.USE_EXTERNAL_STICKERS,
+                                                    PermissionType.USE_EXTERNAL_EMOJIS,
+                                                    PermissionType.MANAGE_ROLES);
+                                    api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(sendUser, per.build()).update();
+                                    if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
+                                        api.getServerTextChannelById(list.getTextID()).get().createUpdater().addPermissionOverwrite(sendUser, per.build()).update();
+                                    }
+                                    responseString = new StringBuilder(sendUser.getName() + "が新しく通話管理者になりました");
+                                } else responseString = new StringBuilder("通話管理者が通話にいらっしゃいます");
+                            }
                         }
                     }
                     if (responseMessage != null) {

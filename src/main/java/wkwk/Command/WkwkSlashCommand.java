@@ -20,6 +20,9 @@ public class WkwkSlashCommand {
         System.out.println("ping");
         SlashCommand ping =
                 SlashCommand.with("ping", "BOTの回線速度を計測").createGlobal(api).join();
+        System.out.println("claim");
+        SlashCommand claim =
+                SlashCommand.with("claim", "一時通話の権限を獲得").createGlobal(api).join();
         System.out.println("invite");
         SlashCommand invite =
                 SlashCommand.with("invite", "BOT招待リンクを表示").createGlobal(api).join();
@@ -33,13 +36,21 @@ public class WkwkSlashCommand {
         SlashCommand add =
                 SlashCommand.with("add", "追加",
                         Collections.singletonList(
-                                SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "user", "特定のユーザーだけ見えるようにする"))
+                                SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "user", "特定のユーザーだけ見えるようにする",
+                                        Collections.singletonList(
+                                                SlashCommandOption.create(SlashCommandOptionType.USER, "selectUser", "対象ユーザー", true)
+                                        )
+                                ))
                 ).createGlobal(api).join();
         System.out.println("delete");
         SlashCommand delete =
                 SlashCommand.with("delete", "削除",
                         Collections.singletonList(
-                                SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "user", "特定のユーザーだけに見えないように"))
+                                SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "user", "特定のユーザーだけに見えないように",
+                                        Collections.singletonList(
+                                                SlashCommandOption.create(SlashCommandOptionType.USER, "selectUser", "対象ユーザー", true)
+                                        )
+                                ))
                 ).createGlobal(api).join();
         System.out.println("set");
         SlashCommand set =

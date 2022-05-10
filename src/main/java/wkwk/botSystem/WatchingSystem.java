@@ -27,6 +27,9 @@ public class WatchingSystem {
                 }
                 builder.append(event.getMessageAuthor().asUser().get().getDiscriminatedName()).append("\n ID : ").append(event.getMessageAuthor().asUser().get().getIdAsString()).append("\n本文:\n").append(event.getMessageContent());
                 messageBuilder.setContent(builder.toString());
+                event.getMessage().getEmbeds().forEach(embed -> {
+                    messageBuilder.addEmbed(embed.toBuilder());
+                });
                 for (MessageAttachment attachment : event.getMessageAttachments()) {
                     messageBuilder.addAttachment(attachment.getUrl());
                 }

@@ -570,7 +570,7 @@ public class SlashCommandSystem {
                             responseString = new StringBuilder("https://wkb.page.link/guild");
                             break;
                         case "help":
-                            new HelpSystem(api).sendHelp(event);
+                            new HelpSysFtem(api).sendHelp(event);
                             responseString = new StringBuilder("送信しました");
                             break;
                     }

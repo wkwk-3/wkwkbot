@@ -24,6 +24,7 @@ import wkwk.parameter.record.ChannelRecord;
 import wkwk.parameter.record.ServerDataRecord;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -261,8 +262,10 @@ public class TempChannelSystem {
                             } else if (id.equals("transfer")) {
                                 if (api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUserIds().size() > 1 && api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().get(buttonInteraction.getUser().getId()).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
                                     SelectMenuBuilder selectMenuBuilder = new SelectMenuBuilder().setCustomId("transSelect").setPlaceholder("移譲ユーザーを選択してください").setMaximumValues(1).setMinimumValues(1);
-                                    for (Long userId : api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUserIds()) {
-                                        selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(api.getUserById(userId).join().getName()).setValue(String.valueOf(userId)).build());
+                                    Collection<User> users = api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUsers();
+                                    users.remove(buttonInteraction.getUser());
+                                    for (User user : users) {
+                                        selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(user.getName()).setValue(user.getIdAsString()).build());
                                     }
                                     messageBuilder = new MessageBuilder()
                                             .setContent("通話管理権限移譲")

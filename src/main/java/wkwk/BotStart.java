@@ -19,6 +19,7 @@ import wkwk.twitterSystem.AutoTweet;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 
 public class BotStart {
     public static void main(String[] args) {
@@ -51,61 +52,7 @@ public class BotStart {
                     System.out.println("システムを終了します");
                     System.exit(0);
                 } else if ("reload".equals(cmd)) {
-
                     new ReloadSystem(api).run();
-
-
-
-
-
-                    /*
-                    int i = 0;
-                    int j = 0;
-                    int k = 0;
-                    String outServer = "削除するサーバーデータがありませんでした";
-                    String outMention = "削除するメンションデータがありませんでした";
-                    String outTemp = "削除する一時データがありませんでした";
-                    for (String serverId : dao.getServerList())
-                        if (!api.getServerById(serverId).isPresent()) {
-                            i++;
-                            dao.serverLeaveAllDataDelete(serverId);
-                            System.out.println("右のサーバーデーターを削除しました -> " + serverId);
-                        }
-                    for (String text : dao.getAllMentionText().getTextID())
-                        if (!api.getServerTextChannelById(text).isPresent()) {
-                            j++;
-                            dao.deleteMentions(text);
-                            System.out.println("右のメンションデータを削除しました -> " + text);
-                        } else {
-                            ChannelRecord list = dao.TempGetChannelList(api.getServerTextChannelById(text).get().getIdAsString(), "t");
-                            if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent() && api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUserIds().size() < 1) {
-                                j++;
-                                api.getServerVoiceChannelById(list.getVoiceID()).get().delete();
-                                if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
-                                    api.getServerTextChannelById(list.getTextID()).get().delete();
-                                }
-                                dao.TempDeleteData(list.getServerID());
-                                if (api.getTextChannelById(dao.getMentionChannel(list.getServerID())).isPresent()) {
-                                    for (String message : dao.getMentionMessage(list.getTextID()).getMessages()) {
-                                        api.getMessageById(message, api.getTextChannelById(dao.getMentionChannel(list.getServerID())).get()).join().delete();
-                                    }
-                                    dao.deleteMentions(list.getTextID());
-                                }
-                                System.out.println("右の一時通話群を削除しました -> " + list.getVoiceID());
-                            }
-                        }
-                    for (String voice : dao.TempVoiceIds()) {
-                        if (!api.getServerVoiceChannelById(voice).isPresent()) {
-                            k++;
-                            dao.TempDeleteChannelList(voice, "v");
-                            System.out.println("右の一時データを削除しました -> " + voice);
-                        }
-                    }
-                    if (i > 0) outServer = "サーバーデータ削除完了";
-                    if (j > 0) outMention = "メンションデータ削除完了";
-                    if (k > 0) outTemp = "一時データ削除完了";
-                    System.out.println(outServer + "\n" + outMention + "\n" + outTemp);
-                     */
                     api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
                 } else if ("ts".equals(cmd)) {
                     autoTweet.start();

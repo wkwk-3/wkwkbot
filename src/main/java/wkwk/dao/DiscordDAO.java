@@ -739,20 +739,18 @@ public class DiscordDAO extends DAOBase {
     public ArrayList<DeleteMessageRecord> getDeleteMessage(String date) {
         ArrayList<DeleteMessageRecord> list = new ArrayList<>();
         this.open();
-        PreparedStatement preStmt1 = null;
-        PreparedStatement preStmt2 = null;
         String sql = "SELECT EXISTS(SELECT * FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.DELETE_TIME.getParameter() + " < ?) AS MESSAGE_CHECK";
         String sql2 = "SELECT * FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.DELETE_TIME.getParameter() + " < ?";
         try {
-            preStmt1 = con.prepareStatement(sql);
-            preStmt1.setString(1, date);
-            ResultSet rs = preStmt1.executeQuery();
+            prestmt = con.prepareStatement(sql);
+            prestmt.setString(1, date);
+            ResultSet rs = prestmt.executeQuery();
             while (rs.next()) {
                 if (rs.getInt("MESSAGE_CHECK") == 1) {
                     try {
-                        preStmt2 = con.prepareStatement(sql2);
-                        preStmt2.setString(1, date);
-                        ResultSet rsx = preStmt2.executeQuery();
+                        prestmt = con.prepareStatement(sql2);
+                        prestmt.setString(1, date);
+                        ResultSet rsx = prestmt.executeQuery();
                         while (rsx.next()) {
                             DeleteMessageRecord message = new DeleteMessageRecord();
                             message.setMessageId(rsx.getString(DeleteMessagesParameters.MESSAGE_ID.getParameter()));
@@ -767,8 +765,7 @@ public class DiscordDAO extends DAOBase {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            this.close(preStmt1);
-            this.close(preStmt2);
+            this.close(prestmt);
         }
         return list;
     }

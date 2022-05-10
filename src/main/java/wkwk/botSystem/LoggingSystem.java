@@ -25,9 +25,12 @@ public class LoggingSystem {
         DiscordDAO dao = new DiscordDAO();
         SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         api.addServerMemberJoinListener(event -> {
+            System.out.println("1");
             ArrayList<LoggingRecord> logRecord = dao.getLogging("s", event.getServer().getIdAsString());
             logRecord.forEach(record -> {
-                if (record.getLogType().equals("USER") && api.getServerTextChannelById(record.getChannelId()).isPresent()) {
+                System.out.println("2");
+                if (record.getLogType().equals("user") && api.getServerTextChannelById(record.getChannelId()).isPresent()) {
+                    System.out.println("3");
                     ServerTextChannel textChannel = api.getServerTextChannelById(record.getChannelId()).get();
                     Date date = Date.from(event.getUser().getCreationTimestamp());
                     textChannel.sendMessage(new EmbedBuilder()
@@ -37,13 +40,15 @@ public class LoggingSystem {
                             .addInlineField("アカウント作成日時", sd.format(date))
                             .setColor(Color.BLACK)
                     ).join();
+                    System.out.println("4");
                 }
+                System.out.println("5");
             });
         });
         api.addServerMemberLeaveListener(event -> {
             ArrayList<LoggingRecord> logRecord = dao.getLogging("s", event.getServer().getIdAsString());
             logRecord.forEach(record -> {
-                if (record.getLogType().equals("USER") && api.getServerTextChannelById(record.getChannelId()).isPresent()) {
+                if (record.getLogType().equals("user") && api.getServerTextChannelById(record.getChannelId()).isPresent()) {
                     ServerTextChannel textChannel = api.getServerTextChannelById(record.getChannelId()).get();
                     textChannel.sendMessage(
                             new EmbedBuilder()
@@ -63,7 +68,7 @@ public class LoggingSystem {
                 TextChannel channel = event.getChannel();
                 User user = event.getMessageAuthor().get().asUser().get();
                 dao.getLogging("c", channel.getIdAsString()).forEach(record -> {
-                    if (api.getTextChannelById(record.getChannelId()).isPresent() && record.getLogType().equals("CHAT") && channel.getIdAsString().equals(record.getTargetChannelId()) && event.getMessageContent().isPresent()) {
+                    if (api.getTextChannelById(record.getChannelId()).isPresent() && record.getLogType().equals("chat") && channel.getIdAsString().equals(record.getTargetChannelId()) && event.getMessageContent().isPresent()) {
                         api.getTextChannelById(record.getChannelId()).get().sendMessage(
                                 new EmbedBuilder()
                                         .setAuthor(user)

@@ -2,26 +2,18 @@ package wkwk.twitterSystem;
 
 import io.github.redouane59.twitter.TwitterClient;
 import io.github.redouane59.twitter.signature.TwitterCredentials;
+import wkwk.csv.TweetDataLoad;
 import wkwk.parameter.record.TweetAPIRecord;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class AutoTweet {
+    TweetDataLoad csvReader = new TweetDataLoad();
     int oldTime = -1;
     TwitterClient twitterClient;
-    String tweetText = "当BOTの質問がございましたら、下記サーバーに参加し\n" +
-            "気軽にご質問ください。\n" +
-            "BOT招待 : \n" +
-            "https://wkb.page.link/bot\n" +
-            "サーバー招待 :\n" +
-            "https://wkb.page.link/guild\n" +
-            "::emoji::\n" +
-            "#wkwkbot #Discord #bot #通話管理";
-    String[] emojis = {"🌝", "🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘", "🌙", "🌚", "🌛", "🌜", "☀", "🌞", "⭐", "🌟", "🌠", "☄", "🌈", "☂", "❄", "🔥", "💧"};
+    String tweetText = csvReader.getTweetTemplate();
+    List<String> emojis = csvReader.getTweetEmojis();
     TimerTask task;
     Timer timer;
 
@@ -42,7 +34,7 @@ public class AutoTweet {
                 int newTime = Integer.parseInt(sdf.format(date));
                 if (oldTime != newTime) {
                     oldTime = newTime;
-                    String tweet = tweetText.replaceFirst("::emoji::", emojis[newTime]);
+                    String tweet = tweetText.replaceFirst("::emoji::", emojis.get(newTime));
                     twitterClient.postTweet(tweet);
                     System.out.println(date + "にツイート");
                 }

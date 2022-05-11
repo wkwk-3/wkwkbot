@@ -2,6 +2,8 @@ package wkwk.botSystem;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.emoji.Emoji;
+import org.javacord.api.entity.permission.Role;
+import wkwk.Command.Processing;
 import wkwk.dao.DiscordDAO;
 import wkwk.parameter.record.ReactionRoleRecord;
 
@@ -16,6 +18,7 @@ public class ReactionRoleSystem {
 
     public void run() {
         DiscordDAO dao = new DiscordDAO();
+        Processing processing = new Processing(api);
         api.addReactionAddListener(event -> {
             if (!event.requestUser().join().isBot()) {
                 Emoji emoji = event.getEmoji();
@@ -24,14 +27,9 @@ public class ReactionRoleSystem {
                     String textChannel = event.getChannel().getIdAsString();
                     String messageId = event.requestMessage().join().getIdAsString();
                     ReactionRoleRecord record = dao.getReactAllData(serverId);
-                    if (record.getTextChannelID() != null && record.getMessageID() != null && record.getTextChannelID().equals(textChannel) && record.getMessageID().equals(messageId)) {
-                        ArrayList<String> emojis = record.getEmoji();
-                        ArrayList<String> roles = record.getRoleID();
-                        for (int i = 0; i < record.getEmoji().size(); i++) {
-                            if (emoji.asUnicodeEmoji().get().equals(emojis.get(i)) && api.getRoleById(roles.get(i)).isPresent()) {
-                                event.requestUser().join().addRole(api.getRoleById(roles.get(i)).get()).join();
-                            }
-                        }
+                    Role targetRole = processing.getReactionRole(emoji, record);
+                    if (targetRole != null && record.getTextChannelID() != null && record.getMessageID() != null && record.getTextChannelID().equals(textChannel) && record.getMessageID().equals(messageId)) {
+                        event.requestUser().join().addRole(targetRole).join();
                     }
                 }
             }
@@ -44,14 +42,9 @@ public class ReactionRoleSystem {
                     String textChannel = event.getChannel().getIdAsString();
                     String messageId = event.requestMessage().join().getIdAsString();
                     ReactionRoleRecord record = dao.getReactAllData(serverId);
-                    if (record.getTextChannelID() != null && record.getMessageID() != null && record.getTextChannelID().equals(textChannel) && record.getMessageID().equals(messageId)) {
-                        ArrayList<String> emojis = record.getEmoji();
-                        ArrayList<String> roles = record.getRoleID();
-                        for (int i = 0; i < record.getEmoji().size(); i++) {
-                            if (emoji.asUnicodeEmoji().get().equals(emojis.get(i)) && api.getRoleById(roles.get(i)).isPresent()) {
-                                event.requestUser().join().removeRole(api.getRoleById(roles.get(i)).get()).join();
-                            }
-                        }
+                    Role targetRole = processing.getReactionRole(emoji, record);
+                    if (targetRole != null && record.getTextChannelID() != null && record.getMessageID() != null && record.getTextChannelID().equals(textChannel) && record.getMessageID().equals(messageId)) {
+                        event.requestUser().join().removeRole(targetRole).join();
                     }
                 }
             }

@@ -29,10 +29,11 @@ public class PresetSystem {
                         case "removeName":
                             if (api.getServerById(serverId).isPresent() && api.getServerById(serverId).get().getPermissions(menuInteraction.getUser()).getAllowedPermission().contains(PermissionType.ADMINISTRATOR) || menuInteraction.getUser().isBotOwner()) {
                                 String name = menuInteraction.getChosenOptions().get(0).getValue();
+                                response = "削除に失敗しました";
                                 if (menuInteraction.getServer().isPresent()) {
                                     dao.deleteNamePreset(menuInteraction.getServer().get().getIdAsString(), name);
                                     response = name + "を削除しました";
-                                } else response = "削除に失敗しました";
+                                }
                             }
                             break;
                         case "removeLogging":

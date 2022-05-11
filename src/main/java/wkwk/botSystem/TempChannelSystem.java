@@ -1,7 +1,6 @@
 package wkwk.botSystem;
 
 import org.javacord.api.DiscordApi;
-import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.channel.*;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageBuilder;
@@ -39,7 +38,7 @@ public class TempChannelSystem {
     public void run() {
 
         DiscordDAO dao = new DiscordDAO();
-        Processing processing = new Processing();
+        Processing processing = new Processing(api);
 
         api.addServerVoiceChannelMemberJoinListener(event -> {
             User joinUser = event.getUser();
@@ -84,22 +83,11 @@ public class TempChannelSystem {
                         ChannelRecord list = dao.TempGetChannelList(joinVoiceId, "v");
                         if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
                             ServerTextChannel tx = api.getServerTextChannelById(list.getTextID()).get();
-                            PermissionsBuilder per = new PermissionsBuilder()
-                                    .setAllowed(PermissionType.READ_MESSAGES,
-                                            PermissionType.READ_MESSAGE_HISTORY,
-                                            PermissionType.SEND_MESSAGES,
-                                            PermissionType.ADD_REACTIONS,
-                                            PermissionType.ATTACH_FILE,
-                                            PermissionType.USE_APPLICATION_COMMANDS,
-                                            PermissionType.USE_EXTERNAL_STICKERS,
-                                            PermissionType.USE_EXTERNAL_EMOJIS,
-                                            PermissionType.MANAGE_ROLES);
-                            tx.createUpdater().addPermissionOverwrite(joinUser, per.build()).update();
+                            tx.createUpdater().addPermissionOverwrite(joinUser, processing.getUserPermission().build()).update();
                             if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent())
                                 if (api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUserIds().size() == 1) {
                                     api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(joinUser, new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS).build()).update();
-                                    per.setAllowed(PermissionType.MANAGE_CHANNELS, PermissionType.MANAGE_MESSAGES);
-                                    api.getServerTextChannelById(list.getTextID()).get().createUpdater().addPermissionOverwrite(joinUser, per.build()).update();
+                                    api.getServerTextChannelById(list.getTextID()).get().createUpdater().addPermissionOverwrite(joinUser, processing.getAdminPermission().build()).update();
                                 }
                         }
                     }
@@ -107,7 +95,7 @@ public class TempChannelSystem {
                     ex.printStackTrace();
                 }
             }
-            api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
+            processing.upDataBotActivity();
         });
         api.addServerVoiceChannelMemberLeaveListener(event -> {
             ServerDataRecord data;
@@ -158,7 +146,7 @@ public class TempChannelSystem {
                 }
             } catch (SystemException | DatabaseException ignored) {
             }
-            api.updateActivity(ActivityType.PLAYING, dao.GetServerCount() + "servers | " + dao.GetVoiceCount() + "VC");
+            processing.upDataBotActivity();
         });
         api.addButtonClickListener(event -> {
             MessageBuilder messageBuilder = null;
@@ -178,22 +166,22 @@ public class TempChannelSystem {
                             if (id.equals("hide")) {
                                 if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
                                     PermissionsBuilder permissions = new PermissionsBuilder();
-                                    boolean lockIs = dao.GetChannelLock(textChannelId);
-                                    boolean hideIs = dao.GetChannelHide(textChannelId);
-                                    if (hideIs) {
-                                        hideIs = false;
+                                    boolean isLock = dao.GetChannelLock(textChannelId);
+                                    boolean isHide = dao.GetChannelHide(textChannelId);
+                                    if (isHide) {
+                                        isHide = false;
                                         permissions.setUnset(PermissionType.READ_MESSAGES);
                                         response += "通話非表示解除完了";
                                     } else {
-                                        hideIs = true;
+                                        isHide = true;
                                         permissions.setDenied(PermissionType.READ_MESSAGES);
                                         response += "通話非表示完了";
                                     }
-                                    if (lockIs) permissions.setDenied(PermissionType.CONNECT);
+                                    if (isLock) permissions.setDenied(PermissionType.CONNECT);
                                     else permissions.setUnset(PermissionType.CONNECT);
                                     ArrayList<Role> targetRole = new ArrayList<>();
                                     for (Map.Entry<Long, Permissions> permissionMap : api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenRolePermissions().entrySet()) {
-                                        if (hideIs) {
+                                        if (isHide) {
                                             for (PermissionType allowType : permissionMap.getValue().getAllowedPermission()) {
                                                 if (allowType.equals(PermissionType.READ_MESSAGES) && api.getRoleById(permissionMap.getKey()).isPresent()) {
                                                     targetRole.add(api.getRoleById(permissionMap.getKey()).get());
@@ -215,27 +203,27 @@ public class TempChannelSystem {
                                         updater.addPermissionOverwrite(target, permissions.build());
                                     }
                                     updater.update();
-                                    dao.UpdateChannelHide(textChannelId, hideIs);
+                                    dao.UpdateChannelHide(textChannelId, isHide);
                                 }
                             } else if (id.equals("lock")) {
                                 if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
                                     PermissionsBuilder permissions = new PermissionsBuilder();
-                                    boolean lockIs = dao.GetChannelLock(textChannelId);
-                                    boolean hideIs = dao.GetChannelHide(textChannelId);
-                                    if (lockIs) {
-                                        lockIs = false;
+                                    boolean isLock = dao.GetChannelLock(textChannelId);
+                                    boolean isHide = dao.GetChannelHide(textChannelId);
+                                    if (isLock) {
+                                        isLock = false;
                                         permissions.setUnset(PermissionType.CONNECT);
                                         response += "通話ロック解除完了";
                                     } else {
-                                        lockIs = true;
+                                        isLock = true;
                                         permissions.setDenied(PermissionType.CONNECT);
                                         response += "通話ロック完了";
                                     }
-                                    if (hideIs) permissions.setDenied(PermissionType.READ_MESSAGES);
+                                    if (isHide) permissions.setDenied(PermissionType.READ_MESSAGES);
                                     else permissions.setUnset(PermissionType.READ_MESSAGES);
                                     ArrayList<Role> targetRole = new ArrayList<>();
                                     for (Map.Entry<Long, Permissions> permissionMap : api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenRolePermissions().entrySet()) {
-                                        if (lockIs) {
+                                        if (isLock) {
                                             for (PermissionType allowType : permissionMap.getValue().getAllowedPermission()) {
                                                 if (allowType.equals(PermissionType.CONNECT) && api.getRoleById(permissionMap.getKey()).isPresent()) {
                                                     targetRole.add(api.getRoleById(permissionMap.getKey()).get());
@@ -257,7 +245,7 @@ public class TempChannelSystem {
                                         updater.addPermissionOverwrite(target, permissions.build());
                                     }
                                     updater.update();
-                                    dao.UpdateChannelLock(textChannelId, lockIs);
+                                    dao.UpdateChannelLock(textChannelId, isLock);
                                 }
                             } else if (id.equals("transfer")) {
                                 if (api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUserIds().size() > 1 && api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().get(buttonInteraction.getUser().getId()).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)) {
@@ -343,25 +331,16 @@ public class TempChannelSystem {
                             requestVoiceId.equals(buttonInteraction.getUser().getConnectedVoiceChannel(buttonInteraction.getServer().get()).get().getIdAsString()) &&
                             api.getServerVoiceChannelById(requestVoiceId).isPresent()) {
                         if (id.equals("claim")) {
-                            boolean claimSw = api.getServerVoiceChannelById(requestVoiceId).get().getOverwrittenUserPermissions().entrySet().stream().filter(entry -> entry.getValue().getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)).findFirst().map(entry -> api.getServerVoiceChannelById(requestVoiceId).get().getConnectedUserIds().stream().noneMatch(connectId -> Objects.equals(connectId, entry.getKey()))).orElse(true);
-                            if (claimSw) {
+                            response = "通話管理者が通話にいらっしゃいます";
+                            if (api.getServerVoiceChannelById(requestVoiceId).get().getOverwrittenUserPermissions().entrySet().stream().filter(entry -> entry.getValue().getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)).findFirst().map(entry -> api.getServerVoiceChannelById(requestVoiceId).get().getConnectedUserIds().stream().noneMatch(connectId -> Objects.equals(connectId, entry.getKey()))).orElse(true)) {
                                 api.getServerVoiceChannelById(requestVoiceId).get().createUpdater().addPermissionOverwrite(buttonInteraction.getUser(), new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS).build()).update();
                                 if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
-                                    api.getServerTextChannelById(list.getTextID()).get().createUpdater().addPermissionOverwrite(buttonInteraction.getUser(),
-                                            new PermissionsBuilder().setAllowed(
-                                                    PermissionType.MANAGE_CHANNELS,
-                                                    PermissionType.READ_MESSAGES,
-                                                    PermissionType.READ_MESSAGE_HISTORY,
-                                                    PermissionType.SEND_MESSAGES,
-                                                    PermissionType.ADD_REACTIONS,
-                                                    PermissionType.ATTACH_FILE,
-                                                    PermissionType.USE_APPLICATION_COMMANDS,
-                                                    PermissionType.USE_EXTERNAL_STICKERS,
-                                                    PermissionType.USE_EXTERNAL_EMOJIS,
-                                                    PermissionType.MANAGE_ROLES).build()).update();
+                                    api.getServerTextChannelById(list.getTextID()).get().createUpdater()
+                                            .addPermissionOverwrite(buttonInteraction.getUser(),processing.getAdminPermission().build())
+                                            .update();
                                 }
                                 response = buttonInteraction.getUser().getName() + "が新しく通話管理者になりました";
-                            } else response = "通話管理者が通話にいらっしゃいます";
+                            }
                         }
                     }
                     event.getInteraction().createImmediateResponder().setFlags(InteractionCallbackDataFlag.EPHEMERAL).setContent(response).respond();
@@ -393,27 +372,20 @@ public class TempChannelSystem {
                         if (isManage) {
                             switch (cmd) {
                                 case "transSelect":
-                                    long oldManege = menuInteraction.getUser().getId();
+                                    User oldManege = menuInteraction.getUser();
                                     if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
                                         User selectUser = api.getUserById(menuInteraction.getChosenOptions().get(0).getValue()).join();
-                                        api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(selectUser, new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS, PermissionType.READ_MESSAGES).build()).removePermissionOverwrite(api.getUserById(oldManege).join()).update();
+                                        api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater()
+                                                .addPermissionOverwrite(selectUser, processing.getAdminPermission().build())
+                                                .removePermissionOverwrite(oldManege)
+                                                .addPermissionOverwrite(oldManege, processing.getUserPermission().build())
+                                                .update();
                                         if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
-                                            api.getServerTextChannelById(list.getTextID()).get().createUpdater().addPermissionOverwrite(selectUser, new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS, PermissionType.READ_MESSAGES,
-                                                    PermissionType.READ_MESSAGE_HISTORY,
-                                                    PermissionType.SEND_MESSAGES,
-                                                    PermissionType.ADD_REACTIONS,
-                                                    PermissionType.ATTACH_FILE,
-                                                    PermissionType.USE_APPLICATION_COMMANDS,
-                                                    PermissionType.USE_EXTERNAL_STICKERS,
-                                                    PermissionType.USE_EXTERNAL_EMOJIS,
-                                                    PermissionType.MANAGE_ROLES).build()).removePermissionOverwrite(api.getUserById(oldManege).join()).addPermissionOverwrite(api.getUserById(oldManege).join(), new PermissionsBuilder().setAllowed(PermissionType.READ_MESSAGES,
-                                                    PermissionType.READ_MESSAGE_HISTORY,
-                                                    PermissionType.SEND_MESSAGES,
-                                                    PermissionType.ADD_REACTIONS,
-                                                    PermissionType.ATTACH_FILE,
-                                                    PermissionType.USE_APPLICATION_COMMANDS,
-                                                    PermissionType.USE_EXTERNAL_STICKERS,
-                                                    PermissionType.USE_EXTERNAL_EMOJIS).build()).update();
+                                            api.getServerTextChannelById(list.getTextID()).get().createUpdater()
+                                                    .addPermissionOverwrite(selectUser, processing.getAdminPermission().build())
+                                                    .removePermissionOverwrite(oldManege)
+                                                    .addPermissionOverwrite(oldManege, processing.getUserPermission().build())
+                                                    .update();
                                         }
                                         response = selectUser.getName() + "が新しく通話管理者になりました";
                                     }

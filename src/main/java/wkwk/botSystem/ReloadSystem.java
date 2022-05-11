@@ -102,7 +102,8 @@ public class ReloadSystem {
             }
         }
 
-        String out = "リロード結果\n" + "ボット送信メッセージ" + botSend + "件削除しました\n" +
+        String out =
+                "リロード結果\n" + "ボット送信メッセージ" + botSend + "件削除しました\n" +
                 "自動消去メッセージ" + deleteMessage + "件削除しました\n" +
                 "自動消去チャンネル" + deleteTime + "件削除しました\n" +
                 "ログ出力" + logging + "件削除しました\n" +

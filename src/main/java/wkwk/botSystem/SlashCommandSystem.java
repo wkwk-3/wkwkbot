@@ -39,7 +39,7 @@ public class SlashCommandSystem {
     public void run() {
         User wkwk = api.getYourself();
 
-        Processing processing = new Processing();
+        Processing processing = new Processing(api);
         DiscordDAO dao = new DiscordDAO();
         Show show = new Show();
 
@@ -75,7 +75,7 @@ public class SlashCommandSystem {
                                     mentionChannel.createUpdater().addPermissionOverwrite(wkwk, new PermissionsBuilder().setAllowed(PermissionType.MENTION_EVERYONE).build()).update().join();
                                     ServerDataRecord data = new ServerDataRecord();
                                     data.setServer(serverId);
-                                    data.setFstChannel(new ServerVoiceChannelBuilder(server).setName("NewTemp").setRawPosition(0).setBitrate(64000).addPermissionOverwrite(everyone, new PermissionsBuilder().setDenied(PermissionType.SEND_MESSAGES).build()).addPermissionOverwrite(wkwk, new PermissionsBuilder().setAllowed(PermissionType.MOVE_MEMBERS).build()).create().join().getIdAsString());
+                                    data.setFstChannel(new ServerVoiceChannelBuilder(server).setName("NewTemp").setRawPosition(0).setBitrate(64000).addPermissionOverwrite(everyone, new PermissionsBuilder().setAllowed(PermissionType.SEND_MESSAGES).build()).addPermissionOverwrite(wkwk, new PermissionsBuilder().setAllowed(PermissionType.MOVE_MEMBERS).build()).create().join().getIdAsString());
                                     data.setMentionChannel(mentionChannel.getIdAsString());
                                     data.setVoiceCategory(new ChannelCategoryBuilder(server).setName("Voice").setRawPosition(0).create().join().getIdAsString());
                                     data.setTextCategory(new ChannelCategoryBuilder(server).setName("Text").setRawPosition(0).create().join().getIdAsString());

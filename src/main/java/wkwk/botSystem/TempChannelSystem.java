@@ -66,7 +66,7 @@ public class TempChannelSystem {
                             if (data.getTextBy()) {
                                 ServerTextChannel text = new ServerTextChannelBuilder(server).setName(defaultName).setCategory(tcat).addPermissionOverwrite(server.getEveryoneRole(), new PermissionsBuilder().setAllDenied().build()).create().get();
                                 list.setTextID(text.getIdAsString());
-                                new MessageBuilder().setContent("通話名前変更、通話最大人数変更、募集メッセージ送信は\nスラッシュコマンドになりました").addComponents(
+                                new MessageBuilder().setContent("通話名前変更 : `/name `\n通話最大人数変更 : `/size `\n募集メッセージ送信 : `/men `").addComponents(
                                         ActionRow.of(Button.success("name", "通話名前変更"),
                                                 Button.success("size", "通話人数変更"),
                                                 Button.success("send-recruiting", "募集送信"),
@@ -81,14 +81,11 @@ public class TempChannelSystem {
                         }
                     } else if (joinChannelCategory != null && joinChannelCategory.getIdAsString().equals(vcatId)) {
                         ChannelRecord list = dao.TempGetChannelList(joinVoiceId, "v");
+                        if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
+                            api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(joinUser, api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUserIds().size() == 1 ? processing.getAdminPermission().build() : processing.getUserPermission().build()).update();
+                        }
                         if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
-                            ServerTextChannel tx = api.getServerTextChannelById(list.getTextID()).get();
-                            tx.createUpdater().addPermissionOverwrite(joinUser, processing.getUserPermission().build()).update();
-                            if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent())
-                                if (api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUserIds().size() == 1) {
-                                    api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(joinUser, new PermissionsBuilder().setAllowed(PermissionType.MANAGE_CHANNELS).build()).update();
-                                    api.getServerTextChannelById(list.getTextID()).get().createUpdater().addPermissionOverwrite(joinUser, processing.getAdminPermission().build()).update();
-                                }
+                            api.getServerTextChannelById(list.getTextID()).get().createUpdater().addPermissionOverwrite(joinUser, api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUserIds().size() == 1 ? processing.getAdminPermission().build() : processing.getUserPermission().build()).update();
                         }
                     }
                 } catch (SystemException | DatabaseException | ExecutionException | InterruptedException ex) {

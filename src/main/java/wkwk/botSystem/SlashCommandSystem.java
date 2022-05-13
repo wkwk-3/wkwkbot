@@ -515,19 +515,9 @@ public class SlashCommandSystem {
                                 if (cmd.equals("claim")) {
                                     boolean claimSw = api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().entrySet().stream().filter(entry -> entry.getValue().getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)).findFirst().map(entry -> api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUserIds().stream().noneMatch(connectId -> Objects.equals(connectId, entry.getKey()))).orElse(true);
                                     if (claimSw) {
-                                        PermissionsBuilder per = new PermissionsBuilder()
-                                                .setAllowed(PermissionType.READ_MESSAGES,
-                                                        PermissionType.READ_MESSAGE_HISTORY,
-                                                        PermissionType.SEND_MESSAGES,
-                                                        PermissionType.ADD_REACTIONS,
-                                                        PermissionType.ATTACH_FILE,
-                                                        PermissionType.USE_APPLICATION_COMMANDS,
-                                                        PermissionType.USE_EXTERNAL_STICKERS,
-                                                        PermissionType.USE_EXTERNAL_EMOJIS,
-                                                        PermissionType.MANAGE_ROLES);
-                                        api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(sendUser, per.build()).update();
+                                        api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(sendUser, processing.getAdminPermission().build()).update();
                                         if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
-                                            api.getServerTextChannelById(list.getTextID()).get().createUpdater().addPermissionOverwrite(sendUser, per.build()).update();
+                                            api.getServerTextChannelById(list.getTextID()).get().createUpdater().addPermissionOverwrite(sendUser, processing.getAdminPermission().build()).update();
                                         }
                                         responseString = new StringBuilder(sendUser.getName() + "が新しく通話管理者になりました");
                                     } else responseString = new StringBuilder("通話管理者が通話にいらっしゃいます");
@@ -545,35 +535,34 @@ public class SlashCommandSystem {
                             dao.addBotSendMessage(record);
                         }
                     }
-                } else {
-                    switch (cmd) {
-                        case "ping":
-                            long ping = 0L;
-                            try {
-                                InetAddress address = InetAddress.getByName("8.8.8.8");
-                                for (int n = 0; n < 5; n++) {
-                                    long start = System.currentTimeMillis();
-                                    boolean ena = address.isReachable(100);
-                                    long end = System.currentTimeMillis();
-                                    if (ena) ping += (end - start);
-                                }
-                                ping /= 5L;
-                            } catch (IOException ex) {
-                                ex.printStackTrace();
+                }
+                switch (cmd) {
+                    case "ping":
+                        long ping = 0L;
+                        try {
+                            InetAddress address = InetAddress.getByName("8.8.8.8");
+                            for (int n = 0; n < 5; n++) {
+                                long start = System.currentTimeMillis();
+                                boolean ena = address.isReachable(100);
+                                long end = System.currentTimeMillis();
+                                if (ena) ping += (end - start);
                             }
-                            responseString = new StringBuilder(ping + "ms");
-                            break;
-                        case "invite":
-                            responseString = new StringBuilder("https://wkb.page.link/bot");
-                            break;
-                        case "guild":
-                            responseString = new StringBuilder("https://wkb.page.link/guild");
-                            break;
-                        case "help":
-                            new HelpSystem(api).sendHelp(event);
-                            responseString = new StringBuilder("送信しました");
-                            break;
-                    }
+                            ping /= 5L;
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                        responseString = new StringBuilder(ping + "ms");
+                        break;
+                    case "invite":
+                        responseString = new StringBuilder("https://wkb.page.link/bot");
+                        break;
+                    case "guild":
+                        responseString = new StringBuilder("https://wkb.page.link/guild");
+                        break;
+                    case "help":
+                        new HelpSystem(api).sendHelp(event);
+                        responseString = new StringBuilder("送信しました");
+                        break;
                 }
                 interaction.createImmediateResponder().setFlags(InteractionCallbackDataFlag.EPHEMERAL).setContent(responseString.toString()).respond();
             } catch (SystemException | DatabaseException ex) {

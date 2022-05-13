@@ -12,11 +12,16 @@ public class CsvReader {
     List<String> lines = null;
 
     public void csvLoad () {
-        Path path = Paths.get("src\\main\\resources\\BotTextData.csv");
+        Path path = Paths.get("BotTextData.csv");
         try {
             this.lines = Files.readAllLines(path, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            System.out.println("ファイル読み込みに失敗");
+            path = Paths.get("src/main/resources/BotTextData.csv");
+            try {
+                this.lines = Files.readAllLines(path, StandardCharsets.UTF_8);
+            } catch (IOException ex) {
+                System.out.println("ファイル読み込みに失敗");
+            }
         }
     }
 }

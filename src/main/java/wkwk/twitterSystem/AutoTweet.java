@@ -18,6 +18,7 @@ public class AutoTweet {
     Timer timer;
 
     public AutoTweet(TweetAPIRecord list) {
+        System.out.println(tweetText);
         twitterClient = new TwitterClient(TwitterCredentials.builder()
                 .accessToken(list.getToken())
                 .accessTokenSecret(list.getTokenSecret())

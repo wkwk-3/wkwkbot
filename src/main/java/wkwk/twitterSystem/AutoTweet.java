@@ -49,7 +49,7 @@ public class AutoTweet {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         timer = new Timer();
-        timer.schedule(task, calendar.getTime(), 3600000L);
+        timer.schedule(task, calendar.getTime(), 43200000L);
         System.out.println(calendar.getTime() + "にタイマー開始");
     }
 

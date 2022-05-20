@@ -7,10 +7,10 @@ import lombok.Getter;
 @Getter
 public enum LoggingParameters {
 
-    SERVER_ID("SERVERID"),
-    CHANNEL_ID("CHANNELID"),
-    LOG_TYPE("LOGTYPE"),
-    TARGET_CHANNEL_ID("TARGETCHANNELID");
+    SERVER_ID("SERVER_ID"),
+    CHANNEL_ID("CHANNEL_ID"),
+    LOG_TYPE("LOG_TYPE"),
+    TARGET_CHANNEL_ID("TARGET_CHANNEL_ID");
 
     private final String parameter;
 

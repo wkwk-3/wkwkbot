@@ -9,7 +9,7 @@ public enum ReactRoleParameters {
 
     SERVER_ID(ReactMessageParameters.SERVER_ID.getParameter()),
     MESSAGE_ID(ReactMessageParameters.MESSAGE_ID.getParameter()),
-    ROLE_ID("ROLEID"),
+    ROLE_ID("ROLE_ID"),
     EMOJI("EMOJI");
 
     private final String parameter;

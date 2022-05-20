@@ -8,8 +8,8 @@ import lombok.Getter;
 public enum MentionMessageParameters {
 
     SERVER_ID(ServerPropertyParameters.SERVER_ID.getParameter()),
-    MESSAGE_ID("MESSAGEID"),
-    TEXT_CHANNEL_ID("TEXTCHANNELID");
+    MESSAGE_ID("MESSAGE_ID"),
+    TEXT_CHANNEL_ID("TEXT_CHANNEL_ID");
 
     private final String parameter;
 

@@ -7,11 +7,11 @@ import lombok.Getter;
 @Getter
 public enum TempChannelsParameters {
 
-    VOICE_CHANNEL_ID("VOICECHANNELID"),
-    TEXT_CHANNEL_ID("TEXTCHANNELID"),
+    VOICE_CHANNEL_ID("VOICE_CHANNEL_ID"),
+    TEXT_CHANNEL_ID("TEXT_CHANNEL_ID"),
     SERVER_ID(ServerPropertyParameters.SERVER_ID.getParameter()),
-    HIDE_BY("HIDEBY"),
-    LOCK_BY("LOCKBY");
+    HIDE_BY("HIDE_BY"),
+    LOCK_BY("LOCK_BY");
 
     private final String parameter;
 

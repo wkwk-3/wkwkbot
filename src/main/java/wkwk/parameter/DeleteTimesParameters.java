@@ -7,10 +7,10 @@ import lombok.Getter;
 @Getter
 public enum DeleteTimesParameters {
 
-    SERVER_ID("SERVERID"),
-    TEXT_CHANNEL_ID("TEXTCHANNELID"),
-    DELETE_TIME("DELETETIME"),
-    TIME_UNIT("TIMEUNIT");
+    SERVER_ID("SERVER_ID"),
+    TEXT_CHANNEL_ID("TEXT_CHANNEL_ID"),
+    DELETE_TIME("DELETE_TIME"),
+    TIME_UNIT("TIME_UNIT");
 
     private final String parameter;
 

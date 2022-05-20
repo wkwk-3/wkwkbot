@@ -146,24 +146,15 @@ public class SlashCommandSystem {
                                                 if (interaction.getOptionByIndex(0).get().getOptionByIndex(0).isPresent() && interaction.getOptionByIndex(0).get().getOptionByIndex(0).get().getOptionBooleanValueByName("enable").isPresent()) {
                                                     String subCommand = interaction.getOptionByIndex(0).get().getOptionByIndex(0).get().getName();
                                                     boolean enable = interaction.getOptionByIndex(0).get().getOptionByIndex(0).get().getOptionBooleanValueByName("enable").get();
+                                                    String flag = enable ? "有効化" : "無効化";
                                                     switch (subCommand) {
                                                         case "temp":
-                                                            if (enable) {
-                                                                dao.BotSetDate("tempBy", serverId, "1");
-                                                                responseString = new StringBuilder("通話作成を有効化しました");
-                                                            } else {
-                                                                dao.BotSetDate("tempBy", serverId, "0");
-                                                                responseString = new StringBuilder("通話作成を無効化しました");
-                                                            }
+                                                            dao.BotSetDate("tempBy", serverId, enable ? "1": "0");
+                                                            responseString = new StringBuilder("通話作成を" + flag + "しました");
                                                             break;
                                                         case "text":
-                                                            if (enable) {
-                                                                dao.BotSetDate("txtBy", serverId, "1");
-                                                                responseString = new StringBuilder("チャット作成を有効化しました");
-                                                            } else {
-                                                                dao.BotSetDate("txtBy", serverId, "0");
-                                                                responseString = new StringBuilder("チャット作成を無効化しました");
-                                                            }
+                                                            dao.BotSetDate("txtBy", serverId, enable ? "1": "0");
+                                                            responseString = new StringBuilder("チャット作成を" + flag + "しました");
                                                             break;
                                                     }
                                                 }

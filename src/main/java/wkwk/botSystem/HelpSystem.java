@@ -13,14 +13,15 @@ import org.javacord.api.entity.user.User;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
 import org.javacord.api.interaction.SelectMenuInteraction;
 import org.javacord.api.interaction.SlashCommandInteraction;
+import wkwk.core.BotLogin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HelpSystem {
-    DiscordApi api;
+public class HelpSystem extends BotLogin {
+    DiscordApi api = getApi();
     ArrayList<String> subCommandsAdmin = new ArrayList<>(
             Arrays.asList(
                     "ping", "invite", "guild", "setup", "add", "delete", "set",
@@ -147,11 +148,7 @@ public class HelpSystem {
         }
     };
 
-    public HelpSystem(DiscordApi api) {
-        this.api = api;
-    }
-
-    public void run() {
+    public HelpSystem() {
         api.addSelectMenuChooseListener(event -> {
             SelectMenuInteraction menuInteraction = event.getSelectMenuInteraction();
             String cmd = menuInteraction.getCustomId();

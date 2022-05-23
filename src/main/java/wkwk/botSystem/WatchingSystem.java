@@ -4,15 +4,12 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.message.MessageAttachment;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.user.User;
+import wkwk.core.BotLogin;
 
-public class WatchingSystem {
-    DiscordApi api;
+public class WatchingSystem extends BotLogin {
+    DiscordApi api = getApi();
 
-    public WatchingSystem(DiscordApi api) {
-        this.api = api;
-    }
-
-    public void run() {
+    public WatchingSystem() {
         User wkwk = api.getYourself();
         api.addMessageCreateListener(event -> {
             if (event.isPrivateMessage() && event.getMessageAuthor().asUser().isPresent() && api.getServerTextChannelById(966824808622993462L).isPresent()) {

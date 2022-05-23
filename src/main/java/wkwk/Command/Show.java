@@ -15,15 +15,16 @@ import java.awt.*;
 
 public class Show {
     DiscordDAO dao = new DiscordDAO();
+
     public EmbedBuilder create(String serverName, String serverId, User sendUser, DiscordApi api) {
         ServerDataRecord tempData = null;
         String bys = null;
         StringBuilder reacts = new StringBuilder("・リアクションロール設定\n");
         try {
             tempData = dao.TempGetData(serverId);
-            ReactionRoleRecord react = dao.getReactAllData(tempData.getServer());
+            ReactionRoleRecord react = dao.getReactAllData(tempData.getServerId());
             String[] emojis = react.getEmoji().toArray(new String[0]);
-            String[] roles = react.getRoleID().toArray(new String[0]);
+            String[] roles = react.getRoleId().toArray(new String[0]);
             bys = "";
             if (tempData.getTempBy()) {
                 bys += "・一時作成切り替え : 有効化\n";
@@ -41,8 +42,8 @@ public class Show {
             } else {
                 bys += "・一時通話初期人数 : " + size + "人\n";
             }
-            if (api.getServerTextChannelById(react.getTextChannelID()).isPresent()) {
-                reacts.append("　・リアクションロールメッセージ : ").append(api.getMessageById(react.getMessageID(), api.getServerTextChannelById(react.getTextChannelID()).get()).join().getLink()).append("\n");
+            if (api.getServerTextChannelById(react.getTextChannelId()).isPresent()) {
+                reacts.append("　・リアクションロールメッセージ : ").append(api.getMessageById(react.getMessageId(), api.getServerTextChannelById(react.getTextChannelId()).get()).join().getLink()).append("\n");
             }
             for (int i = 0; i < emojis.length; i++) {
                 if (api.getRoleById(roles[i]).isPresent()) {
@@ -58,7 +59,7 @@ public class Show {
         }
         StringBuilder channelLog = new StringBuilder("・メッセージログ設定\n");
         StringBuilder userLog = new StringBuilder("・ユーザーログ設定\n");
-        for (LoggingRecord log : dao.getLogging("s",serverId)) {
+        for (LoggingRecord log : dao.getLogging("s", serverId)) {
             if (log.getLogType().equals("chat")) {
                 channelLog.append("　・対象チャンネル : <#").append(log.getTargetChannelId()).append("> -> 出力チャンネル : <#").append(log.getChannelId()).append(">\n");
             } else if (log.getLogType().equals("user")) {
@@ -67,7 +68,7 @@ public class Show {
         }
         StringBuilder autoDelete = new StringBuilder("・自動削除設定\n");
         for (DeleteTimeRecord delete : dao.getDeleteTimes(serverId)) {
-            autoDelete.append("　・<#").append(delete.getTextChannelId()).append("> -> ").append(delete.getDeleteTime()).append(delete.getTimeUnit().replaceFirst("s","秒後").replaceFirst("S","秒後").replaceFirst("m","分後").replaceFirst("M","分後").replaceFirst("h","時間後").replaceFirst("H","時間後").replaceFirst("d","日後").replaceFirst("D","日後")).append("\n");
+            autoDelete.append("　・<#").append(delete.getTextChannelId()).append("> -> ").append(delete.getDeleteTime()).append(delete.getTimeUnit().replaceFirst("s", "秒後").replaceFirst("S", "秒後").replaceFirst("m", "分後").replaceFirst("M", "分後").replaceFirst("h", "時間後").replaceFirst("H", "時間後").replaceFirst("d", "日後").replaceFirst("D", "日後")).append("\n");
         }
         if (reacts.toString().equals("・リアクションロール設定\n")) reacts = new StringBuilder("・リアクションロール設定 : 無し\n");
         if (channelLog.toString().equals("・メッセージログ設定\n")) channelLog = new StringBuilder("・メッセージログ設定 : 無し\n");
@@ -78,11 +79,11 @@ public class Show {
             return new EmbedBuilder()
                     .setTitle("一覧情報表示 With " + serverName)
                     .setAuthor(sendUser)
-                    .addField("サーバー情報一覧", "・メンション送信チャンネルID : <#" + tempData.getMentionChannel() + ">\n" +
-                            "・一時作成チャネル : <#" + tempData.getFstChannel() + ">\n" +
-                            "・通話カテゴリ : <#" + tempData.getVoiceCategory() + ">\n" +
-                            "・テキストカテゴリ : <#" + tempData.getTextCategory() + ">\n" +
-                            "・カスタム募集 : " + tempData.getStereotyped() + "\n" +
+                    .addField("サーバー情報一覧", "・メンション送信チャンネルID : <#" + tempData.getMentionChannelId() + ">\n" +
+                            "・一時作成チャネル : <#" + tempData.getFstChannelId() + ">\n" +
+                            "・通話カテゴリ : <#" + tempData.getVoiceCategoryId() + ">\n" +
+                            "・テキストカテゴリ : <#" + tempData.getTextCategoryId() + ">\n" +
+                            "・カスタム募集 : " + tempData.getStereoTyped() + "\n" +
                             "・通話初期ネーム : " + tempData.getDefaultName() + "\n" +
                             bys + reacts + channelLog + userLog + namePreset + autoDelete)
                     .setColor(Color.cyan)

@@ -4,21 +4,16 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.emoji.Emoji;
 import org.javacord.api.entity.permission.Role;
 import wkwk.Command.Processing;
+import wkwk.core.BotLogin;
 import wkwk.dao.DiscordDAO;
 import wkwk.parameter.record.ReactionRoleRecord;
 
-import java.util.ArrayList;
+public class ReactionRoleSystem extends BotLogin {
+    DiscordApi api = getApi();
 
-public class ReactionRoleSystem {
-    DiscordApi api;
-
-    public ReactionRoleSystem(DiscordApi api) {
-        this.api = api;
-    }
-
-    public void run() {
+    public ReactionRoleSystem() {
         DiscordDAO dao = new DiscordDAO();
-        Processing processing = new Processing(api);
+        Processing processing = new Processing();
         api.addReactionAddListener(event -> {
             if (!event.requestUser().join().isBot()) {
                 Emoji emoji = event.getEmoji();
@@ -28,7 +23,7 @@ public class ReactionRoleSystem {
                     String messageId = event.requestMessage().join().getIdAsString();
                     ReactionRoleRecord record = dao.getReactAllData(serverId);
                     Role targetRole = processing.getReactionRole(emoji, record);
-                    if (targetRole != null && record.getTextChannelID() != null && record.getMessageID() != null && record.getTextChannelID().equals(textChannel) && record.getMessageID().equals(messageId)) {
+                    if (targetRole != null && record.getTextChannelId() != null && record.getMessageId() != null && record.getTextChannelId().equals(textChannel) && record.getMessageId().equals(messageId)) {
                         event.requestUser().join().addRole(targetRole).join();
                     }
                 }
@@ -43,7 +38,7 @@ public class ReactionRoleSystem {
                     String messageId = event.requestMessage().join().getIdAsString();
                     ReactionRoleRecord record = dao.getReactAllData(serverId);
                     Role targetRole = processing.getReactionRole(emoji, record);
-                    if (targetRole != null && record.getTextChannelID() != null && record.getMessageID() != null && record.getTextChannelID().equals(textChannel) && record.getMessageID().equals(messageId)) {
+                    if (targetRole != null && record.getTextChannelId() != null && record.getMessageId() != null && record.getTextChannelId().equals(textChannel) && record.getMessageId().equals(messageId)) {
                         event.requestUser().join().removeRole(targetRole).join();
                     }
                 }

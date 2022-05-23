@@ -17,6 +17,7 @@ import org.javacord.api.interaction.SlashCommandInteraction;
 import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import wkwk.Command.Processing;
 import wkwk.Command.Show;
+import wkwk.core.BotLogin;
 import wkwk.dao.DiscordDAO;
 import wkwk.exception.DatabaseException;
 import wkwk.exception.SystemException;
@@ -29,17 +30,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class SlashCommandSystem {
-    DiscordApi api;
+public class SlashCommandSystem extends BotLogin {
+    DiscordApi api = getApi();
 
-    public SlashCommandSystem(DiscordApi api) {
-        this.api = api;
-    }
-
-    public void run() {
+    public SlashCommandSystem() {
         User wkwk = api.getYourself();
 
-        Processing processing = new Processing(api);
+        Processing processing = new Processing();
         DiscordDAO dao = new DiscordDAO();
         Show show = new Show();
 
@@ -74,20 +71,20 @@ public class SlashCommandSystem {
                                     ServerTextChannel mentionChannel = new ServerTextChannelBuilder(server).setName("Mention").setRawPosition(1).create().join();
                                     mentionChannel.createUpdater().addPermissionOverwrite(wkwk, new PermissionsBuilder().setAllowed(PermissionType.MENTION_EVERYONE).build()).update().join();
                                     ServerDataRecord data = new ServerDataRecord();
-                                    data.setServer(serverId);
-                                    data.setFstChannel(new ServerVoiceChannelBuilder(server).setName("NewTemp").setRawPosition(0).setBitrate(64000).addPermissionOverwrite(everyone, new PermissionsBuilder().setAllowed(PermissionType.SEND_MESSAGES).build()).addPermissionOverwrite(wkwk, new PermissionsBuilder().setAllowed(PermissionType.MOVE_MEMBERS).build()).create().join().getIdAsString());
-                                    data.setMentionChannel(mentionChannel.getIdAsString());
-                                    data.setVoiceCategory(new ChannelCategoryBuilder(server).setName("Voice").setRawPosition(0).create().join().getIdAsString());
-                                    data.setTextCategory(new ChannelCategoryBuilder(server).setName("Text").setRawPosition(0).create().join().getIdAsString());
+                                    data.setServerId(serverId);
+                                    data.setFstChannelId(new ServerVoiceChannelBuilder(server).setName("NewTemp").setRawPosition(0).setBitrate(64000).addPermissionOverwrite(everyone, new PermissionsBuilder().setAllowed(PermissionType.SEND_MESSAGES).build()).addPermissionOverwrite(wkwk, new PermissionsBuilder().setAllowed(PermissionType.MOVE_MEMBERS).build()).create().join().getIdAsString());
+                                    data.setMentionChannelId(mentionChannel.getIdAsString());
+                                    data.setVoiceCategoryId(new ChannelCategoryBuilder(server).setName("Voice").setRawPosition(0).create().join().getIdAsString());
+                                    data.setTextCategoryId(new ChannelCategoryBuilder(server).setName("Text").setRawPosition(0).create().join().getIdAsString());
                                     dao.TempDataUpData(data);
-                                    if (api.getChannelCategoryById(old.getVoiceCategory()).isPresent())
-                                        api.getChannelCategoryById(old.getVoiceCategory()).get().delete();
-                                    if (api.getChannelCategoryById(old.getTextCategory()).isPresent())
-                                        api.getChannelCategoryById(old.getTextCategory()).get().delete();
-                                    if (api.getServerVoiceChannelById(old.getFstChannel()).isPresent())
-                                        api.getServerVoiceChannelById(old.getFstChannel()).get().delete();
-                                    if (api.getServerTextChannelById(old.getMentionChannel()).isPresent())
-                                        api.getServerTextChannelById(old.getMentionChannel()).get().delete();
+                                    if (api.getChannelCategoryById(old.getVoiceCategoryId()).isPresent())
+                                        api.getChannelCategoryById(old.getVoiceCategoryId()).get().delete();
+                                    if (api.getChannelCategoryById(old.getTextCategoryId()).isPresent())
+                                        api.getChannelCategoryById(old.getTextCategoryId()).get().delete();
+                                    if (api.getServerVoiceChannelById(old.getFstChannelId()).isPresent())
+                                        api.getServerVoiceChannelById(old.getFstChannelId()).get().delete();
+                                    if (api.getServerTextChannelById(old.getMentionChannelId()).isPresent())
+                                        api.getServerTextChannelById(old.getMentionChannelId()).get().delete();
                                     responseString = new StringBuilder("セットアップ完了");
 
                                     break;
@@ -102,7 +99,8 @@ public class SlashCommandSystem {
                                                         if (api.getChannelCategoryById(category).get().getServer().getIdAsString().equals(serverId)) {
                                                             dao.BotSetDate("v", serverId, category);
                                                             responseString = new StringBuilder("VoiceCategory更新完了");
-                                                        } else responseString = new StringBuilder("このサーバーのカテゴリを入力してください");
+                                                        } else
+                                                            responseString = new StringBuilder("このサーバーのカテゴリを入力してください");
                                                     } else responseString = new StringBuilder("カテゴリを入力してください");
                                                 }
                                                 break;
@@ -113,7 +111,8 @@ public class SlashCommandSystem {
                                                         if (api.getChannelCategoryById(category).get().getServer().getIdAsString().equals(serverId)) {
                                                             dao.BotSetDate("t", serverId, category);
                                                             responseString = new StringBuilder("TextCategory更新完了");
-                                                        } else responseString = new StringBuilder("このサーバーのカテゴリを入力してください");
+                                                        } else
+                                                            responseString = new StringBuilder("このサーバーのカテゴリを入力してください");
                                                     } else responseString = new StringBuilder("カテゴリを入力してください");
                                                 }
                                                 break;
@@ -149,11 +148,11 @@ public class SlashCommandSystem {
                                                     String flag = enable ? "有効化" : "無効化";
                                                     switch (subCommand) {
                                                         case "temp":
-                                                            dao.BotSetDate("tempBy", serverId, enable ? "1": "0");
+                                                            dao.BotSetDate("tempBy", serverId, enable ? "1" : "0");
                                                             responseString = new StringBuilder("通話作成を" + flag + "しました");
                                                             break;
                                                         case "text":
-                                                            dao.BotSetDate("txtBy", serverId, enable ? "1": "0");
+                                                            dao.BotSetDate("txtBy", serverId, enable ? "1" : "0");
                                                             responseString = new StringBuilder("チャット作成を" + flag + "しました");
                                                             break;
                                                     }
@@ -180,11 +179,11 @@ public class SlashCommandSystem {
                                                     String emoji = interaction.getOptionByIndex(0).get().getOptionStringValueByName("emoji").get().replaceFirst("️", "");
                                                     String roleId = interaction.getOptionByIndex(0).get().getOptionRoleValueByName("role").get().getIdAsString();
                                                     ReactionRoleRecord record = dao.getReactMessageData(serverId);
-                                                    if (record.getServerID() != null && api.getRoleById(roleId).isPresent() && EmojiManager.isEmoji(emoji) && record.getServerID().equals(serverId) && api.getServerTextChannelById(record.getTextChannelID()).isPresent()) {
-                                                        dao.setReactRoleData(serverId, record.getMessageID(), roleId, emoji);
-                                                        api.getMessageById(record.getMessageID(), api.getServerTextChannelById(record.getTextChannelID()).get()).join().addReaction(emoji).join();
+                                                    if (record.getServerId() != null && api.getRoleById(roleId).isPresent() && EmojiManager.isEmoji(emoji) && record.getServerId().equals(serverId) && api.getServerTextChannelById(record.getTextChannelId()).isPresent()) {
+                                                        dao.setReactRoleData(serverId, record.getMessageId(), roleId, emoji);
+                                                        api.getMessageById(record.getMessageId(), api.getServerTextChannelById(record.getTextChannelId()).get()).join().addReaction(emoji).join();
                                                         str.append("リアクションロール設定完了");
-                                                    } else if (record.getServerID() == null)
+                                                    } else if (record.getServerId() == null)
                                                         str.append("リアクションロールの対象メッセージを設定してください\n");
                                                     if (!EmojiManager.isEmoji(emoji))
                                                         str.append(emoji).append("は絵文字ではない\n");
@@ -215,13 +214,13 @@ public class SlashCommandSystem {
                                             case "namepreset":
                                                 if (interaction.getOptionByIndex(0).isPresent() && interaction.getOptionByIndex(0).get().getOptionStringValueByName("name").isPresent()) {
                                                     String name = interaction.getOptionByIndex(0).get().getOptionStringValueByName("name").get();
-                                                    int nameSize = dao.GetNamePreset(list.getServerID()).size();
+                                                    int nameSize = dao.GetNamePreset(list.getServerId()).size();
                                                     if (name.length() <= 100 && nameSize < 25) {
                                                         dao.addNamePreset(serverId, name);
                                                         responseString = new StringBuilder("名前変更候補を追加しました");
                                                     } else if (name.length() > 100) {
                                                         responseString = new StringBuilder("100文字以内にしてください。");
-                                                    } else if (nameSize == 25){
+                                                    } else if (nameSize == 25) {
                                                         responseString = new StringBuilder("登録されているプリセットが25件あります");
                                                     }
                                                 }
@@ -424,25 +423,25 @@ public class SlashCommandSystem {
                                 responseString = new StringBuilder("そのコマンドは管理者用です");
                             }
                         }
-                        if (list.getVoiceID() != null) {
+                        if (list.getVoiceId() != null) {
                             boolean isManage = sendUser.getConnectedVoiceChannel(server).get().getOverwrittenPermissions(sendUser).getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS);
                             if (isManage) {
                                 if (cmd.equals("n") || cmd.equals("name") && interaction.getOptionStringValueByName("name").isPresent()) {
                                     String name = interaction.getOptionStringValueByName("name").get();
-                                    if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
-                                        api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setName(name).update();
+                                    if (api.getServerVoiceChannelById(list.getVoiceId()).isPresent()) {
+                                        api.getServerVoiceChannelById(list.getVoiceId()).get().createUpdater().setName(name).update();
                                         responseString = new StringBuilder("NAME更新完了");
 
                                     }
-                                    if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
-                                        api.getServerTextChannelById(list.getTextID()).get().createUpdater().setName(name).update();
+                                    if (api.getServerTextChannelById(list.getTextId()).isPresent()) {
+                                        api.getServerTextChannelById(list.getTextId()).get().createUpdater().setName(name).update();
                                         responseString = new StringBuilder("NAME更新完了");
 
                                     }
                                 } else if (cmd.equals("s") || cmd.equals("size") && interaction.getOptionLongValueByName("size").isPresent()) {
                                     int size = Math.toIntExact(interaction.getOptionLongValueByName("size").get());
-                                    if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent() && size >= 0 && size < 100) {
-                                        api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().setUserLimit(size).update();
+                                    if (api.getServerVoiceChannelById(list.getVoiceId()).isPresent() && size >= 0 && size < 100) {
+                                        api.getServerVoiceChannelById(list.getVoiceId()).get().createUpdater().setUserLimit(size).update();
                                         responseString = new StringBuilder("人数制限を" + size + "に設定しました");
                                         if (size == 0L) {
                                             responseString = new StringBuilder("人数制限を0(limitless)に設定しました");
@@ -453,20 +452,13 @@ public class SlashCommandSystem {
                                     if (interaction.getOptionStringValueByName("text").isPresent()) {
                                         mentionText.append(interaction.getOptionStringValueByName("text").get());
                                     }
-                                    ServerDataRecord serverList = dao.TempGetData(list.getServerID());
-                                    if (api.getServerTextChannelById(serverList.getMentionChannel()).isPresent()) {
-                                        ServerTextChannel mention = api.getServerTextChannelById(serverList.getMentionChannel()).get();
-                                        String mentionMessage = serverList.getStereotyped();
+                                    ServerDataRecord serverList = dao.TempGetData(list.getServerId());
+                                    if (api.getServerTextChannelById(serverList.getMentionChannelId()).isPresent()) {
+                                        ServerTextChannel mention = api.getServerTextChannelById(serverList.getMentionChannelId()).get();
+                                        String mentionMessage = serverList.getStereoTyped();
                                         mentionMessage = processing.RecruitingTextRePress(mentionMessage, sendUser, list, mentionText.toString());
                                         Message message = new MessageBuilder().setContent(mentionMessage).send(mention).join();
-                                        message.addReaction("❌");
-                                        dao.addMentionMessage(list.getTextID(), message.getIdAsString(), list.getServerID());
-                                        BotSendMessageRecord record = new BotSendMessageRecord();
-                                        record.setMESSAGEID(message.getIdAsString());
-                                        record.setCHANNELID(mention.getIdAsString());
-                                        record.setUSERID(sendUser.getIdAsString());
-                                        record.setSERVERID(list.getServerID());
-                                        dao.addBotSendMessage(record);
+                                        processing.botSendMessage(message, server, channel, sendUser);
                                         responseString = new StringBuilder("募集メッセを送信しました");
                                     }
                                 } else if (cmd.equals("add")) {
@@ -474,8 +466,8 @@ public class SlashCommandSystem {
                                     if ("user".equals(subCommand)) {
                                         if (interaction.getOptionByIndex(0).get().getOptionUserValueByName("selectUser").isPresent()) {
                                             User user = interaction.getOptionByIndex(0).get().getOptionUserValueByName("selectUser").get();
-                                            if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
-                                                ServerVoiceChannel voiceChannel = api.getServerVoiceChannelById(list.getVoiceID()).get();
+                                            if (api.getServerVoiceChannelById(list.getVoiceId()).isPresent()) {
+                                                ServerVoiceChannel voiceChannel = api.getServerVoiceChannelById(list.getVoiceId()).get();
                                                 ServerVoiceChannelUpdater updater = voiceChannel.createUpdater();
                                                 updater.addPermissionOverwrite(user, new PermissionsBuilder().setAllowed(PermissionType.CONNECT, PermissionType.READ_MESSAGES).build());
                                                 updater.update();
@@ -490,8 +482,8 @@ public class SlashCommandSystem {
                                     if ("user".equals(subCommand)) {
                                         if (interaction.getOptionByIndex(0).get().getOptionUserValueByName("selectUser").isPresent()) {
                                             User user = interaction.getOptionByIndex(0).get().getOptionUserValueByName("selectUser").get();
-                                            if (api.getServerVoiceChannelById(list.getVoiceID()).isPresent()) {
-                                                ServerVoiceChannel voiceChannel = api.getServerVoiceChannelById(list.getVoiceID()).get();
+                                            if (api.getServerVoiceChannelById(list.getVoiceId()).isPresent()) {
+                                                ServerVoiceChannel voiceChannel = api.getServerVoiceChannelById(list.getVoiceId()).get();
                                                 ServerVoiceChannelUpdater updater = voiceChannel.createUpdater();
                                                 updater.addPermissionOverwrite(user, new PermissionsBuilder().setDenied(PermissionType.CONNECT, PermissionType.READ_MESSAGES).build());
                                                 updater.update();
@@ -504,11 +496,11 @@ public class SlashCommandSystem {
                                 }
                             } else {
                                 if (cmd.equals("claim")) {
-                                    boolean claimSw = api.getServerVoiceChannelById(list.getVoiceID()).get().getOverwrittenUserPermissions().entrySet().stream().filter(entry -> entry.getValue().getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)).findFirst().map(entry -> api.getServerVoiceChannelById(list.getVoiceID()).get().getConnectedUserIds().stream().noneMatch(connectId -> Objects.equals(connectId, entry.getKey()))).orElse(true);
+                                    boolean claimSw = api.getServerVoiceChannelById(list.getVoiceId()).get().getOverwrittenUserPermissions().entrySet().stream().filter(entry -> entry.getValue().getAllowedPermission().contains(PermissionType.MANAGE_CHANNELS)).findFirst().map(entry -> api.getServerVoiceChannelById(list.getVoiceId()).get().getConnectedUserIds().stream().noneMatch(connectId -> Objects.equals(connectId, entry.getKey()))).orElse(true);
                                     if (claimSw) {
-                                        api.getServerVoiceChannelById(list.getVoiceID()).get().createUpdater().addPermissionOverwrite(sendUser, processing.getAdminPermission().build()).update();
-                                        if (api.getServerTextChannelById(list.getTextID()).isPresent()) {
-                                            api.getServerTextChannelById(list.getTextID()).get().createUpdater().addPermissionOverwrite(sendUser, processing.getAdminPermission().build()).update();
+                                        api.getServerVoiceChannelById(list.getVoiceId()).get().createUpdater().addPermissionOverwrite(sendUser, processing.getAdminPermission().build()).update();
+                                        if (api.getServerTextChannelById(list.getTextId()).isPresent()) {
+                                            api.getServerTextChannelById(list.getTextId()).get().createUpdater().addPermissionOverwrite(sendUser, processing.getAdminPermission().build()).update();
                                         }
                                         responseString = new StringBuilder(sendUser.getName() + "が新しく通話管理者になりました");
                                     } else responseString = new StringBuilder("通話管理者が通話にいらっしゃいます");
@@ -517,13 +509,7 @@ public class SlashCommandSystem {
                         }
                         if (responseMessage != null) {
                             Message message = responseMessage.send(channel).join();
-                            message.addReaction("❌");
-                            BotSendMessageRecord record = new BotSendMessageRecord();
-                            record.setMESSAGEID(message.getIdAsString());
-                            record.setCHANNELID(channel.getIdAsString());
-                            record.setUSERID(interaction.getUser().getIdAsString());
-                            record.setSERVERID(serverId);
-                            dao.addBotSendMessage(record);
+                            processing.botSendMessage(message, server, channel, sendUser);
                         }
                     }
                 }
@@ -551,7 +537,7 @@ public class SlashCommandSystem {
                         responseString = new StringBuilder("https://wkb.page.link/guild");
                         break;
                     case "help":
-                        new HelpSystem(api).sendHelp(event);
+                        new HelpSystem().sendHelp(event);
                         responseString = new StringBuilder("送信しました");
                         break;
                 }

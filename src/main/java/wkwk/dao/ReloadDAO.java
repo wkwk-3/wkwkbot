@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-public class ReloadDAO extends DAOBase{
+public class ReloadDAO extends DAOBase {
 
     public ArrayList<BotSendMessageRecord> getAllBotSendMessage() {
         this.open();
@@ -20,10 +20,10 @@ public class ReloadDAO extends DAOBase{
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 BotSendMessageRecord record = new BotSendMessageRecord();
-                record.setSERVERID(rs.getString(BotSendMessageParameters.SERVER_ID.getParameter()));
-                record.setCHANNELID(rs.getString(BotSendMessageParameters.CHANNEL_ID.getParameter()));
-                record.setMESSAGEID(rs.getString(BotSendMessageParameters.MESSAGE_ID.getParameter()));
-                record.setUSERID(rs.getString(BotSendMessageParameters.USER_ID.getParameter()));
+                record.setServetId(rs.getString(BotSendMessageParameters.SERVER_ID.getParameter()));
+                record.setChannelId(rs.getString(BotSendMessageParameters.CHANNEL_ID.getParameter()));
+                record.setMessageId(rs.getString(BotSendMessageParameters.MESSAGE_ID.getParameter()));
+                record.setUserId(rs.getString(BotSendMessageParameters.USER_ID.getParameter()));
                 records.add(record);
             }
         } catch (SQLException e) {
@@ -33,6 +33,7 @@ public class ReloadDAO extends DAOBase{
         }
         return records;
     }
+
     public void deleteBotSendMessage(BotSendMessageRecord record) {
         this.open();
         prestmt = null;
@@ -43,10 +44,10 @@ public class ReloadDAO extends DAOBase{
                     + BotSendMessageParameters.CHANNEL_ID.getParameter() + " = ? AND "
                     + BotSendMessageParameters.USER_ID.getParameter() + " = ?";
             prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, record.getSERVERID());
-            prestmt.setString(2, record.getMESSAGEID());
-            prestmt.setString(3, record.getCHANNELID());
-            prestmt.setString(4, record.getUSERID());
+            prestmt.setString(1, record.getServetId());
+            prestmt.setString(2, record.getMessageId());
+            prestmt.setString(3, record.getChannelId());
+            prestmt.setString(4, record.getUserId());
             prestmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -78,6 +79,7 @@ public class ReloadDAO extends DAOBase{
         }
         return records;
     }
+
     public void deleteDeleteMessage(DeleteMessageRecord record) {
         this.open();
         prestmt = null;
@@ -374,15 +376,15 @@ public class ReloadDAO extends DAOBase{
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 ServerDataRecord record = new ServerDataRecord();
-                record.setServer(rs.getString(ServerPropertyParameters.SERVER_ID.getParameter()));
-                record.setMentionChannel(rs.getString(ServerPropertyParameters.MENTION_CHANNEL_ID.getParameter()));
-                record.setFstChannel(rs.getString(ServerPropertyParameters.FIRST_CHANNEL_ID.getParameter()));
-                record.setVoiceCategory(rs.getString(ServerPropertyParameters.VOICE_CATEGORY_ID.getParameter()));
-                record.setTextCategory(rs.getString(ServerPropertyParameters.TEXT_CATEGORY_ID.getParameter()));
+                record.setServerId(rs.getString(ServerPropertyParameters.SERVER_ID.getParameter()));
+                record.setMentionChannelId(rs.getString(ServerPropertyParameters.MENTION_CHANNEL_ID.getParameter()));
+                record.setFstChannelId(rs.getString(ServerPropertyParameters.FIRST_CHANNEL_ID.getParameter()));
+                record.setVoiceCategoryId(rs.getString(ServerPropertyParameters.VOICE_CATEGORY_ID.getParameter()));
+                record.setTextCategoryId(rs.getString(ServerPropertyParameters.TEXT_CATEGORY_ID.getParameter()));
                 record.setTempBy(rs.getBoolean(ServerPropertyParameters.TEMP_BY.getParameter()));
                 record.setTextBy(rs.getBoolean(ServerPropertyParameters.TEXT_BY.getParameter()));
                 record.setDefaultSize(rs.getString(ServerPropertyParameters.DEFAULT_SIZE.getParameter()));
-                record.setStereotyped(rs.getString(ServerPropertyParameters.STEREOTYPED.getParameter()));
+                record.setStereoTyped(rs.getString(ServerPropertyParameters.STEREOTYPED.getParameter()));
                 record.setDefaultName(rs.getString(ServerPropertyParameters.DEFAULT_NAME.getParameter()));
                 records.add(record);
             }
@@ -401,7 +403,7 @@ public class ReloadDAO extends DAOBase{
             String sql = "DELETE FROM " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " WHERE "
                     + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
             prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, record.getServer());
+            prestmt.setString(1, record.getServerId());
             prestmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -420,9 +422,9 @@ public class ReloadDAO extends DAOBase{
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 ChannelRecord record = new ChannelRecord();
-                record.setServerID(rs.getString(TempChannelsParameters.SERVER_ID.getParameter()));
-                record.setVoiceID(rs.getString(TempChannelsParameters.VOICE_CHANNEL_ID.getParameter()));
-                record.setTextID(rs.getString(TempChannelsParameters.TEXT_CHANNEL_ID.getParameter()));
+                record.setServerId(rs.getString(TempChannelsParameters.SERVER_ID.getParameter()));
+                record.setVoiceId(rs.getString(TempChannelsParameters.VOICE_CHANNEL_ID.getParameter()));
+                record.setTextId(rs.getString(TempChannelsParameters.TEXT_CHANNEL_ID.getParameter()));
                 record.setHideBy(rs.getBoolean(TempChannelsParameters.HIDE_BY.getParameter()));
                 record.setLockBy(rs.getBoolean(TempChannelsParameters.LOCK_BY.getParameter()));
                 records.add(record);
@@ -443,8 +445,8 @@ public class ReloadDAO extends DAOBase{
                     + TempChannelsParameters.VOICE_CHANNEL_ID.getParameter() + " = ? AND "
                     + TempChannelsParameters.TEXT_CHANNEL_ID.getParameter() + " = ?";
             prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, record.getVoiceID());
-            prestmt.setString(2, record.getTextID());
+            prestmt.setString(1, record.getVoiceId());
+            prestmt.setString(2, record.getTextId());
             prestmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();

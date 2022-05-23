@@ -1,23 +1,17 @@
 package wkwk.botSystem;
 
 import org.javacord.api.DiscordApi;
-import org.javacord.api.entity.activity.ActivityType;
-import org.javacord.api.entity.message.MessageBuilder;
-import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.server.Server;
 import wkwk.Command.Processing;
+import wkwk.core.BotLogin;
 import wkwk.dao.DiscordDAO;
 import wkwk.exception.DatabaseException;
 
-public class GuideSystem {
-    DiscordApi api;
+public class GuideSystem extends BotLogin {
+    DiscordApi api = getApi();
 
-    public GuideSystem(DiscordApi api) {
-        this.api = api;
-    }
-
-    public void run() {
-        Processing processing = new Processing(api);
+    public GuideSystem() {
+        Processing processing = new Processing();
         DiscordDAO dao = new DiscordDAO();
         api.addServerJoinListener(e -> {
             Server server = e.getServer();

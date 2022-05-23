@@ -5,17 +5,14 @@ import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.SelectMenuInteraction;
 import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
+import wkwk.core.BotLogin;
 import wkwk.dao.DiscordDAO;
 import wkwk.parameter.record.ReactionRoleRecord;
 
-public class PresetSystem {
-    DiscordApi api;
+public class PresetSystem extends BotLogin {
+    DiscordApi api = getApi();
 
-    public PresetSystem(DiscordApi api) {
-        this.api = api;
-    }
-
-    public void run() {
+    public PresetSystem() {
         DiscordDAO dao = new DiscordDAO();
         api.addSelectMenuChooseListener(event -> {
             SelectMenuInteraction menuInteraction = event.getSelectMenuInteraction();
@@ -36,17 +33,19 @@ public class PresetSystem {
                                 }
                             }
                             break;
+
                         case "removeLogging":
                             String[] inputs = menuInteraction.getChosenOptions().get(0).getValue().split(" ");
                             dao.deleteLogging(inputs[0], inputs[1], inputs[2]);
                             response = "削除しました";
                             break;
+
                         case "removeRole":
                             String selectEmoji = menuInteraction.getChosenOptions().get(0).getValue();
                             ReactionRoleRecord record = dao.getReactAllData(menuInteraction.getServer().get().getIdAsString());
                             for (String emoji : record.getEmoji()) {
                                 if (selectEmoji.equals(emoji)) {
-                                    dao.deleteRoles(emoji, record.getMessageID());
+                                    dao.deleteRoles(emoji, record.getMessageId());
                                     response = emoji + "を削除しました";
                                     break;
                                 }

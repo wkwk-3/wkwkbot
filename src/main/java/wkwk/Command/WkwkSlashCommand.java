@@ -4,17 +4,14 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.interaction.SlashCommand;
 import org.javacord.api.interaction.SlashCommandOption;
 import org.javacord.api.interaction.SlashCommandOptionType;
+import wkwk.core.BotLogin;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class WkwkSlashCommand {
-    DiscordApi api;
-
-    public WkwkSlashCommand(DiscordApi api) {
-        this.api = api;
-    }
+public class WkwkSlashCommand extends BotLogin {
+    DiscordApi api = getApi();
 
     public void createCommand() {
         System.out.println("ping");

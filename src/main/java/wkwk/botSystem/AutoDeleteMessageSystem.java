@@ -1,23 +1,21 @@
 package wkwk.botSystem;
 
 import org.javacord.api.DiscordApi;
+import wkwk.core.BotLogin;
 import wkwk.dao.DiscordDAO;
 import wkwk.parameter.record.DeleteMessageRecord;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class AutoDeleteMessageSystem {
+public class AutoDeleteMessageSystem extends BotLogin {
     TimerTask task;
     Timer timer;
-    DiscordApi api;
+
+    DiscordApi api = getApi();
     DiscordDAO dao = new DiscordDAO();
 
-    public AutoDeleteMessageSystem(DiscordApi api) {
-        this.api = api;
-    }
-
-    public void run() {
+    public AutoDeleteMessageSystem() {
         task = new TimerTask() {
             public void run() {
                 Date date = new Date();

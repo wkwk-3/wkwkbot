@@ -1,15 +1,14 @@
 package wkwk.botSystem;
 
 import org.javacord.api.DiscordApi;
+import wkwk.core.BotLogin;
 import wkwk.dao.ReloadDAO;
 import wkwk.parameter.record.*;
 
-public class ReloadSystem {
-    DiscordApi api;
-    public ReloadSystem(DiscordApi api) {
-        this.api = api;
-    }
-    public void run() {
+public class ReloadSystem extends BotLogin {
+    DiscordApi api = getApi();
+
+    public ReloadSystem() {
         ReloadDAO dao = new ReloadDAO();
         int botSend = 0;
         int deleteMessage = 0;
@@ -23,14 +22,14 @@ public class ReloadSystem {
         int temp = 0;
 
         for (BotSendMessageRecord record : dao.getAllBotSendMessage()) {
-            if (!api.getServerById(record.getSERVERID()).isPresent() || !api.getServerTextChannelById(record.getCHANNELID()).isPresent() || !api.getMessageById(record.getMESSAGEID(),api.getTextChannelById(record.getCHANNELID()).get()).isDone()) {
+            if (!api.getServerById(record.getServetId()).isPresent() || !api.getServerTextChannelById(record.getChannelId()).isPresent() || !api.getMessageById(record.getMessageId(), api.getTextChannelById(record.getChannelId()).get()).isDone()) {
                 botSend++;
                 dao.deleteBotSendMessage(record);
             }
         }
 
         for (DeleteMessageRecord record : dao.getAllDeleteMessage()) {
-            if (!api.getServerById(record.getServerId()).isPresent() || !api.getServerTextChannelById(record.getChannelId()).isPresent() || !api.getMessageById(record.getMessageId(),api.getTextChannelById(record.getChannelId()).get()).isDone()) {
+            if (!api.getServerById(record.getServerId()).isPresent() || !api.getServerTextChannelById(record.getChannelId()).isPresent() || !api.getMessageById(record.getMessageId(), api.getTextChannelById(record.getChannelId()).get()).isDone()) {
                 deleteMessage++;
                 dao.deleteDeleteMessage(record);
             }
@@ -89,14 +88,14 @@ public class ReloadSystem {
         }
 
         for (ServerDataRecord record : dao.getAllServerProperty()) {
-            if (!api.getServerById(record.getServer()).isPresent()) {
+            if (!api.getServerById(record.getServerId()).isPresent()) {
                 property++;
                 dao.deleteServerProperty(record);
             }
         }
 
         for (ChannelRecord record : dao.getAllTempChannel()) {
-            if (!api.getServerById(record.getServerID()).isPresent() || !api.getServerVoiceChannelById(record.getVoiceID()).isPresent() && !api.getServerTextChannelById(record.getTextID()).isPresent() || !api.getServerVoiceChannelById(record.getVoiceID()).isPresent()) {
+            if (!api.getServerById(record.getServerId()).isPresent() || !api.getServerVoiceChannelById(record.getVoiceId()).isPresent() && !api.getServerTextChannelById(record.getTextId()).isPresent() || !api.getServerVoiceChannelById(record.getVoiceId()).isPresent()) {
                 temp++;
                 dao.deleteTempChannel(record);
             }
@@ -104,15 +103,15 @@ public class ReloadSystem {
 
         String out =
                 "リロード結果\n" + "ボット送信メッセージ" + botSend + "件削除しました\n" +
-                "自動消去メッセージ" + deleteMessage + "件削除しました\n" +
-                "自動消去チャンネル" + deleteTime + "件削除しました\n" +
-                "ログ出力" + logging + "件削除しました\n" +
-                "送信済みメンション" + mentionMessage + "件削除しました\n" +
-                "名前変更候補" + namePreset + "件削除しました\n" +
-                "リアクションメッセージ" + reactMessage + "件削除しました\n" +
-                "リアクションロール" + reactRole + "件削除しました\n" +
-                "サーバー設定" + property + "件削除しました\n" +
-                "一時チャンネル" + temp + "件削除しました";
+                        "自動消去メッセージ" + deleteMessage + "件削除しました\n" +
+                        "自動消去チャンネル" + deleteTime + "件削除しました\n" +
+                        "ログ出力" + logging + "件削除しました\n" +
+                        "送信済みメンション" + mentionMessage + "件削除しました\n" +
+                        "名前変更候補" + namePreset + "件削除しました\n" +
+                        "リアクションメッセージ" + reactMessage + "件削除しました\n" +
+                        "リアクションロール" + reactRole + "件削除しました\n" +
+                        "サーバー設定" + property + "件削除しました\n" +
+                        "一時チャンネル" + temp + "件削除しました";
         System.out.println(out);
     }
 }

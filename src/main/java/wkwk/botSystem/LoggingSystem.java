@@ -6,6 +6,7 @@ import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.user.User;
+import wkwk.core.BotLogin;
 import wkwk.dao.DiscordDAO;
 import wkwk.parameter.record.LoggingRecord;
 
@@ -14,23 +15,16 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class LoggingSystem {
-    DiscordApi api;
+public class LoggingSystem extends BotLogin {
+    DiscordApi api = getApi();
 
-    public LoggingSystem(DiscordApi api) {
-        this.api = api;
-    }
-
-    public void run() {
+    public LoggingSystem() {
         DiscordDAO dao = new DiscordDAO();
         SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         api.addServerMemberJoinListener(event -> {
-            System.out.println("1");
             ArrayList<LoggingRecord> logRecord = dao.getLogging("s", event.getServer().getIdAsString());
             logRecord.forEach(record -> {
-                System.out.println("2");
                 if (record.getLogType().equals("user") && api.getServerTextChannelById(record.getChannelId()).isPresent()) {
-                    System.out.println("3");
                     ServerTextChannel textChannel = api.getServerTextChannelById(record.getChannelId()).get();
                     Date date = Date.from(event.getUser().getCreationTimestamp());
                     textChannel.sendMessage(new EmbedBuilder()
@@ -40,11 +34,10 @@ public class LoggingSystem {
                             .addInlineField("アカウント作成日時", sd.format(date))
                             .setColor(Color.BLACK)
                     ).join();
-                    System.out.println("4");
                 }
-                System.out.println("5");
             });
         });
+
         api.addServerMemberLeaveListener(event -> {
             ArrayList<LoggingRecord> logRecord = dao.getLogging("s", event.getServer().getIdAsString());
             logRecord.forEach(record -> {

@@ -5,9 +5,9 @@ import lombok.Data;
 @Data
 public class ChannelRecord {
 
-    private String voiceID;
-    private String textID;
-    private String serverID;
+    private String voiceId;
+    private String textId;
+    private String serverId;
 
     private boolean hideBy;
     private boolean lockBy;

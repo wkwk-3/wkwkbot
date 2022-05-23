@@ -2,6 +2,7 @@ package wkwk.botSystem;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.TextChannel;
+import wkwk.core.BotLogin;
 import wkwk.dao.DiscordDAO;
 import wkwk.parameter.record.DeleteMessageRecord;
 import wkwk.parameter.record.DeleteTimeRecord;
@@ -11,14 +12,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-public class AutoDeleteRegisterSystem {
-    DiscordApi api;
+public class AutoDeleteRegisterSystem extends BotLogin {
+    DiscordApi api = getApi();
 
-    public AutoDeleteRegisterSystem(DiscordApi api) {
-        this.api = api;
-    }
-
-    public void run() {
+    public AutoDeleteRegisterSystem() {
         DiscordDAO dao = new DiscordDAO();
         SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         api.addMessageCreateListener(event -> {

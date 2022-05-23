@@ -5,13 +5,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 
 public class CsvReader {
     List<String> lines = null;
 
-    public void csvLoad () {
+    public void csvLoad() {
         Path path = Paths.get("BotTextData.csv");
         try {
             this.lines = Files.readAllLines(path, StandardCharsets.UTF_8);

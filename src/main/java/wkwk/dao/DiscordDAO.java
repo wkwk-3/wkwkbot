@@ -88,14 +88,14 @@ public class DiscordDAO extends DAOBase {
             prestmt.setString(1, serverId);
             ResultSet rs = prestmt.executeQuery();
             while (rs.next()) {
-                dataList.setServer(serverId);
-                dataList.setMentionChannel(rs.getString(ServerPropertyParameters.MENTION_CHANNEL_ID.getParameter()));
-                dataList.setFstChannel(rs.getString(ServerPropertyParameters.FIRST_CHANNEL_ID.getParameter()));
-                dataList.setVoiceCategory(rs.getString(ServerPropertyParameters.VOICE_CATEGORY_ID.getParameter()));
-                dataList.setTextCategory(rs.getString(ServerPropertyParameters.TEXT_CATEGORY_ID.getParameter()));
+                dataList.setServerId(serverId);
+                dataList.setMentionChannelId(rs.getString(ServerPropertyParameters.MENTION_CHANNEL_ID.getParameter()));
+                dataList.setFstChannelId(rs.getString(ServerPropertyParameters.FIRST_CHANNEL_ID.getParameter()));
+                dataList.setVoiceCategoryId(rs.getString(ServerPropertyParameters.VOICE_CATEGORY_ID.getParameter()));
+                dataList.setTextCategoryId(rs.getString(ServerPropertyParameters.TEXT_CATEGORY_ID.getParameter()));
                 dataList.setTempBy(rs.getBoolean(ServerPropertyParameters.TEMP_BY.getParameter()));
                 dataList.setTextBy(rs.getBoolean(ServerPropertyParameters.TEXT_BY.getParameter()));
-                dataList.setStereotyped(rs.getString((ServerPropertyParameters.STEREOTYPED.getParameter())));
+                dataList.setStereoTyped(rs.getString((ServerPropertyParameters.STEREOTYPED.getParameter())));
                 dataList.setDefaultSize(rs.getString(ServerPropertyParameters.DEFAULT_SIZE.getParameter()));
                 dataList.setDefaultName(rs.getString(ServerPropertyParameters.DEFAULT_NAME.getParameter()));
             }
@@ -149,11 +149,11 @@ public class DiscordDAO extends DAOBase {
         try {
             String sql = "UPDATE " + DAOParameters.TABLE_SERVER_PROPERTY.getParameter() + " SET " + ServerPropertyParameters.FIRST_CHANNEL_ID.getParameter() + " = ?," + ServerPropertyParameters.TEXT_CATEGORY_ID.getParameter() + " = ?," + ServerPropertyParameters.VOICE_CATEGORY_ID.getParameter() + " = ?," + ServerPropertyParameters.MENTION_CHANNEL_ID.getParameter() + " = ? WHERE " + ServerPropertyParameters.SERVER_ID.getParameter() + " = ?";
             prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, data.getFstChannel());
-            prestmt.setString(2, data.getTextCategory());
-            prestmt.setString(3, data.getVoiceCategory());
-            prestmt.setString(4, data.getMentionChannel());
-            prestmt.setString(5, data.getServer());
+            prestmt.setString(1, data.getFstChannelId());
+            prestmt.setString(2, data.getTextCategoryId());
+            prestmt.setString(3, data.getVoiceCategoryId());
+            prestmt.setString(4, data.getMentionChannelId());
+            prestmt.setString(5, data.getServerId());
             prestmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -183,9 +183,9 @@ public class DiscordDAO extends DAOBase {
         try {
             String sql = "INSERT INTO " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " VALUES (?,?,?,0,0)";
             prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, list.getVoiceID());
-            prestmt.setString(2, list.getTextID());
-            prestmt.setString(3, list.getServerID());
+            prestmt.setString(1, list.getVoiceId());
+            prestmt.setString(2, list.getTextId());
+            prestmt.setString(3, list.getServerId());
             prestmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -213,9 +213,9 @@ public class DiscordDAO extends DAOBase {
             ResultSet rs = prestmt.executeQuery();
             list = new ChannelRecord();
             while (rs.next()) {
-                list.setServerID(rs.getString(TempChannelsParameters.SERVER_ID.getParameter()));
-                list.setVoiceID(rs.getString(TempChannelsParameters.VOICE_CHANNEL_ID.getParameter()));
-                list.setTextID(rs.getString(TempChannelsParameters.TEXT_CHANNEL_ID.getParameter()));
+                list.setServerId(rs.getString(TempChannelsParameters.SERVER_ID.getParameter()));
+                list.setVoiceId(rs.getString(TempChannelsParameters.VOICE_CHANNEL_ID.getParameter()));
+                list.setTextId(rs.getString(TempChannelsParameters.TEXT_CHANNEL_ID.getParameter()));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -401,11 +401,11 @@ public class DiscordDAO extends DAOBase {
                 ResultSet rs = prestmt.executeQuery();
                 ReactionRoleRecord record = new ReactionRoleRecord();
                 while (rs.next()) {
-                    record.setServerID(serverId);
-                    record.setTextChannelID(rs.getString(ReactMessageParameters.TEXT_CHANNEL_ID.getParameter()));
-                    record.setMessageID(rs.getString(ReactMessageParameters.MESSAGE_ID.getParameter()));
+                    record.setServerId(serverId);
+                    record.setTextChannelId(rs.getString(ReactMessageParameters.TEXT_CHANNEL_ID.getParameter()));
+                    record.setMessageId(rs.getString(ReactMessageParameters.MESSAGE_ID.getParameter()));
                 }
-                String sql3 = "DELETE FROM " + DAOParameters.TABLE_REACT_ROLE.getParameter() + " WHERE " + ReactRoleParameters.MESSAGE_ID.getParameter() + " = " + record.getMessageID();
+                String sql3 = "DELETE FROM " + DAOParameters.TABLE_REACT_ROLE.getParameter() + " WHERE " + ReactRoleParameters.MESSAGE_ID.getParameter() + " = " + record.getMessageId();
                 Statement stmt = con.createStatement();
                 stmt.execute(sql3);
                 sql = "UPDATE " + DAOParameters.TABLE_REACT_MESSAGE.getParameter() + " SET " + ReactMessageParameters.TEXT_CHANNEL_ID.getParameter() + " = ?," + ReactMessageParameters.MESSAGE_ID.getParameter() + " = ? WHERE " + ReactMessageParameters.SERVER_ID + " = ?";
@@ -436,9 +436,9 @@ public class DiscordDAO extends DAOBase {
             ResultSet rs = prestmt.executeQuery();
             record = new ReactionRoleRecord();
             while (rs.next()) {
-                record.setServerID(serverId);
-                record.setTextChannelID(rs.getString(ReactMessageParameters.TEXT_CHANNEL_ID.getParameter()));
-                record.setMessageID(rs.getString(ReactMessageParameters.MESSAGE_ID.getParameter()));
+                record.setServerId(serverId);
+                record.setTextChannelId(rs.getString(ReactMessageParameters.TEXT_CHANNEL_ID.getParameter()));
+                record.setMessageId(rs.getString(ReactMessageParameters.MESSAGE_ID.getParameter()));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -489,17 +489,17 @@ public class DiscordDAO extends DAOBase {
             ResultSet rs = this.prestmt.executeQuery();
             record = new ReactionRoleRecord();
             while (rs.next()) {
-                record.setServerID(serverId);
-                record.setTextChannelID(rs.getString(ReactMessageParameters.TEXT_CHANNEL_ID.getParameter()));
-                record.setMessageID(rs.getString(ReactMessageParameters.MESSAGE_ID.getParameter()));
+                record.setServerId(serverId);
+                record.setTextChannelId(rs.getString(ReactMessageParameters.TEXT_CHANNEL_ID.getParameter()));
+                record.setMessageId(rs.getString(ReactMessageParameters.MESSAGE_ID.getParameter()));
             }
             String sql2 = "SELECT * FROM " + DAOParameters.TABLE_REACT_ROLE.getParameter() + " WHERE " + ReactRoleParameters.MESSAGE_ID.getParameter() + " = ?";
             prestmt = con.prepareStatement(sql2);
-            prestmt.setString(1, record.getMessageID());
+            prestmt.setString(1, record.getMessageId());
             ResultSet rs2 = prestmt.executeQuery();
             while (rs2.next()) {
                 record.getEmoji().add(rs2.getString(ReactRoleParameters.EMOJI.getParameter()));
-                record.getRoleID().add(rs2.getString(ReactRoleParameters.ROLE_ID.getParameter()));
+                record.getRoleId().add(rs2.getString(ReactRoleParameters.ROLE_ID.getParameter()));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -920,14 +920,14 @@ public class DiscordDAO extends DAOBase {
             ResultSet rs = prestmt.executeQuery();
             while (rs.next()) {
                 ServerDataRecord dataList = new ServerDataRecord();
-                dataList.setServer(rs.getString(ServerPropertyParameters.SERVER_ID.getParameter()));
-                dataList.setMentionChannel(rs.getString(ServerPropertyParameters.MENTION_CHANNEL_ID.getParameter()));
-                dataList.setFstChannel(rs.getString(ServerPropertyParameters.FIRST_CHANNEL_ID.getParameter()));
-                dataList.setVoiceCategory(rs.getString(ServerPropertyParameters.VOICE_CATEGORY_ID.getParameter()));
-                dataList.setTextCategory(rs.getString(ServerPropertyParameters.TEXT_CATEGORY_ID.getParameter()));
+                dataList.setServerId(rs.getString(ServerPropertyParameters.SERVER_ID.getParameter()));
+                dataList.setMentionChannelId(rs.getString(ServerPropertyParameters.MENTION_CHANNEL_ID.getParameter()));
+                dataList.setFstChannelId(rs.getString(ServerPropertyParameters.FIRST_CHANNEL_ID.getParameter()));
+                dataList.setVoiceCategoryId(rs.getString(ServerPropertyParameters.VOICE_CATEGORY_ID.getParameter()));
+                dataList.setTextCategoryId(rs.getString(ServerPropertyParameters.TEXT_CATEGORY_ID.getParameter()));
                 dataList.setTempBy(rs.getBoolean(ServerPropertyParameters.TEMP_BY.getParameter()));
                 dataList.setTextBy(rs.getBoolean(ServerPropertyParameters.TEXT_BY.getParameter()));
-                dataList.setStereotyped(rs.getString((ServerPropertyParameters.STEREOTYPED.getParameter())));
+                dataList.setStereoTyped(rs.getString((ServerPropertyParameters.STEREOTYPED.getParameter())));
                 dataList.setDefaultSize(rs.getString(ServerPropertyParameters.DEFAULT_SIZE.getParameter()));
                 dataList.setDefaultName(rs.getString(ServerPropertyParameters.DEFAULT_NAME.getParameter()));
                 servers.add(dataList);
@@ -969,10 +969,10 @@ public class DiscordDAO extends DAOBase {
             prestmt = null;
             String sql = "INSERT INTO " + DAOParameters.TABLE_BOT_SEND_MESSAGES.getParameter() + " VALUES (?,?,?,?)";
             prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, record.getSERVERID());
-            prestmt.setString(2, record.getMESSAGEID());
-            prestmt.setString(3, record.getCHANNELID());
-            prestmt.setString(4, record.getUSERID());
+            prestmt.setString(1, record.getServetId());
+            prestmt.setString(2, record.getMessageId());
+            prestmt.setString(3, record.getChannelId());
+            prestmt.setString(4, record.getUserId());
             prestmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -983,7 +983,7 @@ public class DiscordDAO extends DAOBase {
 
     public BotSendMessageRecord getBotSendMessage(String MessageID) {
         BotSendMessageRecord record = new BotSendMessageRecord();
-        record.setMESSAGEID("NULL");
+        record.setMessageId("NULL");
         this.open();
         prestmt = null;
         try {
@@ -998,10 +998,10 @@ public class DiscordDAO extends DAOBase {
                     prestmt.setString(1, MessageID);
                     ResultSet resultSet = prestmt.executeQuery();
                     while (resultSet.next()) {
-                        record.setSERVERID(resultSet.getString(BotSendMessageParameters.SERVER_ID.getParameter()));
-                        record.setCHANNELID(resultSet.getString(BotSendMessageParameters.CHANNEL_ID.getParameter()));
-                        record.setMESSAGEID(resultSet.getString(BotSendMessageParameters.MESSAGE_ID.getParameter()));
-                        record.setUSERID(resultSet.getString(BotSendMessageParameters.USER_ID.getParameter()));
+                        record.setServetId(resultSet.getString(BotSendMessageParameters.SERVER_ID.getParameter()));
+                        record.setChannelId(resultSet.getString(BotSendMessageParameters.CHANNEL_ID.getParameter()));
+                        record.setMessageId(resultSet.getString(BotSendMessageParameters.MESSAGE_ID.getParameter()));
+                        record.setUserId(resultSet.getString(BotSendMessageParameters.USER_ID.getParameter()));
 
                     }
                 }

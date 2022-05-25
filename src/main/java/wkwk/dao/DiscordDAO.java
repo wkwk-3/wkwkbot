@@ -199,15 +199,13 @@ public class DiscordDAO extends DAOBase {
         prestmt = null;
         ChannelRecord list = null;
         try {
-            String sql = null;
-            switch (select) {
-                case "v":
-                    sql = "SELECT * FROM " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " WHERE " + TempChannelsParameters.VOICE_CHANNEL_ID.getParameter() + " = ?";
-                    break;
-                case "t":
-                    sql = "SELECT * FROM " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " WHERE " + TempChannelsParameters.TEXT_CHANNEL_ID.getParameter() + " = ?";
-                    break;
-            }
+            String sql = switch (select) {
+                case "v" ->
+                        "SELECT * FROM " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " WHERE " + TempChannelsParameters.VOICE_CHANNEL_ID.getParameter() + " = ?";
+                case "t" ->
+                        "SELECT * FROM " + DAOParameters.TABLE_TEMP_CHANNEL.getParameter() + " WHERE " + TempChannelsParameters.TEXT_CHANNEL_ID.getParameter() + " = ?";
+                default -> null;
+            };
             prestmt = con.prepareStatement(sql);
             prestmt.setString(1, channelId);
             ResultSet rs = prestmt.executeQuery();
@@ -784,6 +782,11 @@ public class DiscordDAO extends DAOBase {
                 preStmt3 = con.prepareStatement(sql);
                 preStmt3.setString(1, id);
                 preStmt3.execute();
+            } else if (select.equalsIgnoreCase("c")) {
+                String sql = "DELETE FROM " + DAOParameters.TABLE_DELETE_MESSAGES.getParameter() + " WHERE " + DeleteMessagesParameters.TEXT_CHANNEL_ID.getParameter() + " = ?";
+                preStmt3 = con.prepareStatement(sql);
+                preStmt3.setString(1, id);
+                preStmt3.execute();
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -1014,13 +1017,17 @@ public class DiscordDAO extends DAOBase {
         return record;
     }
 
-    public void deleteBotSendMessage(String MessageId) {
+    public void deleteBotSendMessage(String select, String Id) {
         this.open();
         prestmt = null;
         try {
-            String sql = "DELETE FROM " + DAOParameters.TABLE_BOT_SEND_MESSAGES.getParameter() + " WHERE " + BotSendMessageParameters.MESSAGE_ID.getParameter() + " = ?";
+            String sql = null;
+            switch (select) {
+                case "channel" -> sql = "DELETE FROM " + DAOParameters.TABLE_BOT_SEND_MESSAGES.getParameter() + " WHERE " + BotSendMessageParameters.CHANNEL_ID.getParameter() + " = ?";
+                case "message" -> sql = "DELETE FROM " + DAOParameters.TABLE_BOT_SEND_MESSAGES.getParameter() + " WHERE " + BotSendMessageParameters.MESSAGE_ID.getParameter() + " = ?";
+            }
             prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, MessageId);
+            prestmt.setString(1, Id);
             prestmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -1029,13 +1036,17 @@ public class DiscordDAO extends DAOBase {
         }
     }
 
-    public void deleteMentionMessage(String MessageId) {
+    public void deleteMentionMessage(String select, String Id) {
         this.open();
         prestmt = null;
         try {
-            String sql = "DELETE FROM " + DAOParameters.TABLE_MENTION_MESSAGE.getParameter() + " WHERE " + BotSendMessageParameters.MESSAGE_ID.getParameter() + " = ?";
+            String sql = null;
+            switch (select) {
+                case "channel" -> sql = "DELETE FROM " + DAOParameters.TABLE_MENTION_MESSAGE.getParameter() + " WHERE " + MentionMessageParameters.TEXT_CHANNEL_ID.getParameter() + " = ?";
+                case "message" -> sql = "DELETE FROM " + DAOParameters.TABLE_MENTION_MESSAGE.getParameter() + " WHERE " + MentionMessageParameters.MESSAGE_ID.getParameter() + " = ?";
+            }
             prestmt = con.prepareStatement(sql);
-            prestmt.setString(1, MessageId);
+            prestmt.setString(1, Id);
             prestmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();

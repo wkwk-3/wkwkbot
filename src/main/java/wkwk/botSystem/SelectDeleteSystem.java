@@ -1,6 +1,8 @@
 package wkwk.botSystem;
 
 import org.javacord.api.DiscordApi;
+import org.javacord.api.entity.channel.ServerChannel;
+import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.emoji.Emoji;
 import wkwk.core.BotLogin;
 import wkwk.dao.DiscordDAO;
@@ -20,14 +22,23 @@ public class SelectDeleteSystem extends BotLogin {
                         BotSendMessageRecord messageRecord = dao.getBotSendMessage(messageId);
                         if (!messageRecord.getMessageId().equalsIgnoreCase("NULL") && messageRecord.getMessageId().equalsIgnoreCase(messageId) && messageRecord.getUserId().equalsIgnoreCase(event.getUser().get().getIdAsString())) {
                             event.getMessage().get().delete();
-                            dao.deleteBotSendMessage(messageId);
-                            dao.deleteMentionMessage(messageId);
+                            dao.deleteBotSendMessage("message",messageId);
+                            dao.deleteMentionMessage("message",messageId);
                             dao.deleteMessage("m", messageId);
                         } else if (!messageRecord.getMessageId().equalsIgnoreCase("NULL") && messageRecord.getMessageId().equalsIgnoreCase(messageId) && !messageRecord.getUserId().equalsIgnoreCase(event.getUser().get().getIdAsString())) {
                             event.removeReaction();
                         }
                     }
                 }
+            }
+        });
+        api.addServerChannelDeleteListener(event -> {
+            ServerChannel channel = event.getChannel();
+            if (channel.asServerTextChannel().isPresent()) {
+                ServerTextChannel textChannel = channel.asServerTextChannel().get();
+                dao.deleteBotSendMessage("channel",channel.getIdAsString());
+                dao.deleteMentionMessage("channel",channel.getIdAsString());
+                dao.deleteMessage("c", textChannel.getId());
             }
         });
     }

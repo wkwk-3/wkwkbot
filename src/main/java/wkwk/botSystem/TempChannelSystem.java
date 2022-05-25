@@ -70,6 +70,17 @@ public class TempChannelSystem extends BotLogin {
                                                 Button.success("send-recruiting", "募集送信"),
                                                 Button.success("claim", "通話権限獲得"),
                                                 Button.danger("next", "次の項目"))).send(text);
+                                ArrayList<String> namePreset = dao.GetNamePreset(serverId);
+                                if (namePreset.size() > 0) {
+                                    SelectMenuBuilder selectMenuBuilder = new SelectMenuBuilder().setCustomId("name").setPlaceholder("変更したい名前を設定してください").setMaximumValues(1).setMinimumValues(1);
+                                    for (String name : namePreset) {
+                                        selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(name).setValue(name).build());
+                                    }
+                                    Message message = new MessageBuilder()
+                                            .setContent("通話名前変更")
+                                            .addComponents(ActionRow.of(selectMenuBuilder.build())).send(text).join();
+                                    processing.botSendMessage(message,server,text,joinUser);
+                                }
                             } else list.setTextId("NULL");
                             ServerVoiceChannel voice = new ServerVoiceChannelBuilder(server).setName(defaultName).setCategory(vcat).setUserlimit(Integer.parseInt(data.getDefaultSize())).setBitrate(64000).create().get();
                             list.setVoiceId(voice.getIdAsString());

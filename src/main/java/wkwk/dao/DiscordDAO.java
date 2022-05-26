@@ -78,7 +78,7 @@ public class DiscordDAO extends DAOBase {
         return token;
     }
 
-    public ServerDataRecord TempGetData(String serverId) throws SystemException, DatabaseException {
+    public ServerDataRecord getTempData(String serverId) throws SystemException, DatabaseException {
         this.open();
         prestmt = null;
         ServerDataRecord dataList = new ServerDataRecord();

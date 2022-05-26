@@ -67,7 +67,7 @@ public class SlashCommandSystem extends BotLogin {
                             switch (cmd) {
                                 case "setup":
                                     ServerDataRecord old;
-                                    old = dao.TempGetData(serverId);
+                                    old = dao.getTempData(serverId);
                                     ServerTextChannel mentionChannel = new ServerTextChannelBuilder(server).setName("Mention").setRawPosition(1).create().join();
                                     mentionChannel.createUpdater().addPermissionOverwrite(wkwk, new PermissionsBuilder().setAllowed(PermissionType.MENTION_EVERYONE).build()).update().join();
                                     ServerDataRecord data = new ServerDataRecord();
@@ -452,7 +452,7 @@ public class SlashCommandSystem extends BotLogin {
                                     if (interaction.getOptionStringValueByName("text").isPresent()) {
                                         mentionText.append(interaction.getOptionStringValueByName("text").get());
                                     }
-                                    ServerDataRecord serverList = dao.TempGetData(list.getServerId());
+                                    ServerDataRecord serverList = dao.getTempData(list.getServerId());
                                     if (api.getServerTextChannelById(serverList.getMentionChannelId()).isPresent()) {
                                         ServerTextChannel mention = api.getServerTextChannelById(serverList.getMentionChannelId()).get();
                                         String mentionMessage = serverList.getStereoTyped();

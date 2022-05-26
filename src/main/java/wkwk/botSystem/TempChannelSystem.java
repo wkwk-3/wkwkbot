@@ -48,7 +48,7 @@ public class TempChannelSystem extends BotLogin {
                 if (event.getChannel().getCategory().isPresent())
                     joinChannelCategory = event.getChannel().getCategory().get();
                 try {
-                    ServerDataRecord data = dao.TempGetData(serverId);
+                    ServerDataRecord data = dao.getTempData(serverId);
                     String firstChannel = data.getFstChannelId();
                     String vcatId = data.getVoiceCategoryId();
                     String tcatId = data.getTextCategoryId();
@@ -111,7 +111,7 @@ public class TempChannelSystem extends BotLogin {
             if (event.getChannel().getCategory().isPresent())
                 leaveChannelCategory = event.getChannel().getCategory().get();
             try {
-                data = dao.TempGetData(serverId);
+                data = dao.getTempData(serverId);
                 String voiceCategory = data.getVoiceCategoryId();
                 if (api.getChannelCategoryById(voiceCategory).isPresent())
                     for (RegularServerChannel voiceList : api.getChannelCategoryById(voiceCategory).get().getChannels()) {
@@ -306,7 +306,7 @@ public class TempChannelSystem extends BotLogin {
                             } else if (id.equals("send-recruiting")) {
                                 String serverId = buttonInteraction.getServer().get().getIdAsString();
                                 User sendUser = buttonInteraction.getUser();
-                                ServerDataRecord serverList = dao.TempGetData(serverId);
+                                ServerDataRecord serverList = dao.getTempData(serverId);
                                 if (api.getServerTextChannelById(serverList.getMentionChannelId()).isPresent()) {
                                     ServerTextChannel mention = api.getServerTextChannelById(serverList.getMentionChannelId()).get();
                                     String mentionMessage = serverList.getStereoTyped();

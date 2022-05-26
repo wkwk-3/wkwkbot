@@ -21,7 +21,7 @@ public class Show {
         String bys = null;
         StringBuilder reacts = new StringBuilder("・リアクションロール設定\n");
         try {
-            tempData = dao.TempGetData(serverId);
+            tempData = dao.getTempData(serverId);
             ReactionRoleRecord react = dao.getReactAllData(tempData.getServerId());
             String[] emojis = react.getEmoji().toArray(new String[0]);
             String[] roles = react.getRoleId().toArray(new String[0]);

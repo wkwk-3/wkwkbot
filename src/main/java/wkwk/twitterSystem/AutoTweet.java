@@ -1,5 +1,8 @@
 package wkwk.twitterSystem;
 
+import com.vdurmont.emoji.Emoji;
+import com.vdurmont.emoji.EmojiLoader;
+import com.vdurmont.emoji.EmojiManager;
 import io.github.redouane59.twitter.TwitterClient;
 import io.github.redouane59.twitter.signature.TwitterCredentials;
 import wkwk.csv.TweetDataLoad;
@@ -13,7 +16,6 @@ public class AutoTweet {
     int oldTime = -1;
     TwitterClient twitterClient;
     String tweetText = csvReader.getTweetTemplate();
-    List<String> emojis = csvReader.getTweetEmojis();
     TimerTask task;
     Timer timer;
 
@@ -30,14 +32,18 @@ public class AutoTweet {
     public void start() {
         task = new TimerTask() {
             public void run() {
-                SimpleDateFormat sdf = new SimpleDateFormat("H");
                 Date date = new Date();
-                int newTime = Integer.parseInt(sdf.format(date));
-                if (oldTime != newTime) {
-                    oldTime = newTime;
-                    String tweet = tweetText.replaceFirst("::emoji::", emojis.get(newTime));
-                    twitterClient.postTweet(tweet);
-                    System.out.println(date + "にツイート");
+                Object[] emojis = EmojiManager.getAll().toArray();
+                while (true) {
+                    int newTime = new Random().nextInt(emojis.length);
+                    if (oldTime != newTime) {
+                        oldTime = newTime;
+                        Emoji emoji = (Emoji) emojis[newTime];
+                        String tweet = tweetText.replaceFirst("::emoji::", emoji.getUnicode());
+                        twitterClient.postTweet(tweet);
+                        System.out.println(date + "にツイート");
+                        break;
+                    }
                 }
             }
         };

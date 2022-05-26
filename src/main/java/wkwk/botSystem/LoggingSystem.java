@@ -27,13 +27,14 @@ public class LoggingSystem extends BotLogin {
                 if (record.getLogType().equals("user") && api.getServerTextChannelById(record.getChannelId()).isPresent()) {
                     ServerTextChannel textChannel = api.getServerTextChannelById(record.getChannelId()).get();
                     Date date = Date.from(event.getUser().getCreationTimestamp());
-                    textChannel.sendMessage(new EmbedBuilder()
-                            .setTitle(event.getUser().getDiscriminatedName() + " が加入")
-                            .setAuthor(event.getUser())
-                            .addInlineField("ID : " + event.getUser().getIdAsString(), event.getUser().getMentionTag())
-                            .addInlineField("アカウント作成日時", sd.format(date))
-                            .setColor(Color.BLACK)
-                    ).join();
+                    textChannel.sendMessage(
+                            new EmbedBuilder()
+                                    .setTitle(event.getUser().getDiscriminatedName() + " が加入")
+                                    .setAuthor(event.getUser())
+                                    .addInlineField("ID : " + event.getUser().getIdAsString(), event.getUser().getMentionTag())
+                                    .addInlineField("アカウント作成日時", sd.format(date))
+                                    .setColor(Color.BLACK)
+                            ).join();
                 }
             });
         });

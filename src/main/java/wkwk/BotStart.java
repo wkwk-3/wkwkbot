@@ -1,5 +1,7 @@
 package wkwk;
 
+import com.vdurmont.emoji.Emoji;
+import com.vdurmont.emoji.EmojiManager;
 import wkwk.Command.Processing;
 import wkwk.Command.WkwkSlashCommand;
 import wkwk.botSystem.*;
@@ -10,6 +12,7 @@ import wkwk.twitterSystem.AutoTweet;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Random;
 
 public class BotStart extends BotLogin {
     public static void main(String[] args) {

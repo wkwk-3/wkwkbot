@@ -1,14 +1,12 @@
 package wkwk.twitterSystem;
 
 import com.vdurmont.emoji.Emoji;
-import com.vdurmont.emoji.EmojiLoader;
 import com.vdurmont.emoji.EmojiManager;
 import io.github.redouane59.twitter.TwitterClient;
 import io.github.redouane59.twitter.signature.TwitterCredentials;
 import wkwk.csv.TweetDataLoad;
 import wkwk.parameter.record.TweetAPIRecord;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class AutoTweet {

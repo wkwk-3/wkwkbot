@@ -124,7 +124,7 @@ public class WkwkSlashCommand extends BotLogin {
         System.out.println("start");
         SlashCommand start =
                 SlashCommand.with("start", "処理開始",
-                        Arrays.asList(
+                        List.of(
                                 SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "delete", "オートデリート開始",
                                         Arrays.asList(
                                                 SlashCommandOption.create(SlashCommandOptionType.LONG, "time", "削除までの時間"),
@@ -134,7 +134,7 @@ public class WkwkSlashCommand extends BotLogin {
         System.out.println("stop");
         SlashCommand stop =
                 SlashCommand.with("stop", "処理終了",
-                        Arrays.asList(
+                        List.of(
                                 SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "delete", "オートデリート終了")
                         )).createGlobal(api).join();
         System.out.println("help");

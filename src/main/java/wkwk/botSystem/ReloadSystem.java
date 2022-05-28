@@ -22,21 +22,21 @@ public class ReloadSystem extends BotLogin {
         int temp = 0;
 
         for (BotSendMessageRecord record : dao.getAllBotSendMessage()) {
-            if (!api.getServerById(record.getServetId()).isPresent() || !api.getServerTextChannelById(record.getChannelId()).isPresent() || !api.getMessageById(record.getMessageId(), api.getTextChannelById(record.getChannelId()).get()).isDone()) {
+            if (api.getServerById(record.getServetId()).isEmpty() || api.getServerTextChannelById(record.getChannelId()).isEmpty() || !api.getMessageById(record.getMessageId(), api.getTextChannelById(record.getChannelId()).get()).isDone()) {
                 botSend++;
                 dao.deleteBotSendMessage(record);
             }
         }
 
         for (DeleteMessageRecord record : dao.getAllDeleteMessage()) {
-            if (!api.getServerById(record.getServerId()).isPresent() || !api.getServerTextChannelById(record.getChannelId()).isPresent() || !api.getMessageById(record.getMessageId(), api.getTextChannelById(record.getChannelId()).get()).isDone()) {
+            if (api.getServerById(record.getServerId()).isEmpty() || api.getServerTextChannelById(record.getChannelId()).isEmpty() || !api.getMessageById(record.getMessageId(), api.getTextChannelById(record.getChannelId()).get()).isDone()) {
                 deleteMessage++;
                 dao.deleteDeleteMessage(record);
             }
         }
 
         for (DeleteTimeRecord record : dao.getAllDeleteTime()) {
-            if (!api.getServerById(record.getServerId()).isPresent() || !api.getServerTextChannelById(record.getTextChannelId()).isPresent()) {
+            if (api.getServerById(record.getServerId()).isEmpty() || api.getServerTextChannelById(record.getTextChannelId()).isEmpty()) {
                 deleteTime++;
                 dao.deleteDeleteTime(record);
             }
@@ -45,13 +45,13 @@ public class ReloadSystem extends BotLogin {
         for (LoggingRecord record : dao.getAllLogging()) {
             switch (record.getLogType()) {
                 case "chat":
-                    if (!api.getServerById(record.getServerId()).isPresent() || !api.getServerTextChannelById(record.getChannelId()).isPresent() || !api.getServerTextChannelById(record.getTargetChannelId()).isPresent()) {
+                    if (api.getServerById(record.getServerId()).isEmpty() || api.getServerTextChannelById(record.getChannelId()).isEmpty() || api.getServerTextChannelById(record.getTargetChannelId()).isEmpty()) {
                         logging++;
                         dao.deleteLogging(record);
                     }
                     break;
                 case "user":
-                    if (!api.getServerById(record.getServerId()).isPresent() || !api.getServerTextChannelById(record.getChannelId()).isPresent()) {
+                    if (api.getServerById(record.getServerId()).isEmpty() || api.getServerTextChannelById(record.getChannelId()).isEmpty()) {
                         logging++;
                         dao.deleteLogging(record);
                     }
@@ -60,42 +60,42 @@ public class ReloadSystem extends BotLogin {
         }
 
         for (MentionMessageRecord record : dao.getAllMentionMessage()) {
-            if (!api.getServerById(record.getServerId()).isPresent() || !api.getServerTextChannelById(record.getTextChannelId()).isPresent() || !api.getMessageById(record.getMessageId(), api.getTextChannelById(record.getTextChannelId()).get()).isDone()) {
+            if (api.getServerById(record.getServerId()).isEmpty() || api.getServerTextChannelById(record.getTextChannelId()).isEmpty() || !api.getMessageById(record.getMessageId(), api.getTextChannelById(record.getTextChannelId()).get()).isDone()) {
                 mentionMessage++;
                 dao.deleteMentionMessage(record);
             }
         }
 
         for (NamePresetRecord record : dao.getAllNamePreset()) {
-            if (!api.getServerById(record.getServerId()).isPresent()) {
+            if (api.getServerById(record.getServerId()).isEmpty()) {
                 namePreset++;
                 dao.deleteNamePreset(record);
             }
         }
 
         for (ReactMessageRecord record : dao.getAllReactMessage()) {
-            if (!api.getServerById(record.getServerId()).isPresent() || !api.getServerTextChannelById(record.getTextChannelId()).isPresent() || !api.getMessageById(record.getMessageId(), api.getTextChannelById(record.getTextChannelId()).get()).isDone()) {
+            if (api.getServerById(record.getServerId()).isEmpty() || api.getServerTextChannelById(record.getTextChannelId()).isEmpty() || !api.getMessageById(record.getMessageId(), api.getTextChannelById(record.getTextChannelId()).get()).isDone()) {
                 reactMessage++;
                 dao.deleteReactMessage(record);
             }
         }
 
         for (ReactRoleRecord record : dao.getAllReactRole()) {
-            if (!api.getServerById(record.getServerId()).isPresent() || !api.getRoleById(record.getRoleId()).isPresent()) {
+            if (api.getServerById(record.getServerId()).isEmpty() || api.getRoleById(record.getRoleId()).isEmpty()) {
                 reactRole++;
                 dao.deleteReactRole(record);
             }
         }
 
         for (ServerDataRecord record : dao.getAllServerProperty()) {
-            if (!api.getServerById(record.getServerId()).isPresent()) {
+            if (api.getServerById(record.getServerId()).isEmpty()) {
                 property++;
                 dao.deleteServerProperty(record);
             }
         }
 
         for (ChannelRecord record : dao.getAllTempChannel()) {
-            if (!api.getServerById(record.getServerId()).isPresent() || !api.getServerVoiceChannelById(record.getVoiceId()).isPresent() && !api.getServerTextChannelById(record.getTextId()).isPresent() || !api.getServerVoiceChannelById(record.getVoiceId()).isPresent()) {
+            if (api.getServerById(record.getServerId()).isEmpty() || api.getServerVoiceChannelById(record.getVoiceId()).isEmpty() && api.getServerTextChannelById(record.getTextId()).isEmpty() || api.getServerVoiceChannelById(record.getVoiceId()).isEmpty()) {
                 temp++;
                 dao.deleteTempChannel(record);
             }

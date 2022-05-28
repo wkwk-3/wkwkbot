@@ -147,14 +147,14 @@ public class SlashCommandSystem extends BotLogin {
                                                     boolean enable = interaction.getOptionByIndex(0).get().getOptionByIndex(0).get().getOptionBooleanValueByName("enable").get();
                                                     String flag = enable ? "有効化" : "無効化";
                                                     switch (subCommand) {
-                                                        case "temp":
+                                                        case "temp" -> {
                                                             dao.BotSetDate("tempBy", serverId, enable ? "1" : "0");
                                                             responseString = new StringBuilder("通話作成を" + flag + "しました");
-                                                            break;
-                                                        case "text":
+                                                        }
+                                                        case "text" -> {
                                                             dao.BotSetDate("txtBy", serverId, enable ? "1" : "0");
                                                             responseString = new StringBuilder("チャット作成を" + flag + "しました");
-                                                            break;
+                                                        }
                                                     }
                                                 }
                                                 break;
@@ -200,13 +200,13 @@ public class SlashCommandSystem extends BotLogin {
                                                         dao.setReactMessageData(serverId, target.getIdAsString(), messageId);
                                                         responseString = new StringBuilder("メッセージ設定完了");
 
-                                                    } else if (!api.getServerTextChannelById(target.getId()).isPresent()) {
+                                                    } else if (api.getServerTextChannelById(target.getId()).isEmpty()) {
                                                         responseString = new StringBuilder("チャンネルIDを入力してください");
 
                                                     } else if (!api.getServerTextChannelById(target.getId()).get().getServer().getIdAsString().equals(serverId)) {
                                                         responseString = new StringBuilder("このサーバーのチャンネルIDを入力してください");
 
-                                                    } else if (!api.getMessageById(messageId, api.getServerTextChannelById(target.getId()).get()).join().getServer().isPresent()) {
+                                                    } else if (api.getMessageById(messageId, api.getServerTextChannelById(target.getId()).get()).join().getServer().isEmpty()) {
                                                         responseString = new StringBuilder("このサーバーのメッセージIDを入力してください");
                                                     }
                                                 }
@@ -271,7 +271,7 @@ public class SlashCommandSystem extends BotLogin {
                                     if (interaction.getOptionByIndex(0).isPresent()) {
                                         String subCommandGroup = interaction.getOptionByIndex(0).get().getName();
                                         switch (subCommandGroup) {
-                                            case "role":
+                                            case "role" -> {
                                                 ReactionRoleRecord record = dao.getReactAllData(serverId);
                                                 if (record.getEmoji().size() > 0) {
                                                     SelectMenuBuilder roleMenuBuilder = new SelectMenuBuilder().setCustomId("removeRole").setPlaceholder("削除したいリアクション").setMaximumValues(record.getEmoji().size()).setMinimumValues(1);
@@ -283,8 +283,8 @@ public class SlashCommandSystem extends BotLogin {
                                                             .addComponents(ActionRow.of(roleMenuBuilder.build()));
                                                     responseString = new StringBuilder("選択形式を送信");
                                                 } else responseString = new StringBuilder("候補がありません");
-                                                break;
-                                            case "namepreset":
+                                            }
+                                            case "namepreset" -> {
                                                 ArrayList<String> namePreset = dao.GetNamePreset(serverId);
                                                 if (namePreset.size() > 0) {
                                                     SelectMenuBuilder nameMenuBuilder = new SelectMenuBuilder().setCustomId("removeName").setPlaceholder("削除したい名前").setMaximumValues(namePreset.size()).setMinimumValues(1);
@@ -296,8 +296,8 @@ public class SlashCommandSystem extends BotLogin {
                                                             .addComponents(ActionRow.of(nameMenuBuilder.build()));
                                                     responseString = new StringBuilder("選択形式を送信");
                                                 } else responseString = new StringBuilder("候補がありません");
-                                                break;
-                                            case "logging":
+                                            }
+                                            case "logging" -> {
                                                 ArrayList<LoggingRecord> logRecord = dao.getLogging("s", serverId);
                                                 if (logRecord.size() > 0) {
                                                     SelectMenuBuilder selectMenuBuilder = new SelectMenuBuilder().setCustomId("removeLogging").setPlaceholder("削除したいlog設定を選んでください").setMaximumValues(logRecord.size()).setMinimumValues(1);
@@ -306,7 +306,7 @@ public class SlashCommandSystem extends BotLogin {
                                                             selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(log.getLogType() + ":" + api.getServerTextChannelById(log.getTargetChannelId()).get().getName()).setValue(log.getTargetChannelId() + " " + log.getLogType() + " " + log.getChannelId()).build());
                                                         } else if (api.getServerTextChannelById(log.getTargetChannelId()).isPresent() && log.getLogType().equals("user")) {
                                                             selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(log.getLogType() + ":" + api.getServerTextChannelById(log.getTargetChannelId()).get().getName()).setValue(log.getTargetChannelId() + " " + log.getLogType() + " " + log.getChannelId()).build());
-                                                        } else if (!api.getServerTextChannelById(log.getTargetChannelId()).isPresent()) {
+                                                        } else if (api.getServerTextChannelById(log.getTargetChannelId()).isEmpty()) {
                                                             selectMenuBuilder.addOption(new SelectMenuOptionBuilder().setLabel(log.getLogType() + ":" + log.getTargetChannelId()).setValue(log.getChannelId() + " " + log.getLogType() + " " + log.getChannelId()).build());
                                                         }
                                                     }
@@ -317,7 +317,7 @@ public class SlashCommandSystem extends BotLogin {
                                                 } else {
                                                     responseString = new StringBuilder("候補がありません");
                                                 }
-                                                break;
+                                            }
                                         }
                                     }
                                     break;
@@ -337,22 +337,10 @@ public class SlashCommandSystem extends BotLogin {
                                                 if (dao.addDeleteTimes(times)) {
                                                     responseString = new StringBuilder(Integer.toString(time));
                                                     switch (unit) {
-                                                        case "s":
-                                                        case "S":
-                                                            responseString.append("秒");
-                                                            break;
-                                                        case "m":
-                                                        case "M":
-                                                            responseString.append("分");
-                                                            break;
-                                                        case "h":
-                                                        case "H":
-                                                            responseString.append("時間");
-                                                            break;
-                                                        case "d":
-                                                        case "D":
-                                                            responseString.append("日");
-                                                            break;
+                                                        case "s", "S" -> responseString.append("秒");
+                                                        case "m", "M" -> responseString.append("分");
+                                                        case "h", "H" -> responseString.append("時間");
+                                                        case "d", "D" -> responseString.append("日");
                                                     }
                                                     responseString.append("後削除に設定しました");
                                                 } else responseString = new StringBuilder("設定に失敗しました");
@@ -514,7 +502,7 @@ public class SlashCommandSystem extends BotLogin {
                     }
                 }
                 switch (cmd) {
-                    case "ping":
+                    case "ping" -> {
                         long ping = 0L;
                         try {
                             InetAddress address = InetAddress.getByName("8.8.8.8");
@@ -529,17 +517,13 @@ public class SlashCommandSystem extends BotLogin {
                             ex.printStackTrace();
                         }
                         responseString = new StringBuilder(ping + "ms");
-                        break;
-                    case "invite":
-                        responseString = new StringBuilder("https://wkb.page.link/bot");
-                        break;
-                    case "guild":
-                        responseString = new StringBuilder("https://wkb.page.link/guild");
-                        break;
-                    case "help":
+                    }
+                    case "invite" -> responseString = new StringBuilder("https://wkb.page.link/bot");
+                    case "guild" -> responseString = new StringBuilder("https://wkb.page.link/guild");
+                    case "help" -> {
                         new HelpSystem().sendHelp(event);
-                        responseString = new StringBuilder("送信しました");
-                        break;
+                        responseString = new StringBuilder("個人チャットに送信");
+                    }
                 }
                 interaction.createImmediateResponder().setFlags(InteractionCallbackDataFlag.EPHEMERAL).setContent(responseString.toString()).respond();
             } catch (SystemException | DatabaseException ex) {
